@@ -1,0 +1,62 @@
+// Agent0 — MCP recipes (specs 012 + 025)
+//
+// This file is a TEMPLATE. Workflow:
+//   1. cp .mcp.json.example .mcp.json
+//   2. Open .mcp.json and REMOVE the leading `//` markers from the blocks
+//      you want active.
+//   3. JSON does NOT support `//` comments. Strict parsers reject them.
+//      The `.example` suffix is the "do not parse directly" signal; the
+//      copy step in (1) is where you make the file valid JSON.
+//   4. For DBHub: set DATABASE_URL in your shell or .env before launching
+//      claude. NEVER commit a populated DATABASE_URL to git.
+//   5. For Chrome DevTools MCP: confirm Chrome/Chrome-for-Testing is
+//      installed on the host (`which google-chrome`).
+//   6. For product-pipeline (spec 025): runs locally from this repo's
+//      packages/ subtree — only works WITHIN the Agent0 repo (or a fork
+//      that has cloned packages/mcp-product-pipeline/). Forks without
+//      packages/ wait for the v2 npm publish. Full activation docs:
+//      packages/mcp-product-pipeline/README.md
+//   7. Restart the Claude Code session — .mcp.json is loaded at start.
+//
+// Full per-recipe documentation (capabilities, when to enable, runtime
+// requirements, security): .claude/rules/mcp-recipes.md (external MCPs)
+// and packages/mcp-product-pipeline/README.md (in-repo MCP).
+{
+  "mcpServers": {
+//    "playwright": {
+//      "command": "npx",
+//      "args": ["@playwright/mcp@latest"]
+//    },
+//    "chrome-devtools": {
+//      "command": "npx",
+//      "args": ["-y", "chrome-devtools-mcp@latest"]
+//    },
+//    "dbhub": {
+//      "command": "npx",
+//      "args": ["@bytebase/dbhub@latest"],
+//      "env": {
+//        "DATABASE_URL": "postgres://user:password@localhost:5432/dbname?sslmode=disable"
+//      }
+//    },
+//    "next-devtools": {
+//      "command": "npx",
+//      "args": ["-y", "next-devtools-mcp@latest"]
+//    },
+//    "laravel-boost": {
+//      "command": "php",
+//      "args": ["artisan", "boost:mcp"]
+//      // Requires: composer require laravel/boost --dev + php artisan boost:install.
+//      // Runs within the Laravel project (artisan must be present). Laravel 10-13.
+//      // Full recipe: .claude/rules/mcp-recipes.md § Laravel Boost MCP.
+//    },
+//    "product-pipeline": {
+//      "command": "bun",
+//      "args": ["run", "packages/mcp-product-pipeline/src/server.ts"]
+//      // Optional: disable Open Design grounding in step 2. The two OD MCP
+//      // tools then return code "od-disabled" and the step-2 templates fall
+//      // back to the pre-OD inline 5-school method — use to A/B the paths.
+//      // To enable: add a comma after the args line above, then this line:
+//      // "env": { "PRODUCT_PIPELINE_OD": "off" }
+//    }
+  }
+}

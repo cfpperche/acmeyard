@@ -1,0 +1,22 @@
+# Starter gitleaks config for Agent0.
+#
+# This file is consumed by the `gitleaks protect --staged` invocation inside
+# `.claude/hooks/secrets-scan.sh` (the PreToolUse(Bash) gate that intercepts
+# `git commit`). The discipline — when the scan fires, override grammar,
+# allowlist mechanics, escape hatch, gotchas — is documented in
+# `.claude/rules/secrets-scan.md`. Read that first before editing this file.
+#
+# `[extend].useDefault = true` inherits gitleaks' built-in detector ruleset
+# (AWS keys, GitHub tokens, private keys, JWTs, etc.). Project-specific
+# allowlists go in the `[[allowlists]]` block(s) below.
+
+[extend]
+useDefault = true
+
+# Add allowlists below. See .claude/rules/secrets-scan.md for grammar.
+# The block below is a starter placeholder — replace `paths` / `regexes` /
+# `commits` with real exemptions, or delete the block entirely if not needed.
+# Reference: https://github.com/gitleaks/gitleaks#configuration
+[[allowlists]]
+description = "starter placeholder, replace as needed"
+paths = []
