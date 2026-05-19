@@ -142,7 +142,6 @@ COPY_CHECK_FILES=(
   ".mcp.json.example"
   ".gitleaks.toml"
   ".githooks/pre-commit"
-  ".gitignore"
   ".claude/memory/.gitkeep"
   ".claude/.browser-state/.gitkeep"
 )
@@ -150,6 +149,7 @@ COPY_CHECK_FILES=(
 # Structured merge handled by dedicated functions below
 # - .claude/settings.json
 # - CLAUDE.md
+# - .gitignore
 
 # ---------------------------------------------------------------------------
 # counters
@@ -465,12 +465,116 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
+# .gitignore additive merge
+# ---------------------------------------------------------------------------
+
+# Agent0's .gitignore carries harness-runtime entries (audit logs, state dirs,
+# lock files) that MUST exist in any fork for the harness to run cleanly. Fork's
+# .gitignore is typically stack-canonical (Laravel's vendor/, Next's node_modules/,
+# etc.) and conflicts with Agent0's stack-agnostic template if overwritten. This
+# function appends Agent0 entries the fork is missing, preserving fork-specific
+# lines untouched. Idempotent: re-runs add nothing once the fork has all Agent0
+# entries. Comments and blank lines are NOT membership-keyed (entries are the
+# semantic unit).
+
+merge_gitignore() {
+  local rel=".gitignore"
+  local src="$AGENT0_ROOT/$rel"
+  local dst="$FORK_ROOT/$rel"
+  local marker="# === Agent0 harness sync — additions ==="
+
+  if [ ! -f "$src" ]; then
+    return
+  fi
+
+  # Honor --force-except for the canonical .gitignore case (documented in
+  # harness-sync.md). Even though merge is additive, the operator's intent in
+  # passing --force-except='.gitignore' is "do not touch the fork's .gitignore".
+  if matches_force_except "$rel"; then
+    printf '!! force-except %s (merge skipped)\n' "$rel" >&2
+    CUSTOMIZED_REFUSED=$((CUSTOMIZED_REFUSED + 1))
+    return
+  fi
+
+  if [ ! -f "$dst" ]; then
+    process_file "$rel"
+    return
+  fi
+
+  local src_sha dst_sha
+  src_sha="$(sha_of "$src")"
+  dst_sha="$(sha_of "$dst")"
+  if [ "$src_sha" = "$dst_sha" ]; then
+    printf '= up to date %s\n' "$rel"
+    UP_TO_DATE=$((UP_TO_DATE + 1))
+    return
+  fi
+
+  # Extract entries: non-comment, non-empty, trimmed. Sort for comm.
+  local tmp_src_entries tmp_fork_entries tmp_missing
+  tmp_src_entries="$(mktemp -t sync-gi-src-XXXXXX)"
+  tmp_fork_entries="$(mktemp -t sync-gi-fork-XXXXXX)"
+  tmp_missing="$(mktemp -t sync-gi-miss-XXXXXX)"
+
+  grep -v '^[[:space:]]*#' "$src" | grep -v '^[[:space:]]*$' | awk '{$1=$1;print}' | sort -u > "$tmp_src_entries"
+  grep -v '^[[:space:]]*#' "$dst" | grep -v '^[[:space:]]*$' | awk '{$1=$1;print}' | sort -u > "$tmp_fork_entries"
+
+  # Lines in src but not in dst — these are the additions.
+  comm -23 "$tmp_src_entries" "$tmp_fork_entries" > "$tmp_missing"
+
+  if [ ! -s "$tmp_missing" ]; then
+    printf '= up to date %s\n' "$rel"
+    UP_TO_DATE=$((UP_TO_DATE + 1))
+    rm -f "$tmp_src_entries" "$tmp_fork_entries" "$tmp_missing"
+    return
+  fi
+
+  local missing_count
+  missing_count="$(wc -l < "$tmp_missing" | awk '{print $1}')"
+
+  if [ "$MODE" = "check" ]; then
+    printf '~ would merge %s (%d entries to add)\n' "$rel" "$missing_count"
+    DRIFT=1
+    rm -f "$tmp_src_entries" "$tmp_fork_entries" "$tmp_missing"
+    return
+  fi
+
+  # Build merged content: fork's current content + marker (if new) + missing entries.
+  local tmp_merged
+  tmp_merged="$(mktemp -t sync-gi-merged-XXXXXX)"
+  cat "$dst" > "$tmp_merged"
+
+  if ! grep -Fq "$marker" "$tmp_merged"; then
+    {
+      printf '\n%s\n' "$marker"
+    } >> "$tmp_merged"
+  else
+    printf '\n' >> "$tmp_merged"
+  fi
+
+  while IFS= read -r line; do
+    printf '%s\n' "$line" >> "$tmp_merged"
+  done < "$tmp_missing"
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    printf '~ merged %s (%d entries, dry-run)\n' "$rel" "$missing_count"
+    rm -f "$tmp_src_entries" "$tmp_fork_entries" "$tmp_missing" "$tmp_merged"
+  else
+    mv "$tmp_merged" "$dst"
+    printf '~ merged %s (%d entries appended)\n' "$rel" "$missing_count"
+    rm -f "$tmp_src_entries" "$tmp_fork_entries" "$tmp_missing"
+  fi
+  MERGED=$((MERGED + 1))
+}
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
 
 walk_copy_check
 merge_settings_json
 merge_claude_md
+merge_gitignore
 
 # Summary on stderr so stdout stays parseable per-file decisions.
 {

@@ -25,3 +25,27 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# === Agent0 harness sync — additions ===
+.claude/.brainstorm-state/
+.claude/.browser-state/*.json
+.claude/.delegation-state/
+.claude/.rule-load-debug.jsonl
+.claude/.rule-load-debug.jsonl.lock
+.claude/.runtime-state/
+.claude/.runtime/
+.claude/.session-state/
+.claude/COMPACT_NOTES.md
+.claude/delegation-audit.jsonl
+.claude/projects/
+.claude/secrets-audit.jsonl
+.claude/secrets-audit.jsonl.lock
+.claude/settings.local.json
+.claude/supply-chain-audit.jsonl
+.claude/supply-chain-audit.jsonl.lock
+.claude/tests/secrets-scan/.tmp/
+.mcp.json
+.playwright-mcp/
+/audit-*.png
+CLAUDE.local.md
+prototypes/

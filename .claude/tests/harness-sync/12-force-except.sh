@@ -49,9 +49,9 @@ if [ "$canonical_hook_sha" != "$after_hook_sha" ]; then
   exit 1
 fi
 
-# .gitignore should remain customized-refused
-if ! printf '%s' "$out" | grep -q '!! customized.*gitignore'; then
-  printf 'FAIL: .gitignore should be customized-refused under --force-except\n%s\n' "$out"
+# .gitignore should be force-except-skipped (merge handler honors --force-except too)
+if ! printf '%s' "$out" | grep -qE '(!! customized.*gitignore|!! force-except .gitignore)'; then
+  printf 'FAIL: .gitignore should be force-except-skipped under --force-except\n%s\n' "$out"
   exit 1
 fi
 

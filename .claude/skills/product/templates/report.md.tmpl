@@ -1,0 +1,174 @@
+# Prototype REPORT — {{SLUG}}
+
+_Generated {{DATE}} · stack {{STACK}} · 13-step coverage {{N_STEPS_COMPLETED}}/13 · build {{BUILD_HEALTH}}_
+
+Live agile-frontend run of the `mcp-product-pipeline` 13-step canonical pipeline at standard tier. See `docs/specs/036-prototype-skill-refactor/` for the v2 design.
+
+## Pipeline coverage (per-step status)
+
+| # | Step | Status | Output | Size | Sub-agent model |
+|---|---|---|---|---|---|
+| 01 | Ideation | {{step_01_status}} | `concept-brief.md` | {{step_01_size}} | opus |
+| 02 | Prototype v1 | {{step_02_status}} | `direction-a.html` + `screens/` × {{step_02_screen_count}} | {{step_02_size}} | sonnet |
+| 03 | Spec | {{step_03_status}} | `functional-spec.md` | {{step_03_size}} | sonnet |
+| 04 | UX Testing | {{step_04_status}} | `validation-report.md` ({{step_04_findings_count}} findings) | {{step_04_size}} | sonnet |
+| 05 | Brand | {{step_05_status}} | `brand-book.md` | {{step_05_size}} | sonnet |
+| 06 | Design System | {{step_06_status}} | `tokens.css` + `components.md` + `design-system.md` | {{step_06_size}} | sonnet |
+| 07 | Prototype v2 | {{step_07_status}} | `direction-final.html` + `screens/` × {{step_07_screen_count}} | {{step_07_size}} | sonnet |
+| 08 | PRD | {{step_08_status}} | `prd.md` ({{step_08_us_count}} user stories) | {{step_08_size}} | sonnet |
+| 09 | System Design | {{step_09_status}} | `system-design.md` + `security.md` | {{step_09_size}} | sonnet |
+| 10 | Cost Estimate | {{step_10_status}} | `cost-estimate.md` | {{step_10_size}} | sonnet |
+| 11 | Roadmap | {{step_11_status}} | `roadmap.md` | {{step_11_size}} | sonnet |
+| 12 | Legal | {{step_12_status}} | `legal-posture.md` | {{step_12_size}} | sonnet |
+| 13 | Prototype v3 | {{step_13_status}} | `screen-atlas.md` + `screens/` × {{step_13_screen_count}} | {{step_13_size}} | sonnet |
+
+**Status legend:** ✓ ok · ◐ partial (warnings) · ✗ blocked (reason in `## Blocked steps`).
+
+## Gate-pass log
+
+| Phase | Gate | User choice | Iterations | Time at gate |
+|---|---|---|---|---|
+| 1 | Discovery (after steps 01-04) | {{gate_discovery_choice}} | {{gate_discovery_iterations}} | {{gate_discovery_time}} |
+| 2 | Identity (after steps 05-07) | {{gate_identity_choice}} | {{gate_identity_iterations}} | {{gate_identity_time}} |
+| 3 | Specification (after steps 08-12) | {{gate_specification_choice}} | {{gate_specification_iterations}} | {{gate_specification_time}} |
+| 4 | (no gate; closed with /sdd new handoff) | — | — | — |
+
+## Blocked steps
+
+_Empty when no steps blocked. Each entry: step label + reason + partial artifacts (if any)._
+
+{{blocked_steps_section}}
+
+## Sitemap coverage (steps 02 / 07 / 13)
+
+**Routes wired (step 02 killer flow):** {{N_WIRED_02}} / {{N_TOTAL_02}}
+**Routes wired (step 07 brand-tuned):** {{N_WIRED_07}} / {{N_TOTAL_07}}  (inheritance — must match step 02)
+**Routes wired (step 13 atlas):** {{N_WIRED_13}} / {{N_TOTAL_13}}  (full PRD coverage)
+
+**Per-category coverage (step 13):**
+
+| Category | Required | Sitemap entries | Built | Notes |
+|---|---|---|---|---|
+| marketing | yes | {{marketing_count}} | {{marketing_built}} | {{marketing_note}} |
+| auth | yes | {{auth_count}} | {{auth_built}} | {{auth_note}} |
+| primary | yes | {{primary_count}} | {{primary_built}} | {{primary_note}} |
+| admin | yes | {{admin_count}} | {{admin_built}} | {{admin_note}} |
+| error | yes | {{error_count}} | {{error_built}} | {{error_note}} |
+
+**Gap audit:**
+
+- {{gap_audit_line_1}}
+- {{gap_audit_line_2_optional}}
+
+(Each gap-audit line names a category that was compensated by mechanism — agent added without founder explicit — vs founder-explicit demands.)
+
+## Fidelity scorecard (4-dim per screen; step 13 atlas)
+
+Each screen scores 1-5 on Token / Voice / Component / Brief-fit. Threshold: ≥ 3/5 on every dim for primary/auth.
+
+| Route | Category | Token | Voice | Component | Brief-fit | Min | Notes |
+|---|---|---|---|---|---|---|---|
+| {{route_path_1}} | {{cat_1}} | {{t_1}} | {{v_1}} | {{c_1}} | {{b_1}} | {{min_1}} | {{note_1}} |
+| {{route_path_2}} | {{cat_2}} | {{t_2}} | {{v_2}} | {{c_2}} | {{b_2}} | {{min_2}} | {{note_2}} |
+| ... | ... | ... | ... | ... | ... | ... | ... |
+
+**Below-threshold rows (Min < 3 on primary/auth):** {{n_below_threshold}}
+
+## States matrix (step 13 atlas)
+
+Each route × declared state. ✓ = implemented; · = not declared / not implemented; `[gap]` = declared but missing.
+
+```
+                  default  loading  empty  error  disabled  success
+{{state_matrix_body}}
+```
+
+**Auto-augmented routes** (primary screens where loading/empty/error were added beyond what sitemap declared):
+
+- {{auto_aug_1}}
+
+## PRD coverage matrix (step 13)
+
+Every US-NN from `prd.md` must appear here. Silent omission is a gate failure.
+
+| US-NN | Priority | Story | Coverage | Screen file (or deferred — reason) |
+|---|---|---|---|---|
+| US-01 | {{p_01}} | {{story_01}} | {{cov_01}} | {{file_01}} |
+| US-02 | {{p_02}} | {{story_02}} | {{cov_02}} | {{file_02}} |
+| ... | ... | ... | ... | ... |
+
+**Coverage count:** {{n_covered}} covered · {{n_deferred}} deferred (with reasons) · {{n_missing}} missing (gate failure if > 0)
+
+## Legal-surface checklist (step 12 → step 13)
+
+Net-new surfaces at step 13 driven by step-12 legal posture. Each row: surface name + applicable condition + status.
+
+| Surface | Condition | Status | Screen file |
+|---|---|---|---|
+| Consent dialog (cookies) | GDPR / CCPA applies | {{consent_status}} | {{consent_file}} |
+| Privacy notice | Always | {{privacy_status}} | {{privacy_file}} |
+| AI-disclosure badge | LLM in system-design Integrations | {{ai_disclosure_status}} | {{ai_disclosure_file}} |
+| Sub-processor disclosure page | B2B SaaS or enterprise audience | {{subproc_status}} | {{subproc_file}} |
+| Data export / DSAR UI | GDPR / LGPD applies | {{dsar_status}} | {{dsar_file}} |
+
+(Skip rows where condition doesn't apply — emit `n/a` in Status. Do NOT emit the row as empty.)
+
+## Build health
+
+| Step | Status | Duration |
+|---|---|---|
+| `pnpm install --frozen-lockfile` | {{install_status}} | {{install_duration}} |
+| `pnpm dev` startup (first 10s) | {{dev_status}} | {{dev_startup}} |
+| `tsc --noEmit` (typecheck) | {{typecheck_status}} | {{typecheck_duration}} |
+| `biome check .` (lint) | {{lint_status}} | {{lint_duration}} |
+| Playwright screenshots (per route) | {{screenshot_status}} | {{screenshot_duration}} |
+
+**BUILD_BROKEN routes:** {{n_broken_routes}}
+{{broken_route_listing_optional}}
+
+### Fan-out degradations (spec 057)
+
+Empty when fan-out (Step 15b per-route screen-writers) ran cleanly. Each entry: route + wave + reason + recovery path. **Degradation = sub-agent hit `CLAUDE_DELEGATION_LOOP_BUDGET` exhaustion (validator-cascade) and the orchestrator switched to parent-write for that route OR subsequent waves.** Visible degradation is EXPECTED — the fallback works as designed; the row exists to make the recovery legible to the founder + reviewer.
+
+| Route | Wave # | Reason | Recovery | Sub-agent attempts before degrade |
+|---|---|---|---|---|
+| {{degrade_route_1}} | {{degrade_wave_1}} | {{degrade_reason_1}} | parent-write (same brief, verbatim) | {{degrade_attempts_1}} |
+| {{degrade_route_2}} | {{degrade_wave_2}} | {{degrade_reason_2}} | parent-write (same brief, verbatim) | {{degrade_attempts_2}} |
+
+**Total degradations:** {{n_degradations}} / {{n_total_routes}} routes ({{degrade_pct}}%)
+
+> **What this section enables.** Repeated degradations on the same wave or same brief shape signal either (a) the brief needs structural attention OR (b) the validator-cascade is firing on a fork-specific Biome rule that brief-time enforcement misses. Watch the trend across dogfoods — single-route degradation is normal noise; ≥30% degradation rate is a design alarm.
+
+## Skill compliance
+
+- `bash .claude/skills/skill/scripts/validate.sh .claude/skills/product` → {{skill_validate_status}}
+
+## Iteration log
+
+_Entries appended when user picked `iterate` at any gate. Empty when no iterations occurred._
+
+{{iteration_log_section}}
+
+## Dogfood findings (optional)
+
+_Templates bugs, skill body gaps, or platform surprises surfaced during this run. Empty if none. Each entry should be actionable (file + line + suggested fix)._
+
+{{dogfood_findings_section}}
+
+## Wall-clock summary
+
+| Phase | Started | Completed | Duration |
+|---|---|---|---|
+| Phase 1 — Discovery | {{p1_start}} | {{p1_end}} | {{p1_dur}} |
+| Phase 2 — Identity | {{p2_start}} | {{p2_end}} | {{p2_dur}} |
+| Phase 3 — Specification | {{p3_start}} | {{p3_end}} | {{p3_dur}} |
+| Phase 4 — Synthesis | {{p4_start}} | {{p4_end}} | {{p4_dur}} |
+| **Total** | {{started_at}} | {{completed_at}} | **{{total_duration}}** |
+
+## Next steps
+
+1. Run `cd {{out_dir}} && {{DEV_COMMAND}}` to start the dev server.
+2. Open `{{LOCAL_URL}}` in your browser (web) or scan the QR code (mobile).
+3. Engineering handoff: `/sdd new {{SLUG}}` from the Agent0 repo when ready to promote past prototype. Use `prd.md`, `system-design.md`, `roadmap.md` as spec inputs (vs starting blank).
+4. Review `## Blocked steps` if non-empty — decide which to re-dispatch via `/product "<idea>" --from-step=NN --out={{out_dir}}` for the affected step.
+5. Apply `## Dogfood findings` back to `.claude/skills/product/` if any items surfaced (template fixes or skill body improvements).
