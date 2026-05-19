@@ -6,9 +6,11 @@ Starting point for new software projects. Replace the placeholder sections below
 
 _Brief description of the project and its purpose._
 
+
 ## Stack
 
 _Language, framework, main dependencies._
+
 
 ## Build & test
 
@@ -18,13 +20,17 @@ _Language, framework, main dependencies._
 # lint:
 ```
 
+
 ## Conventions
 
 _Style, patterns, architectural decisions — what's not obvious from the code._
 
+
 ## Gotchas
 
 _Non-obvious behaviors, known pitfalls, context not captured in code._
+
+<!-- AGENT0:BEGIN -->
 
 ## Spec-driven development
 
@@ -60,11 +66,6 @@ Spec 012: opt-in `.mcp.json` recipes for four mature external MCPs (Playwright, 
 
 ## Harness sync
 
-## Product skill
-
-`/product` is the foundation generator + design partner for the product lifecycle (idea → v1 → vN). Spec 048 (current — v0.3.0) renamed from `/prototype` and refactored output layout: artifacts now semantic-named under `<out>/docs/` (no `NN-` prefix), PRD release-scoped at `docs/prd/v1.md` from day 1, design system grouped at `docs/design-system/`. Inherits the 15-step industry-aligned pipeline from spec 045 (`/prototype` v3 — Cagan/SVPG · Teresa Torres OST · GDPR Art 25 shift-left · Stage-Gate · Lenny Rachitsky 1-pager · April Dunford positioning), which itself inherited 17 decisions from spec 032's MCP work. 4 phases (Discovery / Specification / Identity / Visual-contract) with 3 `AskUserQuestion` gates after steps 4/12/14. Sub-agent models declared per step: Step 01 = `opus`; Steps 02-15 = `sonnet`. Standalone — bundled templates + Next.js / Expo skeletons at `.claude/skills/product/templates/`, no MCP runtime dep. Flags: `<idea>` `--out=<path>` `--stack=<next|expo>` `--from-step=NN` `--skip-prd` `--skip-brand`. State.json v4 (breaking; refuses silent v3 upgrade). Historical lineage: spec 034 (`/prototype` v1, 2026-05-17 — superseded by 036); spec 036 (`/prototype` v2 13-step, 2026-05-18 — superseded by 045); spec 045 (`/prototype` v3 15-step NN-flat, 2026-05-18 — superseded by 048). See `.claude/skills/product/references/{pipeline-coverage,state-machine,delegation-briefs,quality-checklist}.md` for the v0.3.0 design.
-
-
 Spec 016: a one-way sync tool (`.claude/tools/sync-harness.sh <fork-path>`) that brings a fork's harness state up to date with this Agent0 repo. Modes: `--check` (default, read-only — exits 1 if drift), `--apply` (write changes), `--dry-run` (apply-shaped output without writes), `--force` (overwrite fork-customized files with `! overwritten` warning), `--force-except=GLOB[,GLOB...]` (comma-separated globs to preserve under `--force` — e.g. `--force --force-except='.gitignore'`). Source path is explicit — `--agent0-path=PATH` or `AGENT0_HARNESS_PATH` env; refuses to guess. Scope: `.claude/hooks/*.sh`, `.claude/rules/*.md`, `.claude/tools/*.sh`, `.claude/validators/*.sh`, `.claude/skills/`, `.claude/tests/`, `.claude/agents/`, plus `.mcp.json.example`, `.gitleaks.toml`, `.githooks/pre-commit`, `.gitignore`. Structured merge for `.claude/settings.json` (jq dedup by matcher+commands) and `CLAUDE.md` (append missing `^## ` capacity sections before `## Compact Instructions` anchor). Customization detected by `sha256sum` compare; refuses without `--force`. NEVER touches `src/`, fork's `tests/` outside `.claude/tests/`, `docs/`, `package.json`, `Cargo.toml`, `pyproject.toml`, `.mcp.json`, `.env*`. No auto-commit — developer reviews `git diff` and commits manually. See `.claude/rules/harness-sync.md`.
 
 ## Lint validator
@@ -91,9 +92,9 @@ Opt-in observability for CC's native `InstructionsLoaded` hook event. An `Instru
 
 Spec 033: every first-party `.claude/skills/<name>/SKILL.md` must pass the agentskills.io frontmatter spec (Anthropic's open standard, adopted by 40+ runtimes — Hermes Agent, Codex, Cursor, Goose, OpenCode, others — so spec-compliant skills are cross-runtime portable for free). The `/skill` meta-skill handles the lifecycle: `/skill new <slug> [--tier <tier>]` scaffolds a compliant SKILL.md from `.claude/skills/skill/templates/`; `/skill audit [<slug>|--all]` reports per-skill compliance + portability tier; `/skill port <slug>` invokes `scripts/port-frontmatter.sh` to add missing required fields (`name`, `compatibility`, `metadata.agent0-portability-tier`) while preserving body bytes byte-identical; `/skill validate <slug>` runs `scripts/validate.sh` (zero-dep bash; defers to `skills-ref validate` when on PATH per defer-to-canonical pattern). Three portability tiers declared in `metadata.agent0-portability-tier`: `cc-native` (body uses `.claude/`-only paths / CC-specific tools), `agentskills-portable` (universal primitives only — file IO, shell, web), `runtime-agnostic` (also OS-portable). The frozen agentskills.io spec lives at `.claude/skills/skill/references/spec-snapshot.md` (retrieved 2026-05-17); the validator's rule set is in `references/frontmatter-validation-rules.md`; tier definitions and the two locked decisions (the `agent0-` namespace prefix, `argument-hint:` staying top-level) are in `references/portability-tiers.md`. CC-marketplace skills (`init`, `review`, `security-review`, etc.) are surfaced by the CC harness, not by this repo's `.claude/skills/`, and are out of scope for the toolkit.
 
-## Prototype skill
+## Product skill
 
-Spec 034 shipped `/prototype` v1 as the agile alternative to the 13-step `mcp-product-pipeline`, but covered only ~25-30% of the pipeline (4 of 13 steps partially, 8 missing entirely) and harboured a render-killing tokens.css import false-positive bug surfaced via the 2026-05-17 dogfood ("skill rejeitada" user feedback). Spec 036 (`prototype-skill-refactor`) reframes v1 as the agile *frontend* to the same 13-step pipeline: same artifacts (concept brief → spec → UX audit → brand → design system → PRD → system design → cost → roadmap → legal → 3 prototype passes), single "standard" depth tier, standalone (13 step templates + OD vendor index bundled at `.claude/skills/prototype/templates/pipeline/` — 1.3 MB, no MCP runtime dep), 4-phase orchestration (Discovery / Identity / Specification / Synthesis) with 3 `AskUserQuestion` gates between phases. New flags: `--out=<path>` (required; drops v1 `/tmp/` hardcode) and `--from-step=NN` (resume after abort). Per-phase parallel dispatch enforced via explicit "N Agent calls in one message" worked example in SKILL.md. Sub-agent models declared per step: Step 01 (concept brief) = `opus`; Steps 02-13 = `sonnet`. Spec 034 stays `shipped` (v1 still routable) until v2 dogfood replay validates end-to-end — premature supersede would break forks pulling mid-refactor. Quarterly REMINDERS item tracks bundled-vs-canonical template drift sync. See `.claude/skills/prototype/references/{pipeline-coverage,state-machine,delegation-briefs,quality-checklist}.md` for v2 design.
+`/product` is the foundation generator + design partner for the product lifecycle (idea → v1 → vN). Spec 048 (current — v0.3.0) renamed from `/prototype` and refactored output layout: artifacts now semantic-named under `<out>/docs/` (no `NN-` prefix), PRD release-scoped at `docs/prd/v1.md` from day 1, design system grouped at `docs/design-system/`. Inherits the 15-step industry-aligned pipeline from spec 045 (`/prototype` v3 — Cagan/SVPG · Teresa Torres OST · GDPR Art 25 shift-left · Stage-Gate · Lenny Rachitsky 1-pager · April Dunford positioning), which itself inherited 17 decisions from spec 032's MCP work. 4 phases (Discovery / Specification / Identity / Visual-contract) with 3 `AskUserQuestion` gates after steps 4/12/14. Sub-agent models declared per step: Step 01 = `opus`; Steps 02-15 = `sonnet`. Standalone — bundled templates + Next.js / Expo skeletons at `.claude/skills/product/templates/`, no MCP runtime dep. Flags: `<idea>` `--out=<path>` `--stack=<next|expo>` `--from-step=NN` `--skip-prd` `--skip-brand`. State.json v4 (breaking; refuses silent v3 upgrade). Historical lineage: spec 034 (`/prototype` v1, 2026-05-17 — superseded by 036); spec 036 (`/prototype` v2 13-step, 2026-05-18 — superseded by 045); spec 045 (`/prototype` v3 15-step NN-flat, 2026-05-18 — superseded by 048). See `.claude/skills/product/references/{pipeline-coverage,state-machine,delegation-briefs,quality-checklist}.md` for the v0.3.0 design.
 
 ## PHP / Laravel
 
@@ -115,3 +116,5 @@ Safe to compress:
 - Exploratory tangents that didn't influence the final direction
 
 `.claude/COMPACT_NOTES.md` is regenerated by the PreCompact hook with the last 12 turns verbatim — that file is the source of truth for raw signal across the compaction boundary, so the summary itself can stay terse.
+
+<!-- AGENT0:END -->

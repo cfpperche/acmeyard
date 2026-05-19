@@ -49,3 +49,7 @@ Thumbs.db
 /audit-*.png
 CLAUDE.local.md
 prototypes/
+
+.claude/CLAUDE.md.diverged-region.md
+.claude/CLAUDE.md.diverged-sections.md
+.claude/CLAUDE.md.migration-candidate.md
