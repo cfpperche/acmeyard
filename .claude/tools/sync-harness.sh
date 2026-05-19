@@ -120,6 +120,9 @@ fi
 #                           gitignored *.json, only .gitkeep sentinel travels via git.
 # .claude/memory/           project knowledge; content is project-local (spec 019).
 #                           The empty .gitkeep IS in COPY_CHECK_FILES — content is not.
+# .claude/routines/         project-scoped routine definitions (spec 064); content is
+#                           project-local. Only .gitkeep travels via git so a fresh
+#                           fork has the empty directory ready for /routine new.
 
 # Recursive globs (find -type f under base dir) — encoded as "base/**"
 COPY_CHECK_RECURSIVE=(
@@ -144,6 +147,7 @@ COPY_CHECK_FILES=(
   ".githooks/pre-commit"
   ".claude/memory/.gitkeep"
   ".claude/.browser-state/.gitkeep"
+  ".claude/routines/.gitkeep"
 )
 
 # Structured merge handled by dedicated functions below
@@ -300,7 +304,10 @@ merge_settings_json() {
     return
   fi
 
-  # Compute merged JSON: union the two .hooks.* arrays, dedup by (matcher, commands).
+  # Compute merged JSON.
+  # Fork (dst) is the BASE — preserves permissions/env/model/fork-only top-level keys.
+  # Agent0-owned top-level keys ($schema, statusLine) overwrite when Agent0 has them.
+  # hooks: union per-event, dedup by (matcher, ordered list of inner commands).
   local tmp merged
   tmp="$(mktemp -t sync-settings-XXXXXX)"
   if ! jq -s '
@@ -308,15 +315,19 @@ merge_settings_json() {
       (.matcher // "") + "|" + ((.hooks // []) | map(.command // "") | join("##"));
 
     . as $arr |
-    {
-      hooks: (
-        ((($arr[0].hooks // {}) | keys) + (($arr[1].hooks // {}) | keys)) |
-        unique |
-        map(. as $k | {
-          ($k): ((($arr[0].hooks[$k]) // []) + (($arr[1].hooks[$k]) // []) | unique_by(dedup_key))
-        }) | add
+    ($arr[0] // {}) as $fork |
+    ($arr[1] // {}) as $agent0 |
+    $fork
+    | (if ($agent0 | has("$schema"))    then .["$schema"]  = $agent0["$schema"]  else . end)
+    | (if ($agent0 | has("statusLine")) then .statusLine   = $agent0.statusLine  else . end)
+    | .hooks = (
+        ((($fork.hooks // {}) | keys) + (($agent0.hooks // {}) | keys))
+        | unique
+        | map(. as $k | {
+            ($k): ((($fork.hooks[$k]) // []) + (($agent0.hooks[$k]) // []) | unique_by(dedup_key))
+          })
+        | add // {}
       )
-    }
   ' "$dst" "$src" > "$tmp" 2>/dev/null; then
     printf '!! settings.json merge failed (jq error)\n' >&2
     rm -f "$tmp"

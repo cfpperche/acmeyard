@@ -39,6 +39,7 @@ fi
 
 SUBAGENT_TYPE="$(printf '%s' "$INPUT" | jq -r '.tool_input.subagent_type // ""')"
 SESSION_ID="$(printf '%s' "$INPUT" | jq -r '.session_id // ""')"
+TOOL_USE_ID="$(printf '%s' "$INPUT" | jq -r '.tool_use_id // ""')"
 MODEL_SPECIFIED="$(printf '%s' "$INPUT" | jq -r '.tool_input | has("model")')"
 MODEL="$(printf '%s' "$INPUT" | jq -r '.tool_input.model // ""')"
 
@@ -230,6 +231,7 @@ fi
 audit_line="$(jq -c -n \
   --arg ts "$ts" \
   --arg session_id "$SESSION_ID" \
+  --arg tool_use_id "$TOOL_USE_ID" \
   --arg subagent_type "$SUBAGENT_TYPE" \
   --argjson model "$model_field" \
   --argjson model_specified "$MODEL_SPECIFIED" \
@@ -239,7 +241,7 @@ audit_line="$(jq -c -n \
   --argjson advisory_kind "$advisory_kind" \
   --argjson escalation_signals "$signals_json" \
   --arg task_summary "$task_summary" \
-  '{ts:$ts, session_id:$session_id, subagent_type:$subagent_type, model:$model, model_specified:$model_specified, formatted:$formatted, override:$override, advisory_emitted:$advisory_emitted, advisory_kind:$advisory_kind, escalation_signals:$escalation_signals, task_summary:$task_summary}')"
+  '{ts:$ts, session_id:$session_id, tool_use_id:$tool_use_id, subagent_type:$subagent_type, model:$model, model_specified:$model_specified, formatted:$formatted, override:$override, advisory_emitted:$advisory_emitted, advisory_kind:$advisory_kind, escalation_signals:$escalation_signals, task_summary:$task_summary}')"
 
 printf '%s\n' "$audit_line" >> "$AUDIT_LOG"
 

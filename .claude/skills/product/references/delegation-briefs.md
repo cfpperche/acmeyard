@@ -22,7 +22,8 @@ TASK: Produce concept-brief.md for the product idea "{{idea}}" — a deep concep
 CONTEXT: Read .claude/skills/product/templates/pipeline/01-ideation/prompt.md for the canonical brief structure. Read .claude/skills/product/templates/pipeline/01-ideation/references/concept-brief-template.md for the section shape. Read .claude/skills/product/templates/pipeline/01-ideation/references/discovery-playbook.md for the 5-track market discovery process. Read .claude/skills/product/references/pipeline-coverage.md § "Per-step output + size targets" for the standard-tier calibration. Use WebSearch + WebFetch for 5-8 market discovery searches.
 
 CONSTRAINTS:
-- Standard tier: target 4-10 KB output as HARD CEILING (NOT minimum — going over by ≥50% means re-emit at smaller scope).
+- Standard tier: target 4-10 KB output (HARD CEILING — NOT minimum).
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - **Target language: `{{target_language}}`** (BCP-47, resolved at Phase 0.5). All section bodies + persona language + tagline candidates + name candidates in this language; cited sources stay in their original language.
 - Cover the standard-tier minimum sections as H2 headings: Hook (problem + audience) / Mechanics (user flow) / Monetization / Growth loop / Competitive positioning / Risks / Anti-goals / JTBD statement / **Market Sizing (TAM/SAM/SOM — 1 paragraph each, desk research with 1-2 cited sources per number, NOT primary research)**. SKIP critique-mode at standard tier.
 - Cite at least 5 unique sources with inline [N] references. Market Sizing section cites at minimum 1 source per TAM/SAM/SOM number.
@@ -54,7 +55,8 @@ CONSTRAINTS:
 - CSS :root custom properties (vendor-agnostic names: --color-primary, --background, --foreground).
 - Includes "Most Popular" string token + ≥1 `<svg` (catalog citation discipline).
 - **Do NOT produce sitemap.yaml** — that's Step 07's deliverable per spec 045 (sitemap-IA promoted to own step).
-- Size budget: per `.claude/skills/product/templates/pipeline/02-prototype/schema.md § Target` (currently 10-30 KB for direction-a.html; soft overshoot trigger at max × 1.2 → partial-result with `oversize_reason`).
+- Size budget: per `.claude/skills/product/templates/pipeline/02-prototype/schema.md § Target` (currently 10-30 KB for direction-a.html).
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/direction-a.html. The 3-5 killer-flow mood screens are produced by separate per-stack screen-writer dispatches (sub-agent b — see § Per-stack screen-writer below).
 
 DELIVERABLE: {{out}}/docs/direction-a.html (+ killer-flow HTML mood screens at {{out}}/docs/screens/NN-<name>.html produced by sub-agent b in parallel)
@@ -74,7 +76,8 @@ TASK: Produce functional-spec.md decomposing "{{idea}}" into pages, components, 
 CONTEXT: Read concept-brief.md at {{out}}/docs/concept-brief.md for product scope. Read direction-a.html at {{out}}/docs/direction-a.html + screens at {{out}}/docs/screens/ for surface inventory. Read .claude/skills/product/templates/pipeline/03-spec/prompt.md for canonical structure (standard tier combines spec + architecture into a single file). Read .claude/skills/product/templates/pipeline/03-spec/schema.md for the size budget (`§ Target`) + required sections.
 
 CONSTRAINTS:
-- Standard tier: combined functional-spec.md (skip separate architecture.md). Size budget: per schema.md § Target (12-30 KB; soft overshoot trigger at max × 1.2).
+- Standard tier: combined functional-spec.md (skip separate architecture.md). Size budget: per schema.md § Target (12-30 KB).
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - **Target language: `{{target_language}}`** (BCP-47). All section bodies, page descriptions, Gherkin scenario text + acceptance prose in this language. Technical terms (HTTP, JSON, OAuth, etc) stay English. User-story summaries match the language.
 - Sections required (H2): Product Overview / Pages & Surfaces (table per page) / Features (with Gherkin) / Navigation Map / Cross-cutting concerns / Acceptance Scenarios / Edge Cases / Non-goals / Decisions Pending / Preliminary Architecture / **Problem-Validation Interviews (3-5 summaries seeding OST; synthetic-OK at standard tier — clearly marked as synthetic vs sourced from real interviews)**.
 - Scale depth to surface importance; killer flow gets full treatment; trivial pages collapse to 2-4 table rows.
@@ -103,6 +106,7 @@ CONSTRAINTS:
 - YAML frontmatter: `findings[]` with `{id, severity 1-4, heuristic, location, issue, recommendation, fix_skill_hint}` where fix_skill_hint ∈ `{design-system, screen-atlas, deferred}` (note: `prototype-v2` removed per spec 045 — Step 7 deleted; fixes that were `prototype-v2` now route to `screen-atlas`).
 - ≥ 3 findings minimum.
 - 5-8 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/validation-report.md.
 
 DELIVERABLE: {{out}}/docs/validation-report.md (with YAML frontmatter)
@@ -123,6 +127,7 @@ CONTEXT: Read concept-brief.md + functional-spec.md + validation-report.md front
 
 CONSTRAINTS:
 - 4-7 KB hard ceiling (TIGHTER than v2's 6-10). Each section ≤3 bullets to preserve 1-pager honesty.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - **Target language: `{{target_language}}`** (BCP-47). All H2 body text + user-story summaries + acceptance criteria in this language. H2 section headers themselves stay English-canonical (Problem / Why now / Success metrics / etc) because they ARE the Lenny 1-pager template — match the source attribution.
 - Lenny bones (H2 in this order): Problem · Why now · Success metrics · Solution sketch · User stories · Anti-goals.
 - Plus 3 our-specific sections (H2 after Lenny bones): Release scope (v1 vs v2 vs vN scoped) · NSM (dedicated slot — ONE primary metric, never two equal-priority) · Upstream/downstream refs (links to concept-brief + functional-spec + downstream sitemap/system-design slots).
@@ -154,6 +159,7 @@ CONSTRAINTS:
 - Mark solutions with status: `explored` (already in scope) / `to-test` (next interview cycle) / `parked` (out of v1).
 - Tree rendered as nested markdown bullets OR mermaid diagram (sub-agent's choice based on visual clarity at this depth).
 - 3-6 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/ost.md.
 
 DELIVERABLE: {{out}}/docs/ost.md
@@ -182,6 +188,7 @@ CONSTRAINTS:
 - Marketing category covers landing + pricing + feature pages.
 - If `deferred_categories` is used, each entry MUST include `reason` (1-2 sentences explaining why category is out of v1 scope).
 - 2-5 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/sitemap.yaml.
 
 DELIVERABLE: {{out}}/docs/sitemap.yaml
@@ -201,7 +208,8 @@ TASK: Produce system-design.md + security.md + data-flow.json for "{{idea}}". Sy
 CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md (scope drives scale assumption) + sitemap.yaml at {{out}}/docs/sitemap.yaml (route inventory drives integration list + auth requirements) + functional-spec.md at {{out}}/docs/functional-spec.md (preliminary architecture) + concept-brief.md at {{out}}/docs/concept-brief.md (product class + audience). Read .claude/skills/product/templates/pipeline/08-system-design/prompt.md + schema.md.
 
 CONSTRAINTS:
-- system-design.md: BRIDGE-FLOOR (6+ sections H2): Stack / Integrations / Data Model / Decisions Locked / Security / Observability / **RACI Matrix** / **Risk Register**. Size budget: per `.claude/skills/product/templates/pipeline/08-system-design/schema.md § Target` (15-42 KB; soft overshoot trigger at max × 1.2).
+- system-design.md: BRIDGE-FLOOR (6+ sections H2): Stack / Integrations / Data Model / Decisions Locked / Security / Observability / **RACI Matrix** / **Risk Register**. Size budget: per `.claude/skills/product/templates/pipeline/08-system-design/schema.md § Target` (15-42 KB).
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - RACI Matrix: 5-10 key roles (founder/engineer/designer/data/legal/...) × 5-10 key activities (auth/payments/audit-trail/...). Each cell: R/A/C/I or blank.
 - Risk Register: 5-10 risks with columns: ID · description · probability (L/M/H) · impact (L/M/H) · mitigation · owner.
 - Stack baseline (adapt per product needs): Next.js 16 (matches prototype) + Postgres + Redis + Slack Bot SDK + LLM API (if needed) + S3-compatible blob.
@@ -226,7 +234,8 @@ TASK: Produce legal-posture.md — founder's articulated legal posture briefing 
 CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md (audience drives jurisdiction exposure) + system-design.md at {{out}}/docs/system-design.md (Integrations name every sub-processor) + **data-flow.json at {{out}}/docs/data-flow.json (parses flows[]; if any flow has data_categories ⊃ {pii, health, minors, financial}, DPIA section is MANDATORY)** + concept-brief.md at {{out}}/docs/concept-brief.md (audience). Read .claude/skills/product/templates/pipeline/09-legal/prompt.md + schema.md.
 
 CONSTRAINTS:
-- Standard tier: BRIEF CHECKLIST + POSTURE. Size budget: **conditional model** per `.claude/skills/product/templates/pipeline/09-legal/schema.md § Target` — base 5-10 KB + DPIA (+5/+12) + AI-Specific (+2/+5) + Regulated Aspects (+2/+8). Compute effective floor/ceiling by summing base with each triggered condition. Soft overshoot at effective max × 1.2 → partial-result with `oversize_reason`.
+- Standard tier: BRIEF CHECKLIST + POSTURE. Size budget: **conditional model** per `.claude/skills/product/templates/pipeline/09-legal/schema.md § Target` — base 5-10 KB + DPIA (+5/+12) + AI-Specific (+2/+5) + Regulated Aspects (+2/+8). Compute effective floor/ceiling by summing base with each triggered condition.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md` (against the effective ceiling computed above): `effective_max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `effective_max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - TOP-OF-DOCUMENT escape clause (line 1-5): "This is founder's posture, NOT legal advice. Counsel review required before launch."
 - Sections required (H2): Terms Model / Privacy Posture (regulation applicability checklist GDPR/LGPD/CCPA Yes/No based on audience) / Data Handling Snapshot / Licensing (product license + OSS compatibility flag) / Sub-Processor Disclosure (extracted from system-design § Integrations — count must match) / IP Assignment Posture / Open Decisions.
 - **§ DPIA (conditional — fires if data-flow.json contains sensitive categories):** Required when Step 08 data-flow has any `data_categories ⊃ {pii, health, minors, financial}`. Lists each sensitive data flow, the legal basis (consent/contract/legitimate-interest/legal-obligation/vital-interest/public-task), the data subject rights affected (access/erasure/portability/restriction), and the risk-mitigation posture. **DPIA-shift-left per GDPR Art 25 + IAPP guidance** — counsel reviews DPIA section in 1-pager form BEFORE coding starts, not after launch.
@@ -257,7 +266,8 @@ CONSTRAINTS:
 - Deliverables table per phase: rows reference Step-05 US-NN.
 - Milestones are observable end-of-phase deliverables.
 - § Overview 2-3 one-liners. § Horizon (duration estimate + team shape). § Open Decisions table.
-- Size budget: per `.claude/skills/product/templates/pipeline/10-roadmap/schema.md § Target` (6-18 KB; soft overshoot trigger at max × 1.2).
+- Size budget: per `.claude/skills/product/templates/pipeline/10-roadmap/schema.md § Target` (6-18 KB).
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/roadmap.md.
 
 DELIVERABLE: {{out}}/docs/roadmap.md
@@ -276,6 +286,7 @@ CONTEXT: Read **roadmap.md at {{out}}/docs/roadmap.md (phase boundaries drive co
 
 CONSTRAINTS:
 - Standard tier: SINGLE-SCENARIO only. 5-8 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Build cost as a RANGE per phase from Step 10 roadmap (Phase 1 / Phase 2 / Phase 3 user-flow titles). Includes hourly/weekly rate assumption with source/confidence. Default $150-200/hr senior IC range with "indie founder-rate" caveat.
 - Run cost line items at v1 scale: tabular per vendor (vendor / tier / monthly cost / source). Count must match system-design § Integrations list (audit discipline).
 - **Legal review + audit costs in their own table row** — pulls from Step 09 legal posture (counsel-review hours estimate + SOC 2 audit if applicable).
@@ -302,6 +313,7 @@ CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md (NSM + audience for positioning) 
 
 CONSTRAINTS:
 - Standard tier: 4-7 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - **Target language: `{{target_language}}`** (BCP-47). Positioning Canvas body lines + launch plan milestones + pricing tier descriptions in this language. The 5 canvas line-labels (`For:`, `Who:`, `We are:`, `Unlike:`, `Our product:`) stay English per Dunford template.
 - Required H2 sections: Positioning Canvas / Launch Plan / Pricing Strategy / Open Decisions.
 - **Positioning Canvas** (Dunford-lite, 3 lines minimum):
@@ -342,6 +354,7 @@ CONSTRAINTS:
 - Voice must REINFORCE Step 12 positioning canvas (e.g. if positioning says "Unlike: enterprise sales-cycle vendors" → brand voice must NOT sound corporate-sales).
 - Header includes **Version:** 0.1 and **Date:** <today>.
 - 4-8 KB hard ceiling.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Write file DIRECTLY to {{out}}/docs/brand-book.md.
 
 DELIVERABLE: {{out}}/docs/brand-book.md
@@ -365,6 +378,7 @@ CONSTRAINTS:
 - tokens.css: dark-first :root block + @media (prefers-color-scheme: light) overrides for color tokens. Includes color (8-14 colors) + spacing (5-7 scale) + radius (3) + font (sans + mono + 5-7 size scale).
 - components.md: per-component anatomy + variants + states for at least Button / Input / Card / Table / Badge / Dialog / EmptyState. 3+ KB.
 - README.md (design-system overview): overview + tokens narrative + audit-response section (which step-04 findings applied as token tunes) + catalog lineage citations. 8+ KB. Required H2: "Audit Response".
+- Overshoot cascade per `.claude/rules/artifact-budgets.md` (applies to ceilings on each file — read per-file max from `14-design-system/schema.md § Target`): `file_max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `file_max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns). Floors above remain enforced via schema Layer 1.
 - Write 3 files DIRECTLY to {{out}}/docs/design-system/: tokens.css + components.md + README.md.
 
 DELIVERABLE: 3 files at {{out}}/docs/design-system/: tokens.css + components.md + README.md
@@ -390,7 +404,8 @@ CONTEXT: Read ALL prior artifacts at {{out}}/docs/ (semantic-named per spec 048;
 Read .claude/skills/product/templates/pipeline/15-screen-atlas/prompt.md + schema.md for atlas shape.
 
 CONSTRAINTS:
-- Size budget: per `.claude/skills/product/templates/pipeline/15-screen-atlas/schema.md § Target` (10-28 KB for screen-atlas.md; soft overshoot trigger at max × 1.2). NOT a re-render of any single screen — the atlas IS the index.
+- Size budget: per `.claude/skills/product/templates/pipeline/15-screen-atlas/schema.md § Target` (10-28 KB for screen-atlas.md). NOT a re-render of any single screen — the atlas IS the index.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md`: `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Required H2 sections (verbatim): Overview / Screens Index / Sitemap Coverage Cross-Check / PRD Coverage Matrix / Design Fidelity / States Coverage Matrix / User Flow Walkthrough / Open Decisions.
 - **Sitemap Coverage Cross-Check** (NEW per spec 045) — for every route in sitemap.yaml, atlas confirms the corresponding `app/<route>/page.tsx` was actually generated. Missing screens listed as `[GAP — re-dispatch screen-writer]`.
 - **Screens Index** — table: filename | route path | category | covers_us | states implemented.
@@ -453,6 +468,7 @@ CONSTRAINTS:
 - Token reads via var(--color-*) inline OR Tailwind utility classes that map to tokens — NO hard-coded #hex or px values (1px borders idiomatic CSS exception).
 - Mock data inline OR in {{out}}/lib/mock-data.ts.
 - Soft token budget: 4000 tokens output.
+- Overshoot cascade per `.claude/rules/artifact-budgets.md` (artifact size — max comes from step context: Step 02 lo-fi screens 4-12 KB, Step 15 hi-fi screens 8-18 KB per `pipeline-coverage.md` § Per-step table): `max × 1.2` → partial-result with `oversize_reason` (sub-agent agency); `max × 1.8` → STOP, partial-result, no further production. DO NOT trim-loop, DO NOT re-emit at smaller scope (both are forbidden antipatterns).
 - Buttons: explicit type attribute (Biome a11y).
 - **Chrome inheritance via route-group layout (spec 052) — DO NOT REINVENT.** The shared sidebar + topbar lives in `{{out}}/app/(app)/layout.tsx` (written by the atlas before this dispatch). Your `page.tsx` renders the route's UNIQUE content body ONLY — no sidebar, no topbar, no app-wide navigation chrome. If you find yourself writing `<Sidebar>` or `<TopNav>` inside `page.tsx`, stop: the layout already provides them. Pages whose category routes them outside `app/(app)/` (marketing/auth/booking) similarly inherit from `app/(marketing)/layout.tsx` or no layout (chromeless) — adapt accordingly.
 - **State rendering — use Next.js sibling files, NOT inline mode chips (spec 052).** Sitemap entry `states: [loading]` → emit `<route>/loading.tsx` (Server Component skeleton, fallback for the route's Suspense boundary). `states: [error]` → emit `<route>/error.tsx` (Client Component with `'use client'`, accepts `{ error, reset }` props, includes a "Try again" button calling `reset()`). `states: [404]` or `states: [not-found]` → emit `<route>/not-found.tsx` (rendered when the page calls `notFound()` from `next/navigation`). **Empty state is page-internal rendering logic** (data-driven `if (items.length === 0) return <EmptyState />` branch) — NOT a developer-mode toggle. Skeleton root-level defaults at `app/{loading,error,not-found}.tsx` are inherited when no per-route override exists (nearest-wins per Next.js convention).

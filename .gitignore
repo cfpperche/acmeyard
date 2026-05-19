@@ -53,3 +53,6 @@ prototypes/
 .claude/CLAUDE.md.diverged-region.md
 .claude/CLAUDE.md.diverged-sections.md
 .claude/CLAUDE.md.migration-candidate.md
+
+.claude/.routines-state/
+.claude/delegation-audit.jsonl.lock
