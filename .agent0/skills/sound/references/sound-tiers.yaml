@@ -1,0 +1,70 @@
+# sound-tiers.yaml — paid creative-audio tier -> fal model oracle for /sound (spec 161).
+#
+# THE ORACLE. sound.sh carries NO model IDs, body shapes, or url paths — it reads
+# them here. Date-stamped + refreshable (mirrors video-tiers.yaml / audio-tiers.yaml).
+# /sound is paid-only by nature (no light local music/SFX engine exists) — the
+# /image brand analog, NOT the local-first /audio analog.
+#
+# WHY data-driven (the /audio lesson): body shapes AND output url paths DIFFER per
+# model — CassetteAI returns `audio_file.url` while ElevenLabs returns `audio.url`;
+# SFX takes `text` while music takes `prompt`+`duration`. A fixed extraction would
+# silently miss CassetteAI. So each tier carries everything the engine needs to be
+# model-agnostic; new models = a yaml edit, no code change.
+#
+# Per-tier fields:
+#   model            fal endpoint id (no leading slash)
+#   prompt_field     request body key for the text prompt ("text" | "prompt")
+#   duration_field   request body key for length in seconds, or null to omit
+#   output_url_path  jq path into the response JSON for the audio url
+#   price            unit price in USD
+#   price_unit       per_second | per_minute | per_gen  (drives cost = price × duration_in_unit)
+#   default_duration default seconds when --duration omitted (informs cost + body)
+#   note             human note
+#
+# Verify endpoint ids + prices + body/url shapes via fal discovery before first use;
+# bump snapshot_date when they move. sound.sh emits a sound-advisory: when older
+# than stale_after_days. ElevenLabs Music (premium) endpoint/body is the least-
+# verified — confirm at first real premium call (the oracle is the single edit point).
+
+snapshot_date: "2026-06-06"
+stale_after_days: 60
+confirm_threshold_usd: 0.25   # hard --confirm-cost-usd required above this (env AGENT0_SOUND_CONFIRM_THRESHOLD overrides)
+
+# default tier per --kind (music has standard/premium; sfx has one)
+default_tier_music: standard
+default_tier_sfx: sfx
+
+tiers:
+  # --- music ---------------------------------------------------------------
+  standard:
+    kind: music
+    model: "cassetteai/music-generator"
+    prompt_field: "prompt"
+    duration_field: "duration"
+    output_url_path: ".audio_file.url"
+    price: 0.02
+    price_unit: per_minute
+    default_duration: 30
+    note: "CassetteAI Music — ~$0.02/min, fast, instrumental from a text prompt."
+  premium:
+    kind: music
+    model: "fal-ai/elevenlabs/music"
+    prompt_field: "prompt"
+    duration_field: "music_length_ms"   # UNVERIFIED — confirm at first premium call
+    output_url_path: ".audio.url"
+    price: 0.80
+    price_unit: per_minute
+    default_duration: 30
+    note: "ElevenLabs Music — ~$0.80/min, highest quality. Endpoint/body UNVERIFIED; verify at first call (oracle is the single edit point). duration_field/units may need a one-line fix."
+
+  # --- sfx -----------------------------------------------------------------
+  sfx:
+    kind: sfx
+    model: "fal-ai/elevenlabs/sound-effects/v2"
+    prompt_field: "text"
+    duration_field: "duration_seconds"
+    output_url_path: ".audio.url"
+    price: 0.002
+    price_unit: per_second
+    default_duration: 5
+    note: "ElevenLabs Sound Effects v2 — ~$0.002/sec, short SFX from a text prompt."

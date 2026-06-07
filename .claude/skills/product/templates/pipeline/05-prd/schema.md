@@ -62,7 +62,7 @@ Section names slugify by lowercasing + dashing — `## User Stories` → `user-s
 
 - **`prd.md` min_size 6144** (6 KB) — covers the 9 required sections at honest depth. An SMB SaaS PRD with 10-20 user stories + P0/P1/P2 tables + 2-4 BDD scenarios per P0 + Backlog with audit-finding back-references lands 12-25 KB. Micro-product compact-mode PRDs (per `prompt.md § 6`) may land at 6-8 KB; the 6 KB floor is the universal sanity line, not the typical-case.
 
-- **`**US-01.**` substring** — the literal `**US-01.**` proves the US-NN ID convention is materialized in user stories. The Markdown bold + dot pattern is unique enough to not collide with other prose. A PRD that uses anthill-style unnumbered "As a..." lines without IDs trips Layer 1 immediately. **Why this specific check matters:** step 13's PRD-coverage scoring depends on stable IDs; if the IDs aren't present at PRD-submit time, downstream coverage scoring breaks silently. The Layer 1 check is the FIRST line of defense; the prompt's voice-rigor guidance (`prompt.md § Voice & rigor` — append-don't-renumber) is the second.
+- **`**US-01.**` substring** — the literal `**US-01.**` proves the US-NN ID convention is materialized in user stories. The Markdown bold + dot pattern is unique enough to not collide with other prose. A PRD that uses unnumbered "As a..." lines without IDs trips Layer 1 immediately. **Why this specific check matters:** step 13's PRD-coverage scoring depends on stable IDs; if the IDs aren't present at PRD-submit time, downstream coverage scoring breaks silently. The Layer 1 check is the FIRST line of defense; the prompt's voice-rigor guidance (`prompt.md § Voice & rigor` — append-don't-renumber) is the second.
 
 - **The literal pipe-delimited row `| # | Requirement | Acceptance Criteria | Source |`** — proves the requirements tables (P0 / P1 / P2 / Backlog) carry the canonical 4-column shape including the `Source` column (the audit-trail / spec-traceability / prototype-screen-link column — see `prompt.md § 4 item 6` for routing). A PRD that ships requirements without the `Source` column breaks the audit-trail discipline; the literal row enforces it.
 
@@ -74,7 +74,7 @@ Section names slugify by lowercasing + dashing — `## User Stories` → `user-s
 
 ## Section content guidance (depth, not just presence)
 
-- **Problem Statement** — concrete user pain with evidence. Specific number / quote / observed behavior from step 1's brief or step 4's audit. Anti-pattern: "the experience could be better". Good: "EM persona spends 12 min on Jira triage daily; spec 026 dogfood persona quote: *'loves Linear's UX but balks at the per-seat price'*."
+- **Problem Statement** — concrete user pain with evidence. Specific number / quote / observed behavior from step 1's brief or step 4's audit. Anti-pattern: "the experience could be better". Good: "EM persona spends 12 min on Jira triage daily; persona quote: *'loves Linear's UX but balks at the per-seat price'*."
 - **Goals** — 3-5 outcome-oriented bullets. "User triages a sprint in <5 min" not "Build triage view".
 - **Non-Goals** — explicit out-of-scope, one-line reason each. Empty Non-Goals = scope creep waiting to happen; the parent's interview at `prompt.md § 2` should produce 3-5 explicit non-goals.
 - **User Stories** — every story carries `**US-NN.**` (zero-padded, sequential). Format: `**US-NN.** As a <role>, I want <action> so that <benefit>.` Append-don't-renumber discipline (see `references/prd-format.md § ID stability`).

@@ -1,0 +1,37 @@
+#
+# transcribe — runtime-neutral, local-first speech-to-text.
+# Spec: docs/specs/159-transcribe/. Engine: whisper.cpp (MIT).
+#
+# Philosophy (decision-grade meeting audio-transcribe-media-family-skills):
+# a LOCAL UTILITY in the vuln-audit class, NOT paid media. Provenance manifest,
+# no cost apparatus. Audio/video content never leaves the machine; only the
+# model weights are fetched (once). Acquisition + operation are as automated and
+# invisible as possible; honest degrade to a one-line hint when impossible.
+#
+# Usage:
+#   transcribe.sh <file> [--format <csv>] [--model <name>] [--lang <code>]
+#                        [--output <dir>] [--quiet] [--json] [--exit-code]
+#   transcribe.sh doctor      # human-readable tri-state of engine/ffmpeg/model
+#   transcribe.sh caps        # machine-readable capability JSON
+#
+#   <file>          audio OR video file (video → audio track extracted via ffmpeg)
+#   --format <csv>  any of: txt,srt,vtt,json,json-full,csv,lrc  (default: txt)
+#   --model <name>  whisper ggml model (default: base ; multilingual)
+#   --lang <code>   force language (default: auto-detect)
+#   --output <dir>  transcripts dir (default: assets/transcripts, gitignored)
+#   --quiet         do NOT echo the txt transcript to stdout
+#   --json          emit a structured status doc on stdout (shape-only)
+#   --exit-code     map result status -> exit code: ok=0 unavailable=2 error=3
+#                   WITHOUT this flag the process ALWAYS exits 0 (advisory family)
+#
+# Result statuses (first-class, decoupled from exit code):
+#   ok           transcription produced
+#   unavailable  engine/ffmpeg could not be found or auto-acquired (with hint)
+#   error        an input/runtime error (missing file, engine failure)
+#
+# Test/override env: TRANSCRIBE_WHISPER_BIN, TRANSCRIBE_FFMPEG_BIN,
+#   TRANSCRIBE_MODEL_DIR, TRANSCRIBE_OUTPUT_DIR, TRANSCRIBE_MANIFEST,
+#   TRANSCRIBE_NO_ACQUIRE, TRANSCRIBE_UVX_PKG, TRANSCRIBE_UVX_SCRIPT.
+
+set -uo pipefail
+--exit:0

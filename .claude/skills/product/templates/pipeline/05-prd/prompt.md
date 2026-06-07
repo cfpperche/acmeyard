@@ -4,11 +4,11 @@ delegable: partial
 delegation_hint: "draft the PRD 1-pager (Lenny Rachitsky hybrid bones + 3 Steward-specific sections) synthesizing step 01 + step 03 spec + step 04 audit; parent should confirm 2 inputs from founder first (priority cut P0/P1/P2 + NSM declaration); user-story IDs follow US-NN convention (consumed by step 07 sitemap-IA + step 15 atlas for coverage matrices); 4-7 KB hard ceiling — tight 1-pager discipline"
 ---
 
-# Step 05 — PRD 1-pager (Lenny hybrid per spec 045 Decision 1 + 15)
+# Step 05 — PRD 1-pager (Lenny hybrid)
 
 **Goal:** the canonical product spec as a TIGHT 1-pager — what's in v1, what's out, what success looks like, with **stable user-story IDs (`US-NN`)** that Step 07 (sitemap-IA) maps to routes + Step 15 (screen-atlas) scores coverage against. This document is the CONTRACT downstream phases consume.
 
-Per spec 045 Decision 1 + 15 (ported from spec 032): PRD is reshaped from monolithic spec to **1-pager** following Lenny Rachitsky's template, with **OST sibling** (Step 06) carrying the discovery landscape and **sitemap-IA** (Step 07) carrying the screen inventory. PRD's job is to compress: ONE NSM, ONE primary persona, P0/P1/P2 tiering hard-cut, 5-12 user stories max. If the PRD wants to grow past 7 KB, the work belongs in OST (opportunities) or sitemap (screens), not in PRD.
+Per design discipline, Decision 1 + 15: PRD is reshaped from monolithic spec to **1-pager** following Lenny Rachitsky's template, with **OST sibling** (Step 06) carrying the discovery landscape and **sitemap-IA** (Step 07) carrying the screen inventory. PRD's job is to compress: ONE NSM, ONE primary persona, P0/P1/P2 tiering hard-cut, 5-12 user stories max. If the PRD wants to grow past 7 KB, the work belongs in OST (opportunities) or sitemap (screens), not in PRD.
 
 **Mode:** `draft-after-input` with `delegable: partial`. The parent may confirm two pieces of input that no prior artifact captured deterministically — **feature priority cut** (P0/P1/P2) and **NSM declaration** (the single primary observable). If founder is hands-off, sub-agent infers from prior artifacts + concept-brief's monetization tier + audit's severity findings. Once locked, the document writing delegates.
 
@@ -51,7 +51,7 @@ Per spec 045 Decision 1 + 15 (ported from spec 032): PRD is reshaped from monoli
 - ...
 ```
 
-### 3 Steward-specific sections (per spec 045 Decision 15)
+### 3 Steward-specific sections
 
 ```markdown
 ## Release scope
@@ -90,7 +90,7 @@ Per spec 045 Decision 1 + 15 (ported from spec 032): PRD is reshaped from monoli
 - ONE NSM (NOT two equal-priority). Supporting metrics optional, read-only.
 - P0/P1/P2 tiering — hard cut. Anything not P0/P1/P2 → Anti-goals or implicit (don't mention).
 - Cross-references to upstream/downstream files use absolute `<out>/docs/NN-<slug>.<ext>` paths.
-- Attribution header: `_PRD shape based on Lenny Rachitsky's 1-pager template (lennysnewsletter.com/p/prds-1-pagers-examples) — hybrid w/ Steward-specific Release scope · NSM · Upstream refs sections per spec 045 Decision 15._`
+- Attribution header: `_PRD shape based on Lenny Rachitsky's 1-pager template (lennysnewsletter.com/p/prds-1-pagers-examples) — hybrid w/ Steward-specific Release scope · NSM · Upstream refs sections._`
 
 ## What this step does NOT do
 
@@ -104,12 +104,10 @@ Per spec 045 Decision 1 + 15 (ported from spec 032): PRD is reshaped from monoli
 
 ## Why 1-pager (not multi-page)
 
-Camp C from spec 032 Decision 1: PRD shrinks to 1-pager, OST sibling carries discovery, prototype hi-fi (Step 15) is the executable spec. Lenny Rachitsky's framing: a 1-pager PRD that fits on one screen forces clarity. A 12-page PRD hides ambiguity. The 4-7 KB ceiling enforces this — over-budget triggers re-emit at smaller scope.
+Industry framing: PRD shrinks to 1-pager, OST sibling carries discovery, prototype hi-fi (Step 15) is the executable spec. Lenny Rachitsky's framing: a 1-pager PRD that fits on one screen forces clarity. A 12-page PRD hides ambiguity. The 4-7 KB ceiling enforces this — over-budget triggers re-emit at smaller scope.
 
 ## Cross-references
 
 - `.claude/skills/product/references/delegation-briefs.md` § Step 05 — full sub-agent brief
 - `.claude/skills/product/references/pipeline-coverage.md` § Step 05 — size targets + lightening
 - `references/prd-format.md` (this step's own reference) — US-NN convention details
-- `docs/specs/045-prototype-skill-pipeline-realign/spec.md` § Decision 1 + 15
-- `docs/specs/032-pipeline-industry-alignment/spec.md` § Decision 1 + 15 — industry rationale

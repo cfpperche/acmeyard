@@ -1,13 +1,13 @@
 # Step 5 — Brand Anti-Patterns
 
-The brand-book failure modes that produce slop. Each row pairs the trap with the discipline that catches it. Half of these are direct ports from the archived `anthill-brand-designer/references/anti-patterns.md`; the rest emerged from real port + dogfood pressure.
+The brand-book failure modes that produce slop. Each row pairs the trap with the discipline that catches it.
 
 | Pattern | Instead |
 |---------|---------|
 | Voice described as "modern, friendly, professional" | Quote the founder verbatim where they were sharp; require concrete examples. If you can swap your words with another product's brand book, the words aren't doing work. |
 | Flat adjective list as voice (e.g. "direct, knowledgeable, optimistic") | Convert every adjective to a `**We are** X. **We are not** <near-adjacent-Y>.` pair. The contrast (X vs Y) is the discipline; an adjective alone is a wishlist. |
 | Voice samples that read like brand-strategy filler ("We empower teams to achieve their goals") | Write the *actual copy* the brand would emit on a real surface — error message, onboarding welcome, paywall, support reply. If you can't picture the surface, don't write the sample. |
-| Logo rules that only say what's allowed | Document prohibited uses explicitly — wrong colors, distortion, busy backgrounds, unauthorized recolors. Anthill mandates ≥ 3 prohibited uses; the deep port keeps the floor. |
+| Logo rules that only say what's allowed | Document prohibited uses explicitly — wrong colors, distortion, busy backgrounds, unauthorized recolors. The floor is ≥ 3 prohibited uses. |
 | Hex codes inside the brand book (e.g. `Primary: #1A56DB`) | Use color *names* + *feelings* in the brand book ("anchor on a single saturated cyan as the only on-signal"). Hex codes belong in step 6 (design-system). The boundary keeps the brand-book voice-shaped, not token-shaped. |
 | Typography scale inside the brand book (`H1: 48px / 56px line-height`) | Same rule as hex — name the typographic posture in step 5 ("typewriter-grade monospace pairing with a humanist sans for body"); type scale lands in step 6. |
 | Confusing posture-numbers with scale-tokens, then over-stripping | Single-number posture ("hairline 1-px borders", "corner radius capped at 2 px", "no font below 12 px", "secondary text at roughly 70% lightness") IS allowed — these describe the visual stance and survive the boundary. What the boundary rejects is *enumerated* scale (`borders: 1 / 2 / 4 / 8 px`, `H1 48 / H2 36 / Body 16`, `space: 4/8/12/16/24/32 px`) and *exact* token values (`oklch(0.72 0.010 240)`). Stripping all numbers because some are forbidden produces a vague brand-book; keep the posture-numbers, drop the scale-tokens. |

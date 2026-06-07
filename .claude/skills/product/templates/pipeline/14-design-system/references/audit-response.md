@@ -1,6 +1,6 @@
 # Step 6 — Consuming Step-4 Audit Frontmatter
 
-The structured handoff that closes the audit→token-edit loop. When step 4 emits YAML frontmatter (measurable mode, see `04-ux-testing/schema.md` § "Optional YAML frontmatter — structured findings handoff"), step 6 reads it and applies `fix_skill_hint: "design-system"` findings inline. This page is the consumer-side spec.
+The structured handoff that closes the audit→token-edit loop. When step 4 emits YAML frontmatter (measurable mode, see `04-validation/schema.md` § "Optional YAML frontmatter — structured findings handoff"), step 6 reads it and applies `fix_skill_hint: "design-system"` findings inline. This page is the consumer-side spec.
 
 ## What step 4 hands over (the contract)
 
@@ -158,7 +158,7 @@ When step 4 frontmatter exists but no findings have `fix_skill_hint: "design-sys
 ```markdown
 ## Audit Response
 
-*Step 4 emitted structured findings, none routed to design-system. All findings deferred to step 15 (screen-atlas; absorbed step 7 per spec 045) or marked deferred for backlog. No token edits applied this step.*
+*Step 4 emitted structured findings, none routed to design-system. All findings deferred to step 15 (screen-atlas) or marked deferred for backlog. No token edits applied this step.*
 
 ### Findings reviewed (not actioned)
 
@@ -182,4 +182,4 @@ The explicit empty-state line is the contract. Skipping the section silently is 
 
 ## Why this contract matters
 
-Without the structured handoff, the audit→fix loop is the human's job. A real consumer reading the audit, finding a contrast fail, mapping it to the right token, applying the value change, re-checking the cascade — and remembering to do this for every finding. The frontmatter + this consumption pattern automates the routing and makes the application trace-able. This is the audit-as-delegation-manifest pattern from the anthill comparison, restored in the MCP port.
+Without the structured handoff, the audit→fix loop is the human's job. A real consumer reading the audit, finding a contrast fail, mapping it to the right token, applying the value change, re-checking the cascade — and remembering to do this for every finding. The frontmatter + this consumption pattern automates the routing and makes the application trace-able. This is the audit-as-delegation-manifest pattern.

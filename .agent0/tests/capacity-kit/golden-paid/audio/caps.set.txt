@@ -1,0 +1,13 @@
+{
+  "kokoro": "uvx --with kokoro --with soundfile python <ROOT>/.agent0/tools/audio-kokoro.py",
+  "piper": "uvx --from piper-tts piper",
+  "espeak_ng": "yes",
+  "paid_fal_key": true,
+  "channels": [
+    "uvx",
+    "pip",
+    "espeak-ng",
+    "ffmpeg"
+  ]
+}
+--exit:0

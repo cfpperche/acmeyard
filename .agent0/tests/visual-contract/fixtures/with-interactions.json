@@ -1,0 +1,12 @@
+{
+  "required": [ { "role": "heading", "name": "Dashboard" } ],
+  "max_console_errors": 0,
+  "interactions": [
+    { "action": "click", "target": { "role": "button", "name": "Create project" },
+      "expect": { "role": "dialog", "name": "New project" } },
+    { "action": "type", "target": { "role": "textbox", "name": "Project name" }, "value": "Acme",
+      "expect": { "role": "button", "name": "Save" } },
+    { "action": "click", "target": { "role": "button", "name": "Nonexistent" },
+      "expect": { "role": "alert", "name": "never" }, "flaky": true }
+  ]
+}

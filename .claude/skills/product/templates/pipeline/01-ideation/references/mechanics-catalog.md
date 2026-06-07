@@ -4,8 +4,6 @@ Proven growth and retention mechanics for software products. Each includes: what
 
 Use these as building blocks when generating concepts. Layer 2-3 per concept.
 
-Ported from anthill `anthill-product-ideator/references/mechanics-catalog.md`. Content travels verbatim — these are domain mechanics, not anthill-specific.
-
 ---
 
 ## ACQUISITION MECHANICS (how users discover and sign up)

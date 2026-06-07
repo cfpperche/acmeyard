@@ -12,7 +12,7 @@ delegation_hint: "render one HTML artifact for step 2 — either one of three Tu
 - **Turn 1** (discovery → 3 directions → REPORT) — parent runs the discovery interview with the user (§ 2), attributes one categorically distinct angle per direction (§ 3 + § 3.5), and **dispatches 3 sub-agents in parallel** — one direction each, angle locked in CONSTRAINTS, following the per-direction build rules in § 4. When the 3 sub-agents return, parent composes `compare.html` (§ 5) and `REPORT.md` (§ 6) cross-cutting the 3 outputs.
 - **Turn 2** (N hi-fi screens of picked direction, N calibrated per product) — gated by a Layer 3 checkpoint where the user picks one direction. Parent then derives N from the brief + Turn-1 Plan (§ 9's calibration table) and dispatches N sub-agents in parallel (or fewer, batched) to render the screens at high fidelity using the picked direction's tokens. Schema floor is `min_count: 3` (universal sanity); typical ranges 3-5 (micro / CLI tool), 6-10 (SMB SaaS), 10-15 (marketplace / multi-persona).
 
-Sub-agent delegation is `partial`: the **discovery interview** (§ 2), the **angle attribution** (§ 3 + § 3.5), the **cross-cutting artifacts** (§ 5 compare.html + § 6 REPORT.md — both need view of all 3 directions to compose), and the **user checkpoint** at end of Turn 1 stay with the parent. The **per-direction build** (§ 4) and the **per-screen Turn-2 render** (§ 9) are delegable — and SHOULD be delegated, in parallel. The single-Producer pattern that earlier versions implied is empirically suboptimal: a single agent making the angle choice and the 3 builds in sequence converges all 3 directions on the same aesthetic axis (the "2 of 3 dark-canvas" finding from the spec 027 dogfood — `.claude/memory/od-grounding-dogfood.md`). Pre-attributed angles + parallel sub-agents make that convergence structurally impossible — see § 3.5.
+Sub-agent delegation is `partial`: the **discovery interview** (§ 2), the **angle attribution** (§ 3 + § 3.5), the **cross-cutting artifacts** (§ 5 compare.html + § 6 REPORT.md — both need view of all 3 directions to compose), and the **user checkpoint** at end of Turn 1 stay with the parent. The **per-direction build** (§ 4) and the **per-screen Turn-2 render** (§ 9) are delegable — and SHOULD be delegated, in parallel. The single-Producer pattern that earlier versions implied is empirically suboptimal: a single agent making the angle choice and the 3 builds in sequence converges all 3 directions on the same aesthetic axis (the "2 of 3 dark-canvas" finding from prior dogfood). Pre-attributed angles + parallel sub-agents make that convergence structurally impossible — see § 3.5.
 
 **Output files** (all under `docs/`):
 - `direction-a.html`, `direction-b.html`, `direction-c.html` — 3 mood boards, ≥ 8 KB each
@@ -84,6 +84,8 @@ The 5 schools (editorial-monocle / modern-minimal / warm-soft / tech-utility / b
 
 **Hard rule:** the 3 directions must come from genuinely different angles — different palette family, different typographic personality, different layout posture. NOT three takes on the same green. If two directions land in the same school, drop one and pick a contrasting school.
 
+**Canvas contrast (load-bearing):** school-distinct is NOT enough. Two directions can map to different schools yet still read as visually similar by sharing one canvas tone — the 2026-05-14 OD dogfood clustered two directions on dark canvases (`linear-app`+`vercel`, `voltagent`+`warp`) despite being school-distinct, collapsing the visible range. Treat background canvas as an explicit diversity axis: across the 3 directions use **at least 2 distinct canvas tones** (light/paper, dark/ink, tinted/colored). Do not ship 3 dark-canvas directions because dark reads as "premium" — a 3-up exists to show range, and 3 dark canvases throw that away. When the brief or a chosen DS pulls toward dark, make at least one direction earn its contrast with a light or tinted canvas.
+
 Per direction, pin in chat BEFORE writing HTML:
 - **Codename** (e.g., "Operador Silencioso", "Calma Estratégica") — visual DNA reference, not marketing label
 - **Palette** — 6 tokens (background / foreground / primary / accent / border / muted) with exact `hsl()` / `oklch()` values, taken from the consulted `DESIGN.md` files (verbatim, not improvised)
@@ -94,21 +96,21 @@ Per direction, pin in chat BEFORE writing HTML:
 
 ### 3.5 Fan-out — 3 parallel sub-agents, one direction each
 
-With the 3 angles pinned (§ 3), the parent does **not** produce the directions itself. The parent composes **3 sub-agent briefs** (5-field handoff per `.claude/rules/delegation.md`) and **dispatches them in the same response** so they run concurrently. Each brief locks ONE pre-attributed angle into CONSTRAINTS — the sub-agent does not pick its own angle, does not hedge across angles, does not compare itself to the other two.
+With the 3 angles pinned (§ 3), the parent does **not** produce the directions itself. The parent composes **3 sub-agent briefs** (5-field handoff per `.agent0/context/rules/delegation.md`) and **dispatches them in the same response** so they run concurrently. Each brief locks ONE pre-attributed angle into CONSTRAINTS — the sub-agent does not pick its own angle, does not hedge across angles, does not compare itself to the other two.
 
 Brief shape per direction (composed by the parent — `product_get_delegation_brief(2)` returns one generic brief, not three direction-specific ones; the parent specialises it three times):
 
 - **TASK** — "produce one HTML mood-board direction for `<product>` — '`<Direction X: codename>`' — saved to `docs/direction-<x>.html`".
-- **CONTEXT** — paths to the concept brief (`docs/concept-brief.md`), the step-2 template files (this `prompt.md`, `schema.md`, all `references/*.md` — especially `od-bridge.md`, `visual-constraints.md`, `anti-patterns.md`), and explicit confirmation that the OD vendor lives at `.claude/skills/product/design-systems/` (73 `DESIGN.md` directories) with a catalogue index at `.claude/skills/product/references/od-catalog-index.json` — the sub-agent reads files directly with its `Read` tool, no MCP indirection. State that two sibling sub-agents are producing the other two directions concurrently, and instruct the sub-agent NOT to coordinate with or hedge against them.
+- **CONTEXT** — paths to the concept brief (`docs/concept-brief.md`), the step-2 template files (this `prompt.md`, `schema.md`, all `references/*.md` — especially `od-bridge.md`, `visual-constraints.md`, `anti-patterns.md`), and explicit confirmation that the OD vendor lives at `.claude/skills/product/design-systems/` (one `DESIGN.md` per vendored design system) with a catalogue index at `.claude/skills/product/references/od-catalog-index.json` — the sub-agent reads files directly with its `Read` tool, no MCP indirection. State that two sibling sub-agents are producing the other two directions concurrently, and instruct the sub-agent NOT to coordinate with or hedge against them.
 - **CONSTRAINTS** — the LOCKED angle (one paragraph: mood line, palette family + the explicit forbidden zones for *this* direction, type stack, layout posture), the design-system shortlist the parent already pulled from the OD catalogue for this angle (or "shortlist from the catalogue yourself, anchored to school `<X>`"), the schema-required `contains` substrings (`<!DOCTYPE html`, `<style`, `:root`, `--background`, `--foreground`, `--primary`, `Most Popular`, `<svg`), the 8-section build rhythm from § 4, the file path, the size floor (≥ 10 KB), the boundary rules (no writes outside the step-2 dir, no comparison to other directions in this file, no second-guessing the assigned angle).
 - **DELIVERABLE** — the written HTML file at the named path. In the final message back to the parent: file path, the 1-3 OD design systems chosen with their vendored `design-systems/<system>/DESIGN.md` paths, a 2-3 sentence summary of the specific design choices, and any honest tension with the OD catalogue (partial fits disclosed by name, accents that were brief-specified rather than DS-inherited).
 - **DONE_WHEN** — file exists at the path, size ≥ 10 KB, every required `contains` substring literally present, OD design system paths cited in an HTML comment header at the top of the file, and the final message reports all four items above.
 
-Use `model: opus` for each sub-agent — sonnet times out on heavy step-2 templates (SESSION.md captures this empirically). Dispatch all 3 in the **same response** so they run concurrently rather than sequentially.
+Use `model: opus` for each sub-agent — sonnet times out on heavy step-2 templates (observed empirically). Dispatch all 3 in the **same response** so they run concurrently rather than sequentially.
 
 **Why this pattern** — not just parallelism for speed:
 
-- **Anti-convergence** — pre-attributing the angle makes "2 of 3 directions land on the same dark-canvas vibe" structurally impossible. The spec 027 dogfood documented the convergence failure of the single-Producer pattern; this fan-out is the durable fix. Without pre-attribution, the brief's centre of gravity (here typically "dark-mode-leaning + Linear-grade speed") pulls every direction toward the same axis.
+- **Anti-convergence** — pre-attributing the angle makes "2 of 3 directions land on the same dark-canvas vibe" structurally impossible. An earlier dogfood documented the convergence failure of the single-Producer pattern; this fan-out is the durable fix. Without pre-attribution, the brief's centre of gravity (here typically "dark-mode-leaning + Linear-grade speed") pulls every direction toward the same axis.
 - **Honest DS-fit grading** — isolation makes each sub-agent grade its own DS-catalogue fit against ITS angle, not against an internal multi-direction comparison. The dogfood found this as an emergent property: sub-agents disclose partial fits by name ("Warp is a stretch citation for Cool Brutalist — I borrowed only the terminal-block layout DNA; native warm-parchment palette was swapped") and disclose when an accent is brief-specified rather than DS-inherited (Direction C's oxblood). **Promote this discipline explicitly** in CONSTRAINTS: instruct the sub-agent to disclose partial fits and brief-specified-not-DS choices, both inline in the HTML's lineage section and back to the parent in its DELIVERABLE message.
 - **Context-budget hygiene** — three sub-agents materialise their HTML in their own contexts; the parent's context stays fresh for the cross-cutting work (compare.html + REPORT.md) and for the user-checkpoint dialogue.
 
@@ -141,7 +143,7 @@ Read `references/visual-constraints.md` + `references/a11y-checklist.md` + `refe
 </section>
 ```
 
-This is the **discipline that separates landing-page cohesion from loose sections**. Headings alone are not enough; the eyebrow + title + lead trio gives every section narrative entry. Anthill's reference output uses this rhythm consistently across every content section — adopt it. The header (#1) and palette strip (#2) sections may use a lighter variant (no lead) but content sections #3-#6 must carry all 4 layers.
+This is the **discipline that separates landing-page cohesion from loose sections**. Headings alone are not enough; the eyebrow + title + lead trio gives every section narrative entry. Reference landing-page output uses this rhythm consistently across every content section — adopt it. The header (#1) and palette strip (#2) sections may use a lighter variant (no lead) but content sections #3-#6 must carry all 4 layers.
 
 Eyebrow content — use these EXACT labels (or close variants that explicitly name the section type — NOT the section content):
 
@@ -232,6 +234,8 @@ Read `references/checklist.md`. For EACH direction:
 **Anti-AI-slop P0** (`references/anti-patterns.md` for full list):
 - No purple/violet gradient backgrounds · no generic emoji feature icons · no left-coloured-border rounded cards as default · no hand-drawn SVG humans · Inter/Roboto/Arial as body only · no invented metrics · no filler copy · no motivational copy
 
+> **Craft floor (post-emit).** After you emit, an independent judge runs the deterministic anti-slop check (`scripts/craft-floor-check.ts`, canonical rules in `references/craft-floor.md`) over your directions and grades a `craft-floor` criterion — a default-Tailwind-indigo accent (`#6366f1`…), a two-stop purple→blue/blue→cyan gradient, emoji feature-icons, filler copy, or default-sans display when a serif is bound is a hard tell. Self-correct these now; the bound `DESIGN.md`'s own tokens are exempt (brand purple is fine — the Tailwind *default* is the tell).
+
 Two fix passes is normal. Do NOT emit with a failing dimension.
 
 ### 7. Write REPORT.md
@@ -281,7 +285,7 @@ Pull the **Scale** field from the concept brief's identity block. Map it:
 | Micro-Product / single-purpose tool / CLI helper | **3-5** | Primary action surface · settings · empty-error. CLI: `--help` / primary command / error output. |
 | Mobile App (focused, 1-persona) | **4-7** | Onboarding · main view · detail · settings · (1-2 mechanic surfaces) |
 | Developer Tool / API-first | **4-8** | Landing · dashboard · integration / quickstart · key-state · error / empty |
-| SMB SaaS (the spec 026 default) | **6-10** | Landing · onboarding · dashboard · 2 core CRUD/workflow · settings · empty-error |
+| SMB SaaS (the default) | **6-10** | Landing · onboarding · dashboard · 2 core CRUD/workflow · settings · empty-error |
 | Venture-Scale / Marketplace / multi-persona | **10-15** | Multi-persona surfaces (consumer-side + provider-side) increase the count linearly |
 
 Brief field is missing or ambiguous → ask the user during discovery (§ 2) or default to **SMB SaaS** (6-10).
@@ -301,7 +305,7 @@ Brief field is missing or ambiguous → ask the user during discovery (§ 2) or 
 
 Use as starting points, not as the answer. Each line is one HTML file.
 
-**SMB SaaS, N=8 (the spec 026 default — was hardcoded, now derived):**
+**SMB SaaS, N=8 (the default — was hardcoded, now derived):**
 1. `01-landing.html` — full marketing landing (hero, value sections, pricing, FAQ)
 2. `02-onboarding.html` — first-run wizard (3-5 steps)
 3. `03-dashboard.html` — primary in-product workspace
@@ -353,10 +357,10 @@ Call `product_advance` to move to step 3 (spec). Step 2 carries a Layer 3 checkp
 - Framework code (.tsx / .vue / .svelte). Step 13 (prototype-v3) synthesizes the picked direction into stack-native code when the spec demands it
 - Brand voice deep-dive. Step 5 (brand) covers voice, copy patterns, illustration style
 - Design tokens for code consumption. Step 6 (design-system) emits the `tokens.css` consumed by step 7 + step 13
-- User testing of the mockups. Step 4 (ux-testing) validates via intuition-mode or tested-mode
+- User testing of the mockups. Step 4 (validation) validates via intuition-mode or tested-mode
 
-## What this step replaces
+## Scope notes
 
-Anthill's `anthill-prototype` skill (402 LOC SKILL.md + 10 references = 2311 LOC total) in `html-mockup` mode. The `stack-native` half (full-product / mobile-native / shadcn-bootstrap = 1382 LOC across 3 references) is OUT OF SCOPE per spec 026 — those reappear when step 13 (prototype-v3) gets the framework-synthesis port.
+This step ships the `html-mockup` mode of prototype generation. The `stack-native` half (full-product / mobile-native / shadcn-bootstrap framework-synthesis) is OUT OF SCOPE — that reappears if and when a future prototype-v3 step (step 13) gets the framework-synthesis port.
 
-The OD vendor bundle (anthill's `.anthill/vendor/open-design/` + `.anthill/design-systems/`) **ships inside the `/product` skill** (spec 027 ported to MCP; spec 049 re-homed to the skill): 73 vendored `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, 33 skill bundles + 5-school direction library at `.claude/skills/product/vendor/open-design/`, pinned and checksum-verified. The agent picks systems from the catalogue index at `.claude/skills/product/references/od-catalog-index.json` and `Read`s the chosen `DESIGN.md` paths directly — see `references/od-bridge.md` for the pre-flight read sequence. DESIGN.md citation by name + path is mandatory (`schema.md` enforces it). The pre-OD inline 5-school description is retained in `references/pipeline.md` § "Manual escape — OD vendor unavailable" as a documented fallback for broken installs.
+The Open Design (OD) vendor bundle **ships inside the `/product` skill**: 150 vendored `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, 33 skill bundles + 5-school direction library at `.claude/skills/product/vendor/open-design/`, pinned and checksum-verified. The agent picks systems from the catalogue index at `.claude/skills/product/references/od-catalog-index.json` and `Read`s the chosen `DESIGN.md` paths directly — see `references/od-bridge.md` for the pre-flight read sequence. DESIGN.md citation by name + path is mandatory (`schema.md` enforces it). The pre-OD inline 5-school description is retained in `references/pipeline.md` § "Manual escape — OD vendor unavailable" as a documented fallback for broken installs.

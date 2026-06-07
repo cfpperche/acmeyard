@@ -1,6 +1,6 @@
 # Step-3 self-review checklist
 
-Run before calling `product_step_submit`. Synthesised from `anthill-spec` and `anthill-feature-refiner` checklists. If a box can't be checked, fix it before submitting — Layer 1 will reject some of these mechanically, but most are quality gaps only this review catches.
+Run before calling `product_step_submit`. If a box can't be checked, fix it before submitting — Layer 1 will reject some of these mechanically, but most are quality gaps only this review catches.
 
 ## Inputs
 

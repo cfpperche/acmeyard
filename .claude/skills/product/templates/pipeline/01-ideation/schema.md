@@ -50,7 +50,7 @@ Identity block (name, tagline, scale, model, AI-nativity, comparables) is enforc
 }
 ```
 
-- `min_size: 12288` (12 KB) — anthill reference briefs land at 15-25 KB. A brief under 12 KB is almost certainly under-developed (likely missing the unit-economics, distribution, or moat-analysis depth).
+- `min_size: 12288` (12 KB) — reference briefs at honest depth land at 15-25 KB. A brief under 12 KB is almost certainly under-developed (likely missing the unit-economics, distribution, or moat-analysis depth).
 - `contains` checks the identity-block field labels + key section headings as anchors; section-slug check covers the rest.
 
 ## Section content guidance (depth, not just presence)

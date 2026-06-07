@@ -4,10 +4,15 @@
 
 `<out>/docs/ost.md`
 
-## Size targets
+## Size floor (anti-stub)
 
-- **Floor:** 3 KB (less means tree is too thin or solutions are too shallow)
-- **Ceiling:** 6 KB hard (more means OST is doing PRD's job — push to PRD § Backlog instead)
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains.
+
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `ost.md` | 3 KB | below this the tree is too thin or solutions too shallow |
+
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required structure
 
@@ -47,7 +52,7 @@ Sub-agent picks based on clarity at actual tree depth.
 3. 2-3 Solutions per Opportunity (refuse if 0 OR >3)
 4. Every Opportunity has provenance tag
 5. Every Solution has status tag
-6. File size 3-6 KB (warn if outside range)
+6. File size ≥ 3 KB (anti-stub floor — no ceiling; scope is the quality judge's call)
 
 ## Cross-references
 

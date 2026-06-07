@@ -1,0 +1,7 @@
+sound — capability check (paid-only creative audio)
+  [info] paid lane: FAL_KEY set (no free local lane — paid by nature)
+  [ ok ] tiers: <ROOT>/.agent0/tools/../skills/sound/references/sound-tiers.yaml
+  [ ok ] ffmpeg: ffmpeg
+  [info] confirm threshold: $0.25 (hard --confirm-cost-usd required above it)
+  [info] draft dir: assets/generated/sound (gitignored) | asset dir: assets/sound (tracked) | manifest: assets/generated/.sound-manifest.jsonl
+--exit:0

@@ -6,7 +6,7 @@ delegation_hint: "produce an Opportunity Solution Tree consuming step 05 PRD's N
 
 # Step 06 — OST (Opportunity Solution Tree)
 
-**Goal:** produce `<out>/docs/ost.md` — a structured Opportunity Solution Tree (Teresa Torres, *Continuous Discovery Habits*) connecting the PRD's North Star Metric to user-problem opportunities to candidate solutions. Sibling artifact to PRD (not embedded) per spec 045 Decision 12 (ported from spec 032).
+**Goal:** produce `<out>/docs/ost.md` — a structured Opportunity Solution Tree (Teresa Torres, *Continuous Discovery Habits*) connecting the PRD's North Star Metric to user-problem opportunities to candidate solutions. Sibling artifact to PRD (not embedded).
 
 **Mode:** `synthesis` with `delegable: true`. Sub-agent reads PRD + functional-spec interviews + concept-brief and produces the tree mechanically.
 
@@ -101,10 +101,9 @@ graph TD
 
 ## Why this matters
 
-OST is the sibling artifact that lets the team SEE the discovery-implementation gap. PRD shows what's in scope; OST shows the OPPORTUNITY LANDSCAPE the PRD chose from. When the post-launch-review sibling step (spec 032 Decision 11) eventually ships in the MCP, it consumes THIS tree as the snapshot to compare against (new opportunities discovered post-launch → tree extension). At v1, the tree is just a planning artifact, but it's the OPERATIONAL OUTPUT that distinguishes a "PRD-and-pray" team from a "continuously-discovering" team (Torres-aligned).
+OST is the sibling artifact that lets the team SEE the discovery-implementation gap. PRD shows what's in scope; OST shows the OPPORTUNITY LANDSCAPE the PRD chose from. A future post-launch-review sibling step could consume THIS tree as the snapshot to compare against (new opportunities discovered post-launch → tree extension). At v1, the tree is just a planning artifact, but it's the OPERATIONAL OUTPUT that distinguishes a "PRD-and-pray" team from a "continuously-discovering" team (Torres-aligned).
 
 ## Cross-references
 
 - `.claude/skills/product/references/delegation-briefs.md` § Step 06 — full brief
 - `.claude/skills/product/references/pipeline-coverage.md` § Step 06 — size targets + lightening
-- `docs/specs/032-pipeline-industry-alignment/spec.md` § Decision 12 — original industry rationale

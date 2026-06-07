@@ -6,7 +6,7 @@ delegation_hint: "produce gtm-launch.md — April Dunford positioning canvas (5 
 
 # Step 12 — GTM-launch (positioning + launch + pricing)
 
-**Goal:** produce `<out>/docs/gtm-launch.md` — a tight positioning canvas (April Dunford methodology) + 4-week launch plan sketch + pricing strategy. Stage-Gate stage 6 equivalent at standard tier per spec 045 Decision 7 (ported from spec 032). Closes Phase 2 (Specification) — gate fires after this step.
+**Goal:** produce `<out>/docs/gtm-launch.md` — a tight positioning canvas (April Dunford methodology) + 4-week launch plan sketch + pricing strategy. Stage-Gate stage 6 equivalent at standard tier. Closes Phase 2 (Specification) — gate fires after this step.
 
 **Mode:** `synthesis` with `delegable: true`. Sub-agent reads prior artifacts and produces the canvas + launch plan + pricing strategy mechanically.
 
@@ -108,4 +108,4 @@ Stage-Gate stage 6 (commercialization) is industry-mandatory but routinely skipp
 
 - `.claude/skills/product/references/delegation-briefs.md` § Step 12 — full sub-agent brief
 - `.claude/skills/product/references/pipeline-coverage.md` § Step 12 — size targets + lightening
-- `docs/specs/032-pipeline-industry-alignment/spec.md` § Decision 7 — original industry rationale (Stage-Gate stage 6 + Asana 9-step GTM + HubSpot + PMA citations)
+- Industry methodology: Stage-Gate stage 6 + Asana 9-step GTM + HubSpot + PMA citations

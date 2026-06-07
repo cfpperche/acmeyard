@@ -1,0 +1,2 @@
+audio: no text. usage: audio.sh "<text>" [flags]
+--exit:64

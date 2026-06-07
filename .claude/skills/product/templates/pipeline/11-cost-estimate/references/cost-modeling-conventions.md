@@ -1,6 +1,6 @@
 # Cost modeling conventions — assumption table + scenarios + sensitivity + product-class ladder
 
-How to write `cost-estimate.md`. Section shapes + the load-bearing FPA disciplines from anthill-FPA + the calibration rules.
+How to write `cost-estimate.md`. Section shapes + the load-bearing FPA disciplines + the calibration rules.
 
 ## The assumption table — the audit trail
 
@@ -37,7 +37,7 @@ Every input the model depends on lands in the `## Assumptions` table with **valu
 - **Aspirational confidence** — a paid-conversion-rate marked High without product data is the regression mode. Conservative confidence is the discipline.
 - **Mixing sources across rows** — if half the rows cite vendor pricing pages and half cite "founder estimate" with no Confidence column, the table fails as an audit trail. Every row carries Source AND Confidence; no silent gaps.
 
-## Scenarios — bear / base / bull (anthill-FPA non-negotiable for revenue products)
+## Scenarios — bear / base / bull (FPA non-negotiable for revenue products)
 
 Single-point projections are the regression mode. Three scenarios with **probability weights** + 1-3 key variable changes per row, NOT three estimates of the same number.
 
@@ -82,7 +82,7 @@ The Projections table answers a DIFFERENT question than § Scenarios. Scenarios 
 - **Founder doing burn-rate math:** reads Projections. Wants to see month-1 burn, month-3 break-even, month-6 cash position.
 - **Founder doing fundraise prep / board prep:** reads Scenarios. Wants to see the bear/base/bull arc for the next 24 months.
 
-Both sections matter for revenue-generating products at v1. Anthill-FPA's canonical Step 2 template carries both (§ Projections + § Scenarios as separate sections); the MCP port absorbed Projections in the post-step-10 calibration (2026-05-16) to close the gap with anthill-FPA's runway-math story.
+Both sections matter for revenue-generating products at v1. The canonical FPA shape carries both (§ Projections + § Scenarios as separate sections); this template absorbed § Projections in the post-step-10 calibration (2026-05-16) to close the gap with the runway-math story.
 
 ### Canonical shape
 
@@ -199,7 +199,7 @@ The 3 assumptions driving 80% of cost / ARR variance:
 ### Anti-patterns the section catches
 
 - **Listing every assumption as "sensitive"** — defeats the purpose. The section's job is to name what's LOAD-BEARING; if every assumption is sensitive, none are.
-- **Deciding signal absent** — "Paid conversion could be lower than projected" without naming the closed-beta measurement that confirms it is the anthill-port discipline gap. Every sensitivity row carries a deciding signal that closes the band.
+- **Deciding signal absent** — "Paid conversion could be lower than projected" without naming the closed-beta measurement that confirms it is the discipline gap this section catches. Every sensitivity row carries a deciding signal that closes the band.
 - **Sensitivity without quantification** — "If conversion is lower, costs are higher" is useless. The band + the formula + the impact-in-dollars are the load-bearing content.
 
 ## Product-class calibration ladder
@@ -211,7 +211,7 @@ Mirrors step-9's calibration ladder; the cost-estimate.md depth scales with prod
 | **Micro-Product / CLI helper / single-purpose tool** | Compact ~5 KB | Build-Cost: 1-2 weeks total. Run-Cost: 1-3 line items (single host vendor + maybe Sentry). Scenarios: bear/base only; bull is "we sell more copies" which doesn't shift the model. Unit Economics: simplified to "one-time price × N copies − fixed run cost". Sensitivity: 1-2 drivers (CAC for paid; usage spike for free-with-API). |
 | **Mobile App (focused, 1 persona)** | Standard ~8 KB | Build-Cost: 12-20 weeks typical. Run-Cost: app-store revenue-share line (15-30% Apple / Google cut). Scenarios: account for review-cycle delays (1-2 week impact on launch). Unit Economics: ARPU calculated after store-cut. |
 | **Developer Tool / API-first** | Standard-Expanded ~10 KB | Pricing model often usage-based (per-API-call). Build-Cost: 14-22 weeks typical (SDK + docs + API + dashboard). Run-Cost emphasises per-API-call infra cost; token cost if AI-backed. Unit Economics emphasises per-call cost / per-call price + free-tier abuse risk. |
-| **SMB SaaS (the spec 026 default)** | Full ~10-15 KB | Full structure. Pricing model typically per-seat subscription. Build-Cost: 14-20 weeks. Run-Cost: 5-8 vendor line items + Stripe fees. Scenarios: 3 paid-conversion bands. Unit Economics: ARPU + CAC + LTV calibrated to SMB-SaaS benchmarks. |
+| **SMB SaaS (the default)** | Full ~10-15 KB | Full structure. Pricing model typically per-seat subscription. Build-Cost: 14-20 weeks. Run-Cost: 5-8 vendor line items + Stripe fees. Scenarios: 3 paid-conversion bands. Unit Economics: ARPU + CAC + LTV calibrated to SMB-SaaS benchmarks. |
 | **Venture-Scale / Marketplace / multi-persona** | Expanded ~15-20 KB | Full structure. Pricing model multi-tier (free / pro / enterprise) or take-rate (marketplace). Build-Cost: 24-40 weeks. Run-Cost: 8-15 vendor line items + per-persona variable cost. Scenarios add upside/downside on take-rate (marketplaces) or per-persona conversion (multi-persona). Unit Economics expanded per-persona. |
 
 Brief field missing or ambiguous → default to **SMB SaaS (Full)**. Mark the chosen depth in `## Overview` opening sentence.
@@ -225,7 +225,7 @@ Step-9 § Overview names a v1 infra cost ceiling target. Step-10 § Overview res
 3. **Exceeds target by 10-50%** — name the assumption(s) that moved the math. *"v1 cost ceiling target was <$200/month closed-beta. Concrete line items land at $278/month — 39% over. The Postgres tier-upgrade trigger (assumption 10) was wrong in step-9: at 500 WAT we cross the Supabase Pro→Team boundary, adding $80/mo. Either accept the higher ceiling or rescope to delay Pro→Team until 1000 WAT (changes step-9 § Open Decision row 2's deciding signal)."*
 4. **Exceeds target by >50%** — surface loudly + name the deciding question for the founder. The founder needs to decide: accept the new ceiling OR rescope v1 to fit the old ceiling OR push pricing higher to absorb the difference. This is a founder-level decision, not an agent decision.
 
-The cost-ceiling cross-reference is an MCP-port discipline that anthill doesn't carry; spec 026 step-9 calibration introduced it.
+The cost-ceiling cross-reference closes the step-9 → step-10 contract loop; step-9 calibration introduced it.
 
 ## Cross-references to other steps
 

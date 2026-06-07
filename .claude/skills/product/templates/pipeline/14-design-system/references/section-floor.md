@@ -39,7 +39,7 @@ Some product classes earn additional sections that wouldn't be filler. Read the 
 
 ### CLI / API tools
 
-- `## Terminal Adaptations` — how the heuristic adaptations from step-4 ux-testing land in the system. Most "components" in CLI tools are output-formatting rules (table padding, error-message structure, help-text discoverability). Document those instead of UI components.
+- `## Terminal Adaptations` — how the heuristic adaptations from step-4 validation land in the system. Most "components" in CLI tools are output-formatting rules (table padding, error-message structure, help-text discoverability). Document those instead of UI components.
 - Drop `## Components` per-component blocks for visual primitives that don't apply (no Modal, no Toast, no NavBar). Replace with `## Output Patterns` covering the emission shape per command type.
 
 ### B2B SaaS (the no-extension default)

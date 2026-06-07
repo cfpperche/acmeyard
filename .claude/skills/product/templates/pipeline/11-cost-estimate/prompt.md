@@ -16,7 +16,7 @@ delegation_hint: "draft step-10 cost-estimate.md from step-8 PRD + step-9 system
 
 ## How to conduct this step
 
-Read `references/cost-modeling-conventions.md` for the assumption-table shape (the load-bearing anthill-FPA discipline: every input has source + confidence), the scenario discipline (bear / base / bull NOT single-point estimates), the sensitivity heuristic (find the 2-3 assumptions that drive 80% of variance), and the product-class calibration ladder (compact micro-product → ~5 KB; SMB SaaS Full → ~10-15 KB).
+Read `references/cost-modeling-conventions.md` for the assumption-table shape (the load-bearing FPA discipline: every input has source + confidence), the scenario discipline (bear / base / bull NOT single-point estimates), the sensitivity heuristic (find the 2-3 assumptions that drive 80% of variance), and the product-class calibration ladder (compact micro-product → ~5 KB; SMB SaaS Full → ~10-15 KB).
 
 ### 1. Read everything prior
 
@@ -48,7 +48,7 @@ Once pricing + price point are locked, the parent dispatches an `Agent` sub-agen
 
 The sub-agent's job is structural synthesis — fill the canonical cost-estimate template using the captured inputs + the prior-artifact reads. No more user questions; the parent's interview was the last input needing the founder.
 
-Use `model: opus` for the sub-agent — sonnet sometimes drops the assumption-table discipline (source + confidence columns get omitted, which is the anthill-FPA regression mode the discipline catches).
+Use `model: opus` for the sub-agent — sonnet sometimes drops the assumption-table discipline (source + confidence columns get omitted, which is the FPA regression mode the discipline catches).
 
 ### 4. The canonical cost-estimate structure
 
@@ -61,7 +61,7 @@ The sub-agent writes `cost-estimate.md` against this 7-required + 3-conditional 
 
 2. **Pricing Model** — declared model (free / freemium / one-time / subscription / usage-based / hybrid / not-for-profit) + one-paragraph rationale anchored to the PRD's persona + audience + § Goals. If subscription/freemium, name the tier structure here (free tier limits + paid tier features) — don't defer to a separate section. If usage-based, name the metering unit and the per-unit price. If free / not-for-profit, declare explicitly and note that § Unit Economics + § Scenarios + § Break-even will skip (or carry a degenerate "no revenue" form).
 
-3. **Assumptions** — the load-bearing anthill-FPA table. Every input the model depends on lands in this table with **value + source + confidence**. Format:
+3. **Assumptions** — the load-bearing FPA assumption table. Every input the model depends on lands in this table with **value + source + confidence**. Format:
    ```markdown
    | # | Assumption | Value | Source | Confidence |
    |---|---|---|---|---|
@@ -75,7 +75,7 @@ The sub-agent writes `cost-estimate.md` against this 7-required + 3-conditional 
    Aim for 8-15 rows depending on product class. EVERY downstream number traces back to a row in this table — the assumption table IS the audit trail.
 
 4. **Build Cost** — range estimate for v1 scope.
-   - Format: `weeks × $/hr × hours-per-week = $-range`. Always a range, never a single point (the anthill-FPA scenario discipline applied to build-cost).
+   - Format: `weeks × $/hr × hours-per-week = $-range`. Always a range, never a single point (the bear/base/bull scenario discipline applied to build-cost).
    - Breakdown by phase (Foundation / Killer flow / Surrounding features / Polish — mirroring step 11's roadmap shape).
    - Mark every number `[Estimated]` unless it traces to a vendor invoice or a signed contract.
    - Acknowledge the range. v1 build estimates are wrong by 30-50% routinely; bake it in.
@@ -159,7 +159,7 @@ The sub-agent writes `cost-estimate.md` against this 7-required + 3-conditional 
     - Amortised build-cost column: divide the build-cost RANGE (§ 4 Build Cost) over a chosen period (commonly 12 or 24 months) and surface the per-month allocation. Mark `[Estimated]`. This is the load-bearing column for founder runway-math.
     - Skip when: free-only or not-for-profit (no MRR → projections degenerate to "monthly run cost only" — replace with a 6-row burn-only table in § Run Cost instead).
 
-11. **Scenarios** — bear / base / bull (anthill-FPA discipline). Per scenario: probability weight + 1-3 key variable changes + impact on ARR + impact on runway / break-even.
+11. **Scenarios** — bear / base / bull (the FPA scenario discipline). Per scenario: probability weight + 1-3 key variable changes + impact on ARR + impact on runway / break-even.
    ```markdown
    | Scenario | Probability | New paid teams/mo | Churn | ARR EOY | Runway (assume $200k cash) |
    |---|---|---|---|---|---|
@@ -187,7 +187,7 @@ Mirrors step-9's product-class calibration ladder:
 | **Micro-Product / CLI helper / single-purpose tool** | Compact (~7 KB) | Full structure but Build-Cost is 1-2 weeks, Run-Cost is 1-3 line items, Projections may collapse to 4-6 rows, Scenarios may degenerate to bear/base only |
 | **Mobile App** | Standard (~10 KB) | Full structure; § Run Cost adds app-store revenue-share line (15-30% Apple/Google cut); § Scenarios accounts for review-cycle delay impact on launch; § Projections handles app-store gating delays in early months |
 | **Developer Tool / API-first** | Standard-Expanded (~12 KB) | Full structure; § Pricing Model often usage-based (per-API-call / per-seat-with-API-rate-limits); § Unit Economics emphasises token cost / per-call infra cost; § Projections per-call-volume tracking |
-| **SMB SaaS (the spec 026 default)** | Full (~13-18 KB) | Full structure; § Pricing Model typically per-seat subscription; § Scenarios carry 3 paid-conversion bands; § Projections 8-12 monthly rows through year-1 |
+| **SMB SaaS (the default)** | Full (~13-18 KB) | Full structure; § Pricing Model typically per-seat subscription; § Scenarios carry 3 paid-conversion bands; § Projections 8-12 monthly rows through year-1 |
 | **Venture-Scale / Marketplace / multi-persona** | Expanded (~18-25 KB) | Full structure; § Unit Economics expanded to per-persona ARPU/CAC; § Scenarios add upside/downside on take-rate (marketplaces) or per-persona conversion (multi-persona); § Projections may need cohort overlay or per-persona breakdown |
 
 Brief field missing or ambiguous → default to **SMB SaaS (Full)**. Mark the chosen depth in `## Overview` opening sentence (`v1 cost estimate for an SMB SaaS — full template depth applied.`).
@@ -222,7 +222,7 @@ Schema enforces section presence + Layer 1 contains/size floors (assumption-tabl
 - **§ Scenarios carries probability weights (25%/50%/25% or similar).** Sums to 100%. Forces honest calibration vs hedging. Mark the probabilities themselves as Confidence-Low in § Assumptions; revise post-closed-beta when real data lands.
 - **§ Recommendations are DECISIONS, not summaries.** Verb-shaped ("Hold per-seat price", "Defer EU spend", "Pause acquisition until retention clears"). Each carries a deciding signal that flips it. Anti-pattern: "Continue current approach" / "Monitor metrics carefully" — both are non-decisions; the section's job is to prevent them.
 - **PRD `US-NN` cross-references where useful.** § Build Cost may scope per-user-story (e.g. "US-07 keyboard-first triage: 3 weeks; US-19 bulk-action: 1 week"); § Run Cost may scope per-integration (e.g. "Stripe drives US-25 + US-28; Resend drives US-23"). Not mandatory at the row level — but useful when the trace is non-obvious.
-- **No meta-commentary about the document's own discipline.** Do NOT write a `## Notes on this cost model's assumption traceability` H2 or any equivalent. The assumption table + the Source columns + the `[Estimated]` flags ARE the discipline; a section *about* them is noise. Spec 026 Phase B step-9 judge-feedback (2026-05-16) flagged this anti-pattern across the pipeline; the rule applies here pre-emptively.
+- **No meta-commentary about the document's own discipline.** Do NOT write a `## Notes on this cost model's assumption traceability` H2 or any equivalent. The assumption table + the Source columns + the `[Estimated]` flags ARE the discipline; a section *about* them is noise. Judge-feedback (2026-05-16) flagged this anti-pattern across the pipeline; the rule applies here pre-emptively.
 - **No "locked decisions" sub-section.** Pricing model, price point, and rate-placeholder are locked in the running prose of § Pricing Model + § Assumptions table. Re-tabling them as a separate Locked H2 duplicates the running commitment. Carries the step-9 calibration discipline.
 
 ## What this step does NOT do
@@ -235,16 +235,16 @@ Schema enforces section presence + Layer 1 contains/size floors (assumption-tabl
 - **Roadmap phasing.** Step 11 reads this artifact to phase v1 build by cost-pressure; build-cost ranges land here, sequencing lands there.
 - **Compliance budget.** Step 12 (legal-posture) absorbs DPA cost, audit fees if SOC 2, sub-processor budget. § Run Cost may flag "compliance line items deferred to step 12" with a pointer.
 
-## What this step replaces
+## Design notes
 
-Step 10 ports `anthill-fpa` (112 LOC SKILL + 59 LOC references — anti-patterns + checklist + examples). The MCP port keeps anthill's load-bearing discipline (documented assumption table with source + confidence; bear / base / bull scenarios; sensitivity for the 2-3 drivers of 80% variance; top-5 financial risks register; unit economics for revenue products) and inherits its anti-patterns catalog (undocumented assumptions, single-point estimates, no sensitivity).
+This step keeps the load-bearing FPA discipline (documented assumption table with source + confidence; bear / base / bull scenarios; sensitivity for the 2-3 drivers of 80% variance; top-5 financial risks register; unit economics for revenue products) and the canonical anti-patterns catalog (undocumented assumptions, single-point estimates, no sensitivity).
 
-The MCP port diverges from anthill on three points worth naming:
+Three calibration choices worth naming:
 
-1. **`anthill-bizops-analyst` is NOT ported into step 10.** anthill-bizops is the operational-metrics / process-mapping / efficiency-analysis sibling — that's ops-monitoring territory, not product-spec cost modeling. The MCP port keeps bizops separate; if a future pipeline step models operational efficiency (capacity planning, headcount-to-revenue ratio, process throughput), it lands there, not in step 10. Spec 026 task 19 explicitly named the FPA-vs-bizops decision; FPA wins for cost-estimate.
+1. **Operational-metrics / process-mapping / efficiency-analysis are out of scope.** That's ops-monitoring territory, not product-spec cost modeling. If a future pipeline step models operational efficiency (capacity planning, headcount-to-revenue ratio, process throughput), it lands there, not in this step. FPA wins for cost-estimate.
 
-2. **Anthill's `.anthill/budget.md` ingestion is not ported.** The MCP analog is the parent's § 2 interview (pricing model + price point + rate) which captures the budget inputs at synthesis time, not from a fork-level config file. The MCP doesn't model fork-level financial state.
+2. **No consumer-level budget config file.** The budget inputs come from the parent's § 2 interview (pricing model + price point + rate) at synthesis time, not from a config file. This pipeline doesn't model consumer-level financial state.
 
-3. **Cost-ceiling cross-reference to step 9.** Anthill's principal-engineer doesn't carry a cost-ceiling pointer; the MCP step-9 calibration (post-task-18 judge-feedback) added it. Step 10 § Overview restates the step-9 ceiling and flags whether line-item math supports or revises it — closes the cross-step loop. Anthill has no equivalent because anthill's pipeline doesn't enforce step-to-step contract symmetry the same way.
+3. **Cost-ceiling cross-reference to step 9.** § Overview restates the step-9 cost ceiling and flags whether line-item math supports or revises it — closes the cross-step loop. The step-to-step contract symmetry (step-9 declares the ceiling, step-10 refines it with concrete line items) was added in the post-task-18 calibration.
 
-Anthill's calls-for-action (`Save the analysis to docs/sdlc/10-cost-estimate/<slug>-cost.md`) translate to the MCP's `product_step_submit` path discipline. Resumability is `product_status` + `.state.json`; the halt protocol is the `schema-incomplete` validation error.
+Resumability is `product_status` + `.state.json`; the halt protocol is the `schema-incomplete` validation error.

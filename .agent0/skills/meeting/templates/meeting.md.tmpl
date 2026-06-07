@@ -1,0 +1,34 @@
+---
+meeting: {{SLUG}}
+topic: "{{TOPIC}}"
+created: {{CREATED}}
+convener: {{CONVENER}}
+mode: human-orchestrated
+roster: {{ROSTER}}
+rotation: {{ROTATION}}
+tier: {{TIER}}
+blind_phase: none
+turn_counter: 0
+next_speaker: {{NEXT_SPEAKER}}
+synthesis: pending
+---
+
+# Meeting: {{TOPIC}}
+
+_A multi-party, multi-model deliberation. The front-matter above is the machine-readable state: `roster` is every participant id, `rotation` is the deterministic **fallback order** of model participants (human excluded), `next_speaker` is the **derived default** speaker (set by a turn's trailing `Next: <id>` directive; not enforced legality), `turn_counter` counts written turns, `synthesis` tracks the close-out. Speaker selection is context-driven: a turn may end with an explicit `Next: <roster-id>` line to hand the floor; otherwise the human directs with `--speaker`. The body below is the chronological transcript._
+
+## Participants
+
+{{PARTICIPANTS_BLOCK}}
+
+## Transcript
+
+_Turns are appended below in order. Each turn header is `### Turn N — <runtime> (<id>)`; a research-backed turn carries a `Sources:` block listing the URLs used. A turn may end with a single trailing `Next: <roster-id>` line to hand the floor to a specific participant (the directive stays visible here; it sets the default next speaker)._
+
+## Synthesis
+
+_Written when a participant is asked to synthesize. Names the synthesizing runtime, the convergence, recorded disagreements, and a recommended next step (graduate to `/sdd refine` as seed context, or no-op). The human then accepts / redirects / ends._
+
+_Decision-grade tier (spec 149): convergence is gated by the claim/evidence ledger (`meeting.sh ledger-check` — a point with only `assertion-only` claims is UNRESOLVED regardless of agreement), and a **minority report** (any residual objection) is preserved verbatim, never smoothed into consensus._
+
+_(not yet synthesized)_

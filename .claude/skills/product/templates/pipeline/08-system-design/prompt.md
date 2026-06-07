@@ -1,14 +1,14 @@
 ---
 mode: synthesis
 delegable: true
-delegation_hint: "draft step-08 system-design bundle (renumbered from v2 step-9 per spec 045) — system-design.md (stack, integrations, data model, decisions locked, security, observability + NEW: RACI matrix + risk register per spec 045 Decision 10) + security.md (threat model, auth/authz, data classification, secrets, AI-specific) + NEW: data-flow.json (structured inventory consumed by Step 09 legal for DPIA trigger) — synthesising step 03 architecture skeleton + step 05 PRD + step 07 sitemap; no user input required; fully delegable"
+delegation_hint: "draft step-08 system-design bundle — system-design.md (stack, integrations, data model, decisions locked, security, observability + NEW: RACI matrix + risk register) + security.md (threat model, auth/authz, data classification, secrets, AI-specific) + NEW: data-flow.json (structured inventory consumed by Step 09 legal for DPIA trigger) — synthesising step 03 architecture skeleton + step 05 PRD + step 07 sitemap; no user input required; fully delegable"
 ---
 
-# Step 08 — System Design (renumbered from v2 step 9; extended with RACI + risk + data-flow per spec 045 Decision 10)
+# Step 08 — System Design (extended with RACI + risk + data-flow)
 
 **Goal:** technical architecture for v1 — stack choices, service decomposition, data model, APIs, integrations, deployment topology, non-functional posture, security floor + **RACI matrix + risk register + data-flow inventory**. The artifact engineering reads to start building (`/sdd new <feature>` consumes this design post-pipeline). **Deepens step 03's preliminary `architecture.md` skeleton** into the production design.
 
-Per spec 045 Decision 10 (ported from spec 032): system-design absorbs RACI matrix + risk register as required sections (separate steps in v2 collapsed). Per spec 045 Decision 4 (shift-left legal): system-design produces `data-flow.json` — structured machine-readable inventory consumed by Step 09 legal posture for DPIA trigger. If any data flow has sensitive categories (`pii | health | minors | financial`), Step 09's DPIA section becomes mandatory.
+Per design discipline, Decision 10: system-design absorbs RACI matrix + risk register as required sections (separate steps in v2 collapsed). Per design discipline, Decision 4 (shift-left legal): system-design produces `data-flow.json` — structured machine-readable inventory consumed by Step 09 legal posture for DPIA trigger. If any data flow has sensitive categories (`pii | health | minors | financial`), Step 09's DPIA section becomes mandatory.
 
 **Mode:** `synthesis` with `delegable: true`. Fully delegable. Sub-agent reads `<out>/docs/functional-spec.md` § Preliminary Architecture + `<out>/docs/prd/v1.md` + `<out>/docs/sitemap.yaml` (route inventory drives integration list) plus earlier artifacts and produces the design without user input.
 
@@ -36,7 +36,7 @@ If the PRD is missing or thin, stop and report to the parent — the design is s
 
 ### 2. The two-floor depth ladder (bridge-floor → canonical-rigor)
 
-**Bridge-floor (minimum)** — the consolidated decisions already locked in the PRD's Technical Considerations + Open Questions resolutions. Mirror the 6 sections from the anthill `system-design-bridge` skill: stack / integrations / data model / decisions locked / security & privacy / observability. Every system-design.md MUST cover at least these.
+**Bridge-floor (minimum)** — the consolidated decisions already locked in the PRD's Technical Considerations + Open Questions resolutions. Six sections: stack / integrations / data model / decisions locked / security & privacy / observability. Every system-design.md MUST cover at least these.
 
 **Canonical-rigor (the 20 KB target)** — add the design rigor the PRD didn't capture: service decomposition with comms protocol, full API endpoint catalog with contract intent, deployment topology, non-functional budgets (perf / reliability / scale), the principal-engineer evaluation table (Simplicity / Reliability / Scalability / Operability / Security with concern levels), the trade-offs table (Option / Pros / Cons / Recommendation per major decision), alternatives considered per major choice with reasoning.
 
@@ -79,11 +79,11 @@ The primary writes against this 11-section spine (full shape with depth conventi
     - **Trade-off triggers (digest)**: ONE prose paragraph (3-5 bullets max) naming the 3-4 **highest-stakes** triggers from the Open Decisions table below — the load-bearing "Recommendation changes if (a)(b)(c)(d)" framing in a form a reader can scan in 30 seconds. Pick the triggers most likely to fire pre-v1 or in the first 3 months post-launch (NOT every entry from the Open table — just the load-bearing ones). Example: *"Recommendation changes if (a) Stripe Checkout conversion drops below 70% — switch to Stripe Elements for in-context flow; (b) first 10 EU customers materialise pre-public-launch — fra1 region work moves before US-east hardening; (c) Postgres CPU breaches 70% sustained for 1h — read-replica work pulls forward; (d) first enterprise prospect raises RLS in security review — RLS migration becomes P0."* This digest IS the load-bearing scan; the Open table below is the audit-trail receipt.
     - **Open decisions (table)**: things this step deferred to implementation OR genuinely unresolved. Markdown table with columns `# | Question | Deciding signal | Closes by`. Each row carries the deciding signal that will close it; rows without a deciding signal are red flags — name the trigger. Aim for 5-12 rows depending on product class; the digest above pulls 3-4 of these forward as the load-bearing scan.
 
-The Locked Decisions table that earlier MCP-port drafts included as a third sub-section has been **cut** — locked decisions are visible in the running prose of § Stack / § Integrations / § Deployment / § Non-Functional and re-tabling them duplicates the running commitment. The bridge-floor's PRD-decision consolidation lands NATURALLY in the relevant sections (§ Stack names the auth provider; § Integrations names the payment processor; § Non-Functional names the uptime target) rather than in a separate extraction table. Spec 026 Phase B post-task-18 calibration via judge-feedback against the anthill source (2026-05-16) confirmed the running-prose pattern carries the audit trail without the meta-table.
+The Locked Decisions table that earlier drafts included as a third sub-section has been **cut** — locked decisions are visible in the running prose of § Stack / § Integrations / § Deployment / § Non-Functional and re-tabling them duplicates the running commitment. The bridge-floor's PRD-decision consolidation lands NATURALLY in the relevant sections (§ Stack names the auth provider; § Integrations names the payment processor; § Non-Functional names the uptime target) rather than in a separate extraction table. Judge-feedback (2026-05-16) confirmed the running-prose pattern carries the audit trail without the meta-table.
 
 ### 4. Derive `architecture.json`
 
-The architecture JSON is a machine-readable component graph derived from system-design.md — same services, entities, and flows reformatted for tooling consumption. JSON-only in spec 026; a future refinement may add HTML rendering (see `references/architecture-shape.md § JSON-to-HTML refinement deferred`).
+The architecture JSON is a machine-readable component graph derived from system-design.md — same services, entities, and flows reformatted for tooling consumption. JSON-only at v1; a future refinement may add HTML rendering (see `references/architecture-shape.md § JSON-to-HTML refinement deferred`).
 
 Required top-level shape:
 
@@ -126,7 +126,7 @@ Depth ladder: micro-products may land at 3-4 KB; SMB SaaS and venture-scale typi
 | **Micro-Product / CLI helper / single-purpose tool** | Compact (~12 KB; may trigger override) | Keep 1, 2, 4, 5 (1-3 endpoints), 7 (host + secrets), 8 (perf only), 11. Cut 3 (monolith-only), 9 (table optional), 10 (1 alternative per major choice) |
 | **Mobile App** | Standard (~20 KB) | Full structure; § 7 covers app-store deployment + crash reporting |
 | **Developer Tool / API-first** | Standard-Expanded (~22 KB) | Full structure; § 5 grows (rate-limit posture, SDK versioning, deprecation policy); § 8 covers SLA |
-| **SMB SaaS (the spec 026 default)** | Full (~22-28 KB) | Full structure; § 6 typically 5-10 integrations; § 11 carries 3-5 open decisions |
+| **SMB SaaS (the default)** | Full (~22-28 KB) | Full structure; § 6 typically 5-10 integrations; § 11 carries 3-5 open decisions |
 | **Venture-Scale / Marketplace / multi-persona** | Expanded (~28-40 KB) | Full structure + § 3 multi-service decomposition; § 8 expands to per-region scaling; § 11 carries the multi-team coordination decisions |
 
 Brief field missing or ambiguous → default to **SMB SaaS (Full)**. Mark the chosen depth in `## Overview` opening sentence ("v1 system design for an SMB SaaS — full template depth applied.").
@@ -156,7 +156,7 @@ On success, `product_advance` moves to step 10 (cost-estimate — synthesis, rea
 - **Name uncertainty explicitly.** "Background job queue: TBD between BullMQ and SQS — decide in implementation when actual job volume is known" is honest; pretending the queue choice is locked when it isn't is the regression mode this section prevents.
 - **Evaluation table concern levels are HONEST, not aspirational.** A v1 with a single Postgres instance and no read replica has `Reliability: Medium` (single point of failure, accepted at v1 scale) — not `Low` (which would imply HA setup that doesn't exist).
 - **PRD user-story IDs (`US-NN`) cross-reference the design.** Entities, APIs, integrations cite the user story that needs them. This makes step 13 (prototype-v3) PRD-coverage scoring honest — every user story has a design path to a screen.
-- **No meta-commentary about the document's own discipline.** Do NOT write a section like `## Notes on this design's audit-trail discipline` or `## How to read this document` explaining how the `Source` columns or `US-NN` cross-references work. A reader who needs the audit trail explained doesn't need the explanation — they need the audit trail to *work*. The Source columns AND the US-NN inline references AND the deciding-signal column on Open Decisions ARE the discipline; a meta-section *about* them is noise. If a future maintainer needs to understand the rationale, the prompt + references in `packages/mcp-product-pipeline/src/templates/09-system-design/` carry it; the system-design.md output is for engineering, not for explaining how the template chose to enforce things. Spec 026 Phase B judge-feedback (2026-05-16) flagged this anti-pattern in the first dogfood run; the rule exists to prevent recurrence.
+- **No meta-commentary about the document's own discipline.** Do NOT write a section like `## Notes on this design's audit-trail discipline` or `## How to read this document` explaining how the `Source` columns or `US-NN` cross-references work. A reader who needs the audit trail explained doesn't need the explanation — they need the audit trail to *work*. The Source columns AND the US-NN inline references AND the deciding-signal column on Open Decisions ARE the discipline; a meta-section *about* them is noise. If a future maintainer needs to understand the rationale, the prompt + references in `.claude/skills/product/templates/pipeline/08-system-design/` carry it; the system-design.md output is for engineering, not for explaining how the template chose to enforce things. Judge-feedback (2026-05-16) flagged this anti-pattern in the first dogfood run; the rule exists to prevent recurrence.
 
 ## What this step does NOT do
 
@@ -167,25 +167,25 @@ On success, `product_advance` moves to step 10 (cost-estimate — synthesis, rea
 - **Full compliance treatment.** `security.md` is the engineering-readable summary; step 12 (legal-posture) is the canonical compliance artifact.
 - **Marketing / GTM.** Step 17 GTM (future MCP).
 
-## What this step replaces
+## Design notes
 
-Step 9 ports two anthill skills into one adaptive template:
+This step combines two disciplines into one adaptive template:
 
-1. **`anthill-system-design-bridge`** (169 LOC SKILL.md + 176 LOC `extraction-template.md` reference) — the light path for non-tested validation modes that consolidated decisions already locked in the PRD into 6 sections (stack / integrations / data model / decisions locked / security & privacy / observability). The MCP port absorbs this as the **bridge-floor** that every system-design.md must cover.
+1. **Bridge-floor** — the light path that consolidates decisions already locked in the PRD into 6 sections (stack / integrations / data model / decisions locked / security & privacy / observability). Every system-design.md must cover at least these.
 
-2. **`anthill-principal-engineer`** (159 LOC SKILL.md + 4 references — checklist 26 + diagram-design 78 + examples 33 + anti-patterns 26) — the canonical path with the 5-step process (context → evaluate → assess → checklist → diagram). The MCP port absorbs this as the **canonical-rigor** layered on top of the bridge-floor: evaluation table, trade-offs, alternatives considered, the architecture.json component graph.
+2. **Canonical-rigor** — the 5-step principal-engineer process (context → evaluate → assess → checklist → diagram) layered on top of the bridge-floor: evaluation table, trade-offs, alternatives considered, the architecture.json component graph.
 
-Three points where the MCP port diverges from the anthill source:
+Three calibration choices worth naming:
 
-- **Single-template adaptive depth, not two skills behind a `validation_mode` flag.** Anthill split bridge vs canonical via PRD frontmatter (`validation_mode: intuition | tested | not-applicable`). The MCP doesn't carry the `validation_mode` plumbing; the template grows depth based on the PRD's complexity (P0 count, integration count, persona count) rather than a flag. Compact-mode micro-products land at bridge-floor; SMB SaaS and venture-scale exercise canonical-rigor.
-- **JSON-only architecture artifact in spec 026.** Anthill's `anthill-principal-engineer` Step 5c renders HTML via `.anthill/scripts/render-architecture-diagram.mjs` (Cocoon-AI-derived, MIT). The MCP port emits the structural JSON; HTML rendering is deferred to a post-spec-026 visualisation refinement (vendor the renderer into `packages/mcp-product-pipeline/scripts/`). Spec 026 V5 accepts "one of `architecture.json` / `architecture.html`" — JSON-only satisfies acceptance.
-- **`security.md` sibling file, not a section in system-design.md.** Anthill's `principal-engineer` puts security treatment in the evaluation table + one section. The MCP port elevates security to a sibling so step 12 (legal-posture) and downstream consumers can cite security.md as a stable contract.
+- **Single-template adaptive depth, not two skills behind a `validation_mode` flag.** The template grows depth based on the PRD's complexity (P0 count, integration count, persona count) rather than an explicit flag. Compact-mode micro-products land at bridge-floor; SMB SaaS and venture-scale exercise canonical-rigor.
+- **JSON-only architecture artifact.** This step emits the structural component-graph JSON; HTML rendering is deferred to a future visualisation refinement. Acceptance: "one of `architecture.json` / `architecture.html`" — JSON-only satisfies.
+- **`security.md` sibling file, not a section in system-design.md.** Security is elevated to a sibling artifact so step 12 (legal-posture) and downstream consumers can cite security.md as a stable contract.
 
-Anthill's `architecture.yaml` constraint (declared `pattern`, `layers`, `vertical_slice` that the assessment must respect or challenge) is not ported — the MCP doesn't model fork-level architecture constraints. If a fork needs this, it lives in the fork's `CLAUDE.md` and the agent reads it as ordinary repo context.
+Consumer project-level architecture constraints (`pattern`, `layers`, `vertical_slice`) are not modeled here. If a consumer project needs them, they live in the consumer project's `CLAUDE.md` and the agent reads them as ordinary repo context.
 
 ---
 
-## NEW required sections per spec 045 Decision 10 + 4
+## NEW required sections
 
 ### `## RACI Matrix` (H2 in system-design.md)
 

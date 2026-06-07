@@ -2,7 +2,7 @@
 
 Use this checklist before advancing through each sub-stage. Do not move forward with unchecked items unless explicitly not applicable.
 
-Adapted from anthill `anthill-product-ideator/references/checklist.md`. Removed anthill-specific sub-step file outputs (00-direction.md / 01-opportunity-map.md / 02-concepts.md / 03-ranking.md / 05-handoff.md); our MCP collapses those into the conversation and persists only the final concept brief.
+The conversational sub-stages (direction → opportunity-map → concepts → ranking) collapse into chat; only the final concept brief lands as an artifact.
 
 ---
 

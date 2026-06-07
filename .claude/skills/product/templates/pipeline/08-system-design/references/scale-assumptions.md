@@ -81,7 +81,7 @@ v1 explicitly does NOT pre-build these. The deciding signal that triggers the wo
 
 The table makes the derivation auditable. A reviewer can question any heuristic value (e.g., "is 40% DAU/WAU realistic for an EM-persona triage tool?") and the agent can revise without rewriting the section.
 
-## Heuristic ratios (calibrated for the spec 026 default product class)
+## Heuristic ratios (calibrated for the default product class)
 
 These are starting points; the agent should adjust for product-class signal from the brief:
 

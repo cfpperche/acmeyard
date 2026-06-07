@@ -1,0 +1,8 @@
+{
+  "required": [
+    { "role": "heading",    "name": "Dashboard" },
+    { "role": "button",     "name": "Create project" },
+    { "role": "navigation", "name": "primary" }
+  ],
+  "max_console_errors": 0
+}

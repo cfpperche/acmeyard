@@ -1,6 +1,6 @@
 # Step 5 — Logo Direction Template
 
-The brand book names logo *posture*, NOT logo *execution*. Execution is a downstream design task informed by this artifact (or a step-6 token + step-7 prototype-v2 motion). The three sub-sections under `## Logo Direction` enforce the discipline that anthill mandated and the deep port keeps:
+The brand book names logo *posture*, NOT logo *execution*. Execution is a downstream design task informed by this artifact (or a step-6 token + step-7 prototype-v2 motion). The three sub-sections under `## Logo Direction` enforce the canonical logo-posture discipline:
 
 ## `### Clear Space`
 
@@ -74,7 +74,7 @@ Minimum **3** explicit prohibitions, each concrete and visually describable. "Do
 
 ## Why these three sub-sections (and not more)
 
-`Clear Space` + `Minimum Size` + `Prohibited Uses` is the smallest set that prevents the most common logo regressions. Anthill's checklist mandates `clear space`, `minimum size`, `approved backgrounds`, and `prohibited uses`. The deep port consolidates "approved backgrounds" into the prohibited-uses list (one of the prohibitions is *background violations*) — same coverage, one fewer sub-section to enforce.
+`Clear Space` + `Minimum Size` + `Prohibited Uses` is the smallest set that prevents the most common logo regressions. The canonical brand-book checklist mandates `clear space`, `minimum size`, `approved backgrounds`, and `prohibited uses`; this template consolidates "approved backgrounds" into the prohibited-uses list (one of the prohibitions is *background violations*) — same coverage, one fewer sub-section to enforce.
 
 If the product genuinely needs more (e.g. enterprise products that ship logo to partners' marketing materials may need an `### Approved Color Variants` sub-section), add it under `## Logo Direction` as a fourth sub-section. The schema enforces presence of the three; nothing prevents a fourth.
 

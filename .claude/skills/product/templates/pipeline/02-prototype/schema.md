@@ -2,18 +2,18 @@
 
 The submitted `REPORT.md` MUST contain the level-2 markdown headings below + meet the Layer 1 size/content floor in the JSON fenced block. All listed files must be persisted via the `extra_files` parameter on `product_step_submit`. Both checks fire on submit; missing sections OR Layer 1 failures produce `code: "schema-incomplete"` with the failure list.
 
-## Target (canonical size budget — reconciled per spec 056)
+## Size floor (anti-stub)
 
-This schema is the **single source of truth** for Step 02 size budgets. `delegation-briefs.md` and `pipeline-coverage.md` REFERENCE these numbers; if a budget needs to change, update here.
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains, as a cheap anti-stub check enforced at submit by the Layer 1 block below.
 
-| Artifact | `min_size` | `max_size` | Calibration source |
-|---|---|---|---|
-| `direction-a.html` (standard tier) | 10 KB | 30 KB | 3-dogfood pass (045/048/Vetro) landed 23-49 KB; ceiling calibrated against median + reasonable spread |
-| `direction-{b,c}.html` (legacy 3-direction mode) | 10 KB | 30 KB | same as `-a` |
-| `screens/*.html` (per file, mood-tier) | 4 KB | 12 KB | unchanged from spec 045 |
-| `REPORT.md` | 6 KB | 18 KB | Turn 1 + Turn 2 combined |
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `direction-a.html` (standard tier) | 10 KB | below this is a stub — missing token system or surfaces |
+| `direction-{b,c}.html` (legacy 3-direction mode) | 10 KB | same as `-a` |
+| `screens/*.html` (per file, mood-tier) | 4 KB | below this is a stub screen |
+| `REPORT.md` | 6 KB | below this Turn 1 sections are missing |
 
-**Soft overshoot:** exceeding `max_size × 1.2` (≈ 36 KB for `direction-a.html`) triggers sub-agent partial-result with `oversize_reason` field naming what bloated. The Layer 1 JSON block below declares the OPERATIONAL floors enforced at submit; the table above is the canonical budget briefs reference.
+A uniform 200 KB catastrophe cap (token-runaway circuit-breaker, not a budget) applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required sections (REPORT.md markdown headings)
 
@@ -38,19 +38,16 @@ The Identity block (codename, palette tokens, type stack, citation chain per dir
     {
       "path": "direction-a.html",
       "min_size": 10240,
-      "max_size": 30720,
       "contains": ["<!DOCTYPE html", "<style", ":root", "--background", "--foreground", "--primary", "Most Popular", "<svg"]
     },
     {
       "path": "direction-b.html",
       "min_size": 10240,
-      "max_size": 30720,
       "contains": ["<!DOCTYPE html", "<style", ":root", "--background", "--foreground", "--primary", "Most Popular", "<svg"]
     },
     {
       "path": "direction-c.html",
       "min_size": 10240,
-      "max_size": 30720,
       "contains": ["<!DOCTYPE html", "<style", ":root", "--background", "--foreground", "--primary", "Most Popular", "<svg"]
     },
     {
@@ -87,7 +84,7 @@ The Identity block (codename, palette tokens, type stack, citation chain per dir
 
 ### Notes on the floors
 
-- **`direction-{a,b,c}.html` min_size 10240** (10 KB) — bumped from 8 KB after adding the charts & sparklines section in refinement v4. Pivota's anthill reference landed at 17-20 KB; benchmark runs land at 33-47 KB. A 10 KB floor catches stubs while allowing terse variants
+- **`direction-{a,b,c}.html` min_size 10240** (10 KB) — bumped from 8 KB after adding the charts & sparklines section in refinement v4. Reference variants land at 17-20 KB; benchmark runs land at 33-47 KB. A 10 KB floor catches stubs while allowing terse variants
 - Each direction file's `contains` enforces:
   - The `:root` token system + 3 canonical token names (`--background` / `--foreground` / `--primary`) — agents that forget the token system trip Layer 1 immediately
   - The substring `Most Popular` — proxy for the required **pricing tile grid** surface (see prompt.md § 4 section #7). The "Most Popular" badge convention is universal across SaaS pricing surfaces; if a product's tier structure uses a different highlight word (e.g., "Recommended", "Featured", or "Free Forever" for a free-only product), the agent should include the literal substring `Most Popular` in a comment (`<!-- Most Popular tier: rendered as "Recommended" because <reason> -->`) or as the emphasis label, to pass the check

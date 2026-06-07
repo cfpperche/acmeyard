@@ -200,7 +200,7 @@ The 3 KB Layer-1 floor is anchored to the 5 sub-sections at honest depth.
 - **Micro-product CLI helper** — security.md typically lands 3-4 KB. Threat model is OWASP top-10 lens with 3-5 relevant rows (path traversal, secrets in config, dependency-confusion). Auth section may be one paragraph ("no multi-user surface; binary auths via OS-level perms on config file"). Regulated aspects almost always empty.
 - **Mobile app** — 4-6 KB. Threat model adds mobile-specific rows (jailbreak / root detection? deep-link spoofing? app-store binary tampering?). Auth section covers mobile session lifecycle (refresh token rotation, biometric unlock). Regulated aspects may include COPPA if kid-targeted.
 - **Developer tool / API-first** — 5-8 KB. Threat model emphasises API-specific (rate-limit bypass, replay, SSRF via user-supplied URLs). Auth section covers API-key vs session-token tradeoffs.
-- **SMB SaaS (spec 026 default)** — 5-8 KB. Full STRIDE-lite + standard auth/authz treatment. LGPD + GDPR posture documented.
+- **SMB SaaS** — 5-8 KB. Full STRIDE-lite + standard auth/authz treatment. LGPD + GDPR posture documented.
 - **Venture-scale / multi-persona** — 8-12 KB. Per-persona authz rules expanded. Multi-region data residency. SOC 2 pre-work. Possibly HIPAA BAA discussion if health-adjacent.
 
 A `security.md` under 3 KB is almost certainly a bullet-skeleton that punted on the threat model — typical regression mode is "STRIDE: ✓ HTTPS, ✓ Auth, ✓ Validated input" without naming the specific risks for THIS product. The 3 KB floor catches that.

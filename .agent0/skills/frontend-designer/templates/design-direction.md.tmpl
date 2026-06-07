@@ -1,0 +1,36 @@
+# Design direction — {{SURFACE}}
+
+_Created {{DATE}} by /frontend-designer. Git-tracked decision record. The "what we will build and why it looks this way" — derived from `reference-research.md` + the domain._
+
+## Stack & design-system resolution
+
+_Filled from the stack ladder (references/stack-ladder.md). State which rung resolved the choice — never a hidden default._
+
+- **Platform / framework:** _(detected | /product system-design | user hint | researched+decided)_
+- **Design system:** _(reused existing: … | proposing new tokens because none exist)_
+- **Resolution rung:** _(which ladder step decided this, and why)_
+
+## Tokens
+
+_Domain-grounded. If reusing an existing design system, reference it and list only deltas. If proposing (no DS exists), define the minimal set and say so explicitly._
+
+- **Color:** _(roles: bg / surface / text / primary / accent / semantic — not raw hex dumps)_
+- **Type:** _(family + scale; cite the free font source, e.g. Fontsource/Google Fonts)_
+- **Spacing / radius / elevation:**
+- **Motion:** _(durations/easings, if any)_
+
+## Direction
+
+_2–4 sentences: the feel, the references it draws from, what makes it right for THIS domain. No persona prose — design rationale._
+
+## Surfaces & components
+
+_The screens/components this pass will create or refine, mapped to reused or proposed DS primitives._
+
+-
+
+## Acceptance (done-proof)
+
+- **UI impact:** _(render | interaction | flow)_
+- **Verify:** `frontend-designer.sh verify <url> fixture-spec.json <outdir>` → green `report.json` _(or, for native-only surfaces, the honest-evidence path per references/done-proof.md)_
+- **Stop criteria:** _(the explicit "good enough" bar for the refine loop; max iterations)_

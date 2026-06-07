@@ -1,0 +1,21 @@
+{
+  "//": "verify-contract fixture — consumed by agent-browser.sh verify-contract (spec 155). 'required' = render tier; add 'interactions' for the interaction tier and 'flow' for the flow tier. Replace the examples with this surface's real assertions.",
+
+  "required": [
+    { "role": "heading", "name": "REPLACE: main heading text" }
+  ],
+  "max_console_errors": 0,
+
+  "interactions": [
+    { "//": "interaction tier — delete if UI impact is render-only",
+      "action": "click",
+      "target": { "role": "button", "name": "REPLACE: control name" },
+      "expect": { "role": "dialog", "name": "REPLACE: expected post-action role/name" } }
+  ],
+
+  "flow": [
+    { "//": "flow tier — delete unless UI impact is flow",
+      "goto": "REPLACE: start url", "expect_url": "REPLACE: /path",
+      "expect": { "role": "heading", "name": "REPLACE: screen heading" } }
+  ]
+}

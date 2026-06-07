@@ -1,0 +1,2 @@
+diagram: no source. usage: diagram.sh <source.mmd | "<mermaid text>"> [flags]
+--exit:64

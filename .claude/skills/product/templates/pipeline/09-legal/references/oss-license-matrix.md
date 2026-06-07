@@ -1,6 +1,6 @@
 # OSS license matrix — MIT, Apache 2.0, LGPL, GPL, AGPL, BUSL, SaaS implications
 
-How to write `## Licensing` in `legal-posture.md`. The load-bearing disciplines from anthill-ip-counsel + the calibration rules that make the licensing section smart, not rigid. AGPL network-copyleft is the single most load-bearing OSS risk in SaaS — flag it loud.
+How to write `## Licensing` in `legal-posture.md`. The load-bearing OSS-license disciplines + the calibration rules that make the licensing section smart, not rigid. AGPL network-copyleft is the single most load-bearing OSS risk in SaaS — flag it loud.
 
 ## The compatibility matrix
 

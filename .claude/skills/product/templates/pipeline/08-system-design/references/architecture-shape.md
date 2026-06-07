@@ -19,15 +19,15 @@ Step 9 deepens that skeleton into the production design. The same modules, entit
 2. **Same entities, concrete schema.** Step 3's `Task { id, project_id, title, status }` becomes a typed pseudo-schema with PG types, indexes, soft-delete posture, multi-tenancy column if applicable. Adding fields is fine; removing entities is a design defect (step 3 had a feature step 9 forgot).
 3. **Same flows, fully traced.** Step 3's "user signs up → email confirmation → first action" becomes a sequence in the architecture.json arrows + a deeper treatment in system-design.md § Services + § APIs. The flow shape from step 3 is the contract; step 9 names every component the flow touches.
 
-When `architecture.md` is missing (step 3 skipped or not yet ported in the fork's pipeline state), the agent reads `functional-spec.md` directly and synthesises the architecture from there. Call this out in `## Decisions Locked & Open § Open` as a discipline note.
+When `architecture.md` is missing (step 3 skipped or not yet ported in the consumer project's pipeline state), the agent reads `functional-spec.md` directly and synthesises the architecture from there. Call this out in `## Decisions Locked & Open § Open` as a discipline note.
 
 ## The two-floor depth ladder
 
-The template merges two anthill skills behind one adaptive depth model:
+The template merges two disciplines behind one adaptive depth model:
 
 ### Bridge-floor (the minimum every system-design.md must cover)
 
-Inherited from `anthill-system-design-bridge`. Six sub-section concepts that consolidate decisions already locked in the PRD:
+Six sub-section concepts that consolidate decisions already locked in the PRD:
 
 - **Stack** — language, framework, runtime, hosting, deployment target (already named in PRD § Technical Considerations)
 - **Integrations** — 3rd-party APIs, payment, auth, observability vendors (already enumerated in PRD § Technical Considerations + § User Stories)
@@ -40,7 +40,7 @@ The bridge-floor is **mechanical consolidation, not design synthesis** — it ex
 
 ### Canonical-rigor (the 20 KB target for v1 SMB SaaS and larger)
 
-Inherited from `anthill-principal-engineer`. Five additional rigor layers on top of the bridge-floor:
+Five additional rigor layers on top of the bridge-floor (principal-engineer assessment discipline):
 
 1. **Service decomposition** with comms protocol — monolith / modular / multi-service; protocol per boundary (REST / RPC / events / shared DB)
 2. **Full API endpoint catalog** — every public + internal endpoint with contract intent (NOT OpenAPI; just the *intent* table)
@@ -335,17 +335,17 @@ The digest sub-section is the load-bearing scan; pick the 3-4 highest-stakes tri
 - `## Deployment` (host platform, CI/CD all named once and committed)
 - `## Non-Functional` (uptime target, perf budgets all named once and committed)
 
-Re-tabling these as a separate Locked sub-section duplicates the running commitment; a Source-column on running prose entries (`Source: PRD § Technical Considerations`) carries the same audit trail at lower meta-table cost. Spec 026 Phase B judge-feedback (2026-05-16) against the anthill source confirmed the running-prose pattern; the Locked-table sub-section was cut as part of the post-task-18 calibration. See `## Voice & anti-patterns` below for the meta-commentary discipline.
+Re-tabling these as a separate Locked sub-section duplicates the running commitment; a Source-column on running prose entries (`Source: PRD § Technical Considerations`) carries the same audit trail at lower meta-table cost. Judge-feedback (2026-05-16) confirmed the running-prose pattern; the Locked-table sub-section was cut as part of the calibration. See `## Voice & anti-patterns` below for the meta-commentary discipline.
 
 Open decisions without a deciding signal are red flags — the design owes the founder a trigger.
 
 ## JSON-to-HTML refinement deferred
 
-Spec 026 ships `architecture.json` only. The anthill source (`anthill-principal-engineer § Step 5c`) emits a sibling `<slug>-architecture.html` via `.anthill/scripts/render-architecture-diagram.mjs` (Cocoon-AI-derived, MIT). The MCP port defers the HTML rendering to a post-spec-026 refinement:
+This step ships `architecture.json` only. A sibling `<slug>-architecture.html` rendering is deferred as a future refinement:
 
-- **Why deferred:** spec 026 V5 accepts "one of `architecture.json` / `architecture.html`" — JSON-only satisfies acceptance. Vendoring the renderer (or replicating it) is a 1-2 day chore that doesn't unlock new pipeline capability (the JSON is the load-bearing artifact; HTML is presentation).
-- **What the refinement would do:** vendor `render-architecture-diagram.mjs` into `packages/mcp-product-pipeline/scripts/`, schema-validate the JSON against the vendored schema, emit HTML next to the JSON at submit time, surface the file path in `product_step_submit` response so the parent can ping the user with the rendered diagram (Layer 3 visual checkpoint).
-- **Forward-compat:** the JSON shape this template emits is a strict subset of anthill's schema (`title`, `summary_prose`, `components[]`, `arrows[]`, optional `zones[]`, optional `summary_cards[]`). The renderer when vendored will accept these graphs unchanged.
+- **Why deferred:** "one of `architecture.json` / `architecture.html`" satisfies acceptance. Vendoring a renderer is a 1-2 day chore that doesn't unlock new pipeline capability (the JSON is the load-bearing artifact; HTML is presentation).
+- **What the refinement would do:** vendor a `render-architecture-diagram.mjs` (or similar) into `.claude/skills/product/scripts/`, schema-validate the JSON against the vendored schema, emit HTML next to the JSON at submit time, surface the file path so the parent can ping the user with the rendered diagram (Layer 3 visual checkpoint).
+- **Forward-compat:** the JSON shape this template emits (`title`, `summary_prose`, `components[]`, `arrows[]`, optional `zones[]`, optional `summary_cards[]`) is the contract any future renderer must accept.
 
 ## Voice & anti-patterns
 
@@ -355,4 +355,4 @@ Spec 026 ships `architecture.json` only. The anthill source (`anthill-principal-
 - **Concern levels are HONEST.** A single-instance Postgres with PITR is `Reliability: Medium`, not aspirational `Low`.
 - **Name uncertainty explicitly.** "Background job queue: TBD between BullMQ and SQS — decide when actual job volume is known" is honest; pretending the queue choice is locked when it isn't is the regression mode.
 - **PRD `US-NN` IDs cross-reference the design.** Every entity, API, integration cites the user story that needs it. This makes step 13 (prototype-v3) PRD-coverage scoring honest.
-- **No meta-commentary about the document's own discipline.** Do NOT write a section like `## Notes on this design's audit-trail discipline` or `## How to read this document` explaining how `Source` columns / `US-NN` refs / deciding-signal columns work. The discipline IS the artifact (Source columns + US-NN refs + deciding-signal columns); a section *about* the discipline is meta noise. A reader who needs the audit trail explained doesn't need the explanation — they need the audit trail to work. Spec 026 Phase B judge-feedback (2026-05-16) flagged this anti-pattern in the first dogfood run; the rule exists to prevent recurrence.
+- **No meta-commentary about the document's own discipline.** Do NOT write a section like `## Notes on this design's audit-trail discipline` or `## How to read this document` explaining how `Source` columns / `US-NN` refs / deciding-signal columns work. The discipline IS the artifact (Source columns + US-NN refs + deciding-signal columns); a section *about* the discipline is meta noise. A reader who needs the audit trail explained doesn't need the explanation — they need the audit trail to work. Judge-feedback (2026-05-16) flagged this anti-pattern in the first dogfood run; the rule exists to prevent recurrence.

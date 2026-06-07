@@ -1,0 +1,21 @@
+#
+# sound — runtime-neutral generation of CREATIVE AUDIO (music + SFX). Spec 161.
+# Paid-only by nature: there is no light local music/SFX engine (the /image brand
+# analog, NOT the local-first /audio analog). Uses fal via fal-rest.sh, a
+# data-driven sound-tiers.yaml oracle, cost-print, a hybrid confirm gate, and a
+# hybrid manifest. Taste-judged: one generation -> gitignored draft -> human
+# promotes a keeper with --asset (no automated "done").
+#
+# Usage:
+#   sound.sh "<prompt>" --kind music|sfx [--tier standard|premium] [--duration <sec>]
+#            [--asset] [--format mp3|wav] [--confirm-cost-usd <n>] [--json] [--exit-code]
+#   sound.sh doctor | caps
+#
+# Result statuses (decoupled from exit code): ok | unavailable | error.
+# Default exit 0; --exit-code maps ok=0 unavailable=2 error=3.
+#
+# Test/override env: SOUND_FAL_REST, SOUND_FFMPEG_BIN, SOUND_DRAFT_DIR,
+#   SOUND_ASSET_DIR, SOUND_MANIFEST, SOUND_TIERS, AGENT0_SOUND_CONFIRM_THRESHOLD.
+
+set -uo pipefail
+--exit:0

@@ -1,6 +1,6 @@
 # sitemap.yaml schema — v3 (load-bearing for Step 07)
 
-The `<out>/docs/sitemap.yaml` file produced by Step 07 (sitemap-IA) drives Step 15's per-route screen-writer dispatches and the screen-atlas's coverage cross-check. **The schema is enforced mechanically by the orchestrator — Step 07 is BLOCKED if `required_categories` not satisfied without explicit deferral.** This is the load-bearing root-cause fix for the Pass-E silent-undercover bug per spec 045 (ported from spec 032 Decision 5 + 13).
+The `<out>/docs/sitemap.yaml` file produced by Step 07 (sitemap-IA) drives the Step 15a screen-atlas's § Screens Index + § Sitemap Coverage Cross-Check, and — via the atlas — the route inventory the SDD foundation child creates route-group directories for. **The schema is enforced mechanically by the orchestrator — Step 07 is BLOCKED if `required_categories` not satisfied without explicit deferral.** This is the load-bearing root-cause fix for the silent-undercover bug observed in earlier dogfood runs.
 
 ## Top-level shape
 
@@ -55,11 +55,11 @@ routes:
 
 | Field | Type | Constraint | When to emit |
 |---|---|---|---|
-| `primary_metric` | string | Short human-readable label (≤ 32 chars) naming the route's load-bearing operational value | When the route surfaces a hero-level operational number/state the user comes to check — e.g. cashier total, critical-stock count, today's bookings, MRR. The screen-writer renders it as MetricTile/hero, NOT as a small badge in a corner. See `delegation-briefs.md § Per-stack screen-writer CONSTRAINT (d)`. |
+| `primary_metric` | string | Short human-readable label (≤ 32 chars) naming the route's load-bearing operational value | When the route surfaces a hero-level operational number/state the user comes to check — e.g. cashier total, critical-stock count, today's bookings, MRR. The hi-fi mood screen (Step 15b) and the SDD-built screen render it as a hero-level MetricTile, NOT a small corner badge. |
 | `deferred_states` | list of `{name, reason}` | Mirrors `deferred_categories` shape (top-level). Each entry must have non-empty `reason` (1 sentence). | When `states[]` declared a state the data model has no degenerate case for — e.g. a billing route declares `empty` but the founder always has at least one invoice. Sub-agent flips the state from `states` to `deferred_states` and the screen-writer skips its render branch. Auto-augmentation for primary routes (forcing `default+loading+empty+error`) still applies, so deferral is the only way to legitimately drop one. |
-| `chrome` | enum: `app \| marketing \| booking \| auth \| chromeless` | Drives the Next.js route-group placement (`app/(<chrome>)/<path>/page.tsx`) and which `layout.tsx` the page sits under at runtime | **Emit explicitly when chrome diverges from `category` defaults** (e.g. a tutor-public route filed `category: primary` for PRD coverage but rendered as chromeless white-label `chrome: booking`). New sitemaps SHOULD always emit `chrome` to make the routing decision authoritative at sitemap-write time; legacy sitemaps without `chrome` get default-inference (see table below). See `delegation-briefs.md § Per-stack screen-writer` for path-resolution rules. |
+| `chrome` | enum: `app \| marketing \| booking \| auth \| chromeless` | Drives the Next.js route-group placement (`app/(<chrome>)/<path>/page.tsx`) and which `layout.tsx` the page sits under — the SDD foundation child creates one route-group dir + thin `layout.tsx` shell per distinct `chrome` value | **Emit explicitly when chrome diverges from `category` defaults** (e.g. a tutor-public route filed `category: primary` for PRD coverage but rendered as chromeless white-label `chrome: booking`). New sitemaps SHOULD always emit `chrome` to make the routing decision authoritative at sitemap-write time; legacy sitemaps without `chrome` get default-inference (see table below). The atlas § Screens Index surfaces `chrome` per route; the SDD foundation child consumes it — see `references/sdd-handoff.md § Child #1`. |
 
-### `chrome` — orthogonal to `category` (spec 055)
+### `chrome` — orthogonal to `category`
 
 `category` is the **PRD-coverage semantic** (which surface satisfies which user-story; required schema enforcement for the 5 required_categories). `chrome` is the **runtime layout inheritance** (which `app/(<group>)/layout.tsx` the page sits under in Next.js).
 
@@ -89,7 +89,7 @@ For sitemaps without explicit `chrome:` field on each route, the orchestrator ap
 | `auth` | `auth` |
 | `error` | `chromeless` |
 
-**This fallback exists for back-compat with sitemaps generated before spec 055.** New sitemaps SHOULD emit `chrome` explicitly on every route — the default-inference table is mechanical and cannot decide booking-vs-app correctly without help (Vetro evidence: 2 routes filed `primary` were actually `booking`, default-inference would have placed them wrong). The Step 07 prompt instructs sub-agents to always emit `chrome`; the fallback is for resuming/iterating legacy sitemaps.
+**This fallback exists for back-compat with older sitemaps that omit `chrome`.** New sitemaps SHOULD emit `chrome` explicitly on every route — the default-inference table is mechanical and cannot decide booking-vs-app correctly without help (empirical evidence from earlier dogfood: 2 routes filed `primary` were actually `booking`, default-inference would have placed them wrong). The Step 07 prompt instructs sub-agents to always emit `chrome`; the fallback is for resuming/iterating legacy sitemaps.
 
 #### Example with explicit `chrome` divergence
 
@@ -114,7 +114,7 @@ For sitemaps without explicit `chrome:` field on each route, the orchestrator ap
 
 ### `primary_metric` semantic notes
 
-- The value is a **label**, not a value source — sub-agent decides the value (from sitemap `components[]` + route's data-model context). Spec 053 ships this as a string-label v1; if downstream sub-agents prove ambiguous ("which number is that?"), a v2 may richen to `{ label, source, format }`.
+- The value is a **label**, not a value source — sub-agent decides the value (from sitemap `components[]` + route's data-model context). v1 ships as a string-label; if downstream sub-agents prove ambiguous ("which number is that?"), a v2 may richen to `{ label, source, format }`.
 - Optional: routes without an operational hero value (e.g. marketing landing, settings, auth screens) leave it unset.
 - One per route at most. Routes with multiple metrics list the most-glanced one — secondary metrics render as supporting MetricTile siblings or rows in a table, sub-agent's call.
 
@@ -207,9 +207,9 @@ if errors:
 
 The 5-category requirement forces the agent to think about ALL surfaces (not just the "happy path screens" a founder mentions). Real apps have marketing pages, auth flows, primary feature surfaces, admin/settings, AND error states; omitting any of these is the most common prototype gap.
 
-**Pass-E demonstrated this concretely** (spec 036 dogfood at `/tmp/dogfood-v2/`): Steward shipped without `auth` (the sitemap.yaml had ZERO auth routes), without `admin` beyond `/settings/policy` (no billing/team-management/org-settings), and without `error` beyond `/not-found`. Atlas declared "PRD coverage 14/15" — but the silent gap was the ENTIRE auth category. Spec 045's enforcement makes that bug structurally impossible.
+**An earlier dogfood demonstrated this concretely:** a product shipped without `auth` (the sitemap.yaml had ZERO auth routes), without `admin` beyond `/settings/policy` (no billing/team-management/org-settings), and without `error` beyond `/not-found`. Atlas declared "PRD coverage 14/15" — but the silent gap was the ENTIRE auth category. The schema-enforcement gate makes that bug structurally impossible.
 
-Industry validation: Eleken / Slickplan / Raw.Studio / Nielsen Norman Group all enforce this category set in their sitemap deliverables. Spec 032 research (48 sources, 2026-05-17) treated sitemap-IA as own step + schema enforcement as the root-cause fix for the "atlas under-cover" symptom.
+Industry validation: Eleken / Slickplan / Raw.Studio / Nielsen Norman Group all enforce this category set in their sitemap deliverables. Treating sitemap-IA as own step + schema enforcement is the root-cause fix for the "atlas under-cover" symptom.
 
 ## Cross-references
 
@@ -217,4 +217,3 @@ Industry validation: Eleken / Slickplan / Raw.Studio / Nielsen Norman Group all 
 - `pipeline-coverage.md` § Step 07 — size targets
 - `state-machine.md` § Failure handling — orchestrator retry behavior
 - `SKILL.md` § Phase 2 — Specification, Step 07 acceptance check
-- `docs/specs/045-prototype-skill-pipeline-realign/spec.md` § Acceptance criteria B.scenario "sitemap-IA enforces categories"

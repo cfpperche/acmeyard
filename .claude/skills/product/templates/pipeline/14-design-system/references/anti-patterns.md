@@ -1,6 +1,6 @@
 # Step 6 — Design System Anti-Patterns
 
-The bundle failure modes that produce slop or break downstream consumers. Half are direct ports from `anthill-design-system/references/anti-patterns.md`; the rest emerged from the deep-port pressure (multi-artifact bundle + audit-frontmatter consumption + step-7/13 contract).
+The bundle failure modes that produce slop or break downstream consumers.
 
 | Pattern | Instead |
 |---------|---------|
@@ -14,7 +14,7 @@ The bundle failure modes that produce slop or break downstream consumers. Half a
 | `tokens.css` without intent comments | Each token gets a comment naming what it represents and (when applicable) the originating finding ID. `--color-foreground-tertiary: oklch(0.55 …);` is a value; `--color-foreground-tertiary: oklch(0.55 …); /* fix(F-07): brightened from 0.50 to lift surface contrast 3.89:1 → 5.10:1 */` is a system. |
 | Components describing implementation (`React.forwardRef`, `className`) | Components describe **anatomy** + **states** + **tokens consumed**. The implementation layer is the consuming surface's choice; the spec is framework-agnostic. |
 | Ship Storybook / Histoire / Ladle stories from this step | Those are downstream consumer-side artifacts. Step 6 produces the spec + tokens + anatomy; consumers build their own component implementations + stories. |
-| Mandate the 9-section anthill DESIGN.md format verbatim | The MCP port has its own section floor (Overview / Tokens / Components / Patterns / Accessibility Floor / Audit Response, optionally Catalog Lineage). Product-class extensions live in `references/section-floor.md`. The anthill 9-section format was a single-skill convention; the multi-artifact bundle splits the same content across `design-system.md` + `tokens.css` + `components.md`. |
+| Mandate a single rigid section format for `design-system.md` verbatim | This step's section floor is Overview / Tokens / Components / Patterns / Accessibility Floor / Audit Response, optionally Catalog Lineage. Product-class extensions live in `references/section-floor.md`. The multi-artifact bundle splits the content across `design-system.md` + `tokens.css` + `components.md` — don't cram everything into the spec file. |
 | `components.md` as a flat list of component names | Per-component block with Anatomy + Variants + States + Tokens consumed. Without these, downstream steps (7 + 13) have to re-derive how to render each component. |
 | Ship `tokens.json` when no consumer needs it | Optional fourth file. Skip when the consuming codebase doesn't need a machine-readable export (a project that just imports `tokens.css` directly doesn't need JSON). Only generate when Style Dictionary, Tailwind config generation, or Figma variables are real consumers. |
 | Catalog path without citing the anchor | When path is `catalog`, `## Catalog Lineage` MUST name the anchor system(s), what was taken verbatim, what was deviated. Anchorless catalog use is plagiarism + makes deviations invisible. |

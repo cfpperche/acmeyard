@@ -7,16 +7,16 @@ Step 3 submits a **three-artifact bundle**: `functional-spec.md` (primary `conte
 
 A failure in either layer produces `code: "schema-incomplete"` with the precise failure list; nothing is written until the whole bundle passes.
 
-## Target (canonical size budget — reconciled per spec 056)
+## Size floor (anti-stub)
 
-This schema is the **single source of truth** for Step 03 size budgets. `delegation-briefs.md` and `pipeline-coverage.md` REFERENCE these numbers.
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains, enforced at submit by the Layer 1 block below.
 
-| Artifact | `min_size` | `max_size` | Calibration source |
-|---|---|---|---|
-| `functional-spec.md` (combined v3 layout) | 12 KB | 30 KB | 3-dogfood pass (045/048/Vetro) landed 22-65 KB; floor LOWERED from spec 026's 15 KB (compact products were hitting incorrect BLOCKED); ceiling at 30 KB; outlier dogfood-erp at 64.8 KB would trigger partial-result |
-| `architecture.md` (skeleton) | 4 KB | 12 KB | unchanged |
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `functional-spec.md` (combined v3 layout) | 12 KB | below this, pages / states / features are missing |
+| `architecture.md` (skeleton) | 4 KB | the skeleton must still cover all four sections |
 
-**Soft overshoot:** exceeding `max_size × 1.2` (≈ 36 KB for `functional-spec.md`) triggers sub-agent partial-result with `oversize_reason` naming what bloated.
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required sections (markdown headings in `functional-spec.md`)
 
@@ -40,7 +40,6 @@ Each name slugifies by lowercasing + dashing the H2 title — `## Pages & Surfac
     {
       "path": "functional-spec.md",
       "min_size": 12288,
-      "max_size": 30720,
       "contains": [
         "## Pages & Surfaces",
         "## Features",
@@ -74,7 +73,7 @@ Each name slugifies by lowercasing + dashing the H2 title — `## Pages & Surfac
 }
 ```
 
-- `functional-spec.md` `min_size: 12288` (12 KB) — lowered from the spec-026 deep-port floor of 15 KB per spec 056 calibration. A non-trivial product's behavioral contract lands well above the new floor once every page has component / interaction / state tables and features carry Gherkin scenarios. A spec under 12 KB is almost certainly missing pages, states, or features. (Empirical: 3-dogfood pass landed 22-65 KB; the old 15-KB floor blocked compact-product variants that genuinely belonged in the 12-15 KB range.)
+- `functional-spec.md` `min_size: 12288` (12 KB) — lowered from the spec-026 deep-port floor of 15 KB. A non-trivial product's behavioral contract lands well above the new floor once every page has component / interaction / state tables and features carry Gherkin scenarios. A spec under 12 KB is almost certainly missing pages, states, or features. (Empirical: 3-dogfood pass landed 22-65 KB; the old 15-KB floor blocked compact-product variants that genuinely belonged in the 12-15 KB range.)
 - `functional-spec.md` `contains` anchors the page-discipline tables (`| Component |`, `| State |`), the Gherkin keywords (`**Given/When/Then**`), and the load-bearing section headings the slug check alone can't pin to a *specific* casing.
 - `architecture.md` `min_size: 4096` — the structural skeleton is terse by design (step 9 deepens it) but must still cover all four sections with real content.
 - `required_glob` `architecture.[hj][a-z]*` with `min_count: 1` expresses the **"one of"** constraint: the extension must start with `h` or `j` (`[hj]`) followed by ≥1 more letter — matching `architecture.html` *or* `architecture.json` while excluding `architecture.md`. (`[hj]*` does *not* work — a `*` immediately after a `]` is parsed as a char-class quantifier, not a wildcard; the trailing `[a-z]*` is the wildcard.) `min_count: 1` requires at least one rendered-or-machine-readable architecture artifact. No `per_match_contains` because the two file types have categorically different content.

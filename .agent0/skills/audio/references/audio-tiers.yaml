@@ -1,0 +1,28 @@
+# audio-tiers.yaml — paid TTS tier -> fal model oracle for /audio (spec 160).
+#
+# THE ORACLE. audio.sh carries NO model IDs — it reads them here. Date-stamped +
+# refreshable (mirrors video-tiers.yaml). The paid lane deliberately offers what
+# the FREE LOCAL lane (Kokoro/Piper) cannot — ElevenLabs expressiveness / 70+
+# languages — NOT paid-Kokoro (local already gives Kokoro free).
+#
+# Verify endpoint ids + prices via fal discovery before first use; bump the
+# snapshot when they move. audio.sh emits an audio-advisory: when older than
+# stale_after_days.
+
+snapshot_date: "2026-06-06"
+stale_after_days: 60
+default_tier: standard
+
+tiers:
+  standard:
+    model: "fal-ai/elevenlabs/tts/turbo-v2.5"
+    price_per_1k_chars: 0.05
+    note: "ElevenLabs Turbo v2.5 — fast, natural, good default paid quality."
+  premium:
+    model: "fal-ai/elevenlabs/tts/eleven-v3"
+    price_per_1k_chars: 0.10
+    note: "ElevenLabs v3 — most expressive, 70+ languages, inline audio tags."
+
+# Body shape sent to fal (verified/overridable at first real --remote call):
+#   {"text": "<text>", "voice": "<voice-or-default>"}
+# The result JSON carries an audio URL (downloaded in a second hop).

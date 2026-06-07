@@ -2,8 +2,6 @@
 
 Reference these examples when generating concepts and opportunity map entries. The goal is specificity, honesty, and grounded signal — not impressive-sounding filler.
 
-Ported verbatim from anthill `anthill-product-ideator/references/examples.md`.
-
 ---
 
 ## Concept Entry

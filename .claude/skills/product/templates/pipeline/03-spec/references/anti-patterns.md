@@ -1,6 +1,6 @@
 # Spec anti-patterns
 
-Synthesised from `anthill-spec` and `anthill-feature-refiner` failure catalogs. Each row: the trap, then the fix. Read before drafting `functional-spec.md`.
+Each row: the trap, then the fix. Read before drafting `functional-spec.md`.
 
 ## Functional-spec traps
 

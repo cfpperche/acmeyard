@@ -2,8 +2,6 @@
 
 This is the output format for the deep-dive step of ideation. One brief per selected concept. This document IS the design contract handed to step 2 (prototype) — it must contain enough detail to start prototyping and downstream pipeline steps.
 
-Ported from anthill `anthill-product-ideator/references/concept-brief-template.md` (2026-04 vintage). Adapted: handoff section now points at our `product_advance` flow + step 2 (prototype) instead of `/anthill-prototype`; removed `docs/sdlc/` path references.
-
 ---
 
 ```markdown

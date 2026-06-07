@@ -1,0 +1,7 @@
+audio — capability check
+  [ ok ] kokoro: uvx --with kokoro --with soundfile python <ROOT>/.agent0/tools/audio-kokoro.py
+  [ ok ] piper: uvx --from piper-tts piper
+  [ ok ] ffmpeg: ffmpeg
+  [info] paid lane: FAL_KEY set; tiers: <ROOT>/.agent0/tools/../skills/audio/references/audio-tiers.yaml
+  [info] draft dir: assets/generated/audio (gitignored) | asset dir: assets/audio (tracked) | manifest: assets/generated/.audio-manifest.jsonl
+--exit:0

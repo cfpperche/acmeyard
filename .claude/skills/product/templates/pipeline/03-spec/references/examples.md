@@ -1,6 +1,6 @@
 # Spec examples — good vs bad
 
-Concrete contrasts for the load-bearing shapes in `functional-spec.md`. Synthesised from `anthill-spec`'s examples. The pattern in every pair: vague loses, concrete wins.
+Concrete contrasts for the load-bearing shapes in `functional-spec.md`. The pattern in every pair: vague loses, concrete wins.
 
 ## Components table
 

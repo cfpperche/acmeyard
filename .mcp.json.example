@@ -1,4 +1,4 @@
-// Agent0 — MCP recipes (specs 012 + 025)
+// Agent0 — MCP recipes
 //
 // This file is a TEMPLATE. Workflow:
 //   1. cp .mcp.json.example .mcp.json
@@ -11,16 +11,12 @@
 //      claude. NEVER commit a populated DATABASE_URL to git.
 //   5. For Chrome DevTools MCP: confirm Chrome/Chrome-for-Testing is
 //      installed on the host (`which google-chrome`).
-//   6. For product-pipeline (spec 025): runs locally from this repo's
-//      packages/ subtree — only works WITHIN the Agent0 repo (or a fork
-//      that has cloned packages/mcp-product-pipeline/). Forks without
-//      packages/ wait for the v2 npm publish. Full activation docs:
-//      packages/mcp-product-pipeline/README.md
+//   6. For fal-ai: set FAL_KEY in your shell or .env. Recipe uses HTTP
+//      transport (not stdio — distinct from the other 5 blocks).
 //   7. Restart the Claude Code session — .mcp.json is loaded at start.
 //
-// Full per-recipe documentation (capabilities, when to enable, runtime
-// requirements, security): .claude/rules/mcp-recipes.md (external MCPs)
-// and packages/mcp-product-pipeline/README.md (in-repo MCP).
+// These are copy-paste templates only. Consult each upstream MCP README for
+// capabilities, runtime requirements, and security stance before enabling.
 {
   "mcpServers": {
 //    "playwright": {
@@ -35,7 +31,7 @@
 //      "command": "npx",
 //      "args": ["@bytebase/dbhub@latest"],
 //      "env": {
-//        "DATABASE_URL": "postgres://user:password@localhost:5432/dbname?sslmode=disable"
+//        "DATABASE_URL": "${DATABASE_URL}"
 //      }
 //    },
 //    "next-devtools": {
@@ -47,16 +43,19 @@
 //      "args": ["artisan", "boost:mcp"]
 //      // Requires: composer require laravel/boost --dev + php artisan boost:install.
 //      // Runs within the Laravel project (artisan must be present). Laravel 10-13.
-//      // Full recipe: .claude/rules/mcp-recipes.md § Laravel Boost MCP.
+//      // Consult Laravel Boost upstream docs before enabling.
 //    },
-//    "product-pipeline": {
-//      "command": "bun",
-//      "args": ["run", "packages/mcp-product-pipeline/src/server.ts"]
-//      // Optional: disable Open Design grounding in step 2. The two OD MCP
-//      // tools then return code "od-disabled" and the step-2 templates fall
-//      // back to the pre-OD inline 5-school method — use to A/B the paths.
-//      // To enable: add a comma after the args line above, then this line:
-//      // "env": { "PRODUCT_PIPELINE_OD": "off" }
+//    "fal-ai": {
+//      "type": "http",
+//      "url": "https://mcp.fal.ai/mcp",
+//      "headers": {
+//        "Authorization": "Bearer ${FAL_KEY}"
+//      }
+//      // Official fal.ai hosted MCP — 1000+ image/video/audio/3D/LLM models.
+//      // Free MCP layer; pay only for model inferences at standard fal.ai rates.
+//      // FIRST HTTP-transport block in this file — distinct shape from the
+//      // stdio (command/args) blocks above. Get FAL_KEY from fal.ai dashboard.
+//      // See .agent0/context/rules/image-gen.md for Agent0's image-generation posture.
 //    }
   }
 }

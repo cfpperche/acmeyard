@@ -1,14 +1,14 @@
 # OD Bridge — grounding step 2 directions in the vendored Open Design bundle
 
-This document teaches the agent how to consume the vendored **Open Design (OD)** bundle that ships *inside* the `/product` skill (spec 027 ported it to MCP; spec 049 re-homed it to the skill so `/product` stays self-contained after MCP discontinuation). It is the grounded replacement for `pipeline.md`'s inline 5-school description: instead of inventing palette/typography from training data, the agent reads a pinned, vendored `DESIGN.md` per direction and cites it by name in `REPORT.md`.
+This document teaches the agent how to consume the vendored **Open Design (OD)** bundle that ships *inside* the `/product` skill. It is the grounded replacement for `pipeline.md`'s inline 5-school description: instead of inventing palette/typography from training data, the agent reads a pinned, vendored `DESIGN.md` per direction and cites it by name in `REPORT.md`.
 
-Ported from anthill's `anthill-prototype/references/od-bridge.md`. Anthill injected the vendor via symlink and used `.anthill/vendor/...` paths; spec 027 nested it under the MCP package and used MCP tools to resolve absolute paths; spec 049 collapsed that indirection — **the agent reads vendor paths directly under `.claude/skills/product/`**, no tool round-trip needed, because the skill ships the vendor in-tree.
+The agent reads vendor paths directly under `.claude/skills/product/` — no tool round-trip needed, because the skill ships the vendor in-tree.
 
 ## Vendor layout (canonical paths)
 
 | What | Path |
 |------|------|
-| Design systems index (73 entries, lightweight) | `.claude/skills/product/references/od-catalog-index.json` |
+| Design systems index (150 entries, lightweight) | `.claude/skills/product/references/od-catalog-index.json` |
 | Per-system `DESIGN.md` | `.claude/skills/product/design-systems/<system>/DESIGN.md` |
 | Skill bundles (`web-prototype`, `saas-landing`, 31 others) | `.claude/skills/product/vendor/open-design/skills/<bundle>/` |
 | Prompt sources (`directions`, `discovery`, `system`) | `.claude/skills/product/vendor/open-design/prompts/<name>.ts` |

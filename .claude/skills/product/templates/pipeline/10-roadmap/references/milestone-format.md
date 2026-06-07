@@ -157,7 +157,7 @@ Mid-phase markers are SUFFIX-numbered (`M2a`, `M2b`) under the parent end-of-pha
 
 ## When to skip § Milestones
 
-Bridge-mode roadmaps (PRD `validation_mode: intuition` / `not-applicable`) degrade § Milestones to `*Re-evaluated at /anthill-delivery-plan time*`. The bridge has no week numbers; without week numbers, milestones degenerate to phase-end markers ("end of MVP", "end of Growth") which add no information beyond the phase headings.
+Bridge-mode roadmaps (PRD `validation_mode: intuition` / `not-applicable`) degrade § Milestones to `*Re-evaluated at delivery-plan time*`. The bridge has no week numbers; without week numbers, milestones degenerate to phase-end markers ("end of MVP", "end of Growth") which add no information beyond the phase headings.
 
 Canonical-mode roadmaps NEVER skip § Milestones. They are the load-bearing observable-contract section.
 

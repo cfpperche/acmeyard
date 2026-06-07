@@ -4,10 +4,15 @@
 
 `<out>/docs/gtm-launch.md`
 
-## Size targets
+## Size floor (anti-stub)
 
-- **Floor:** 4 KB (less means canvas is too thin OR launch plan misses weeks)
-- **Ceiling:** 7 KB hard (more means falling into full launch playbook — post-PMF concern; trim to standard tier)
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains.
+
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `gtm-launch.md` | 4 KB | below this the canvas is too thin or the launch plan misses weeks |
+
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required H2 sections (in order)
 
@@ -60,7 +65,7 @@ Unless Step 09 legal posture confirms those certifications are actually in place
 4. Each week has 1-3 deliverables + 1 measurement
 5. Pricing Strategy declares tier shape OR single-price
 6. Open Decisions has 2-4 rows
-7. File size 4-7 KB
+7. File size ≥ 4 KB (anti-stub floor — no ceiling; scope is the quality judge's call)
 
 ## Cross-references
 

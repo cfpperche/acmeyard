@@ -108,7 +108,7 @@ The Source column proves traceability. Empty Source is a discipline failure — 
 
 The primary metric is the gate. Observability is read-only — informs v2 decisions, doesn't drive v1 execution trade-offs.
 
-**Why ONE primary, not "at least 2"** (the anthill prescription): two equal-priority metrics produce optimization conflicts. Team A optimizes retention; team B optimizes activation; trade-offs aren't surfaced honestly because both metrics are "primary". The MCP-port discipline: ONE metric is the v1 thesis-test; everything else is observability.
+**Why ONE primary, not "at least 2"**: two equal-priority metrics produce optimization conflicts. Team A optimizes retention; team B optimizes activation; trade-offs aren't surfaced honestly because both metrics are "primary". The discipline: ONE metric is the v1 thesis-test; everything else is observability.
 
 ## Acceptance Criteria (BDD per P0)
 

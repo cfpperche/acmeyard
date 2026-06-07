@@ -2,8 +2,6 @@
 
 Common failures that produce weak, generic, or unfundable product concepts. Check every concept against these before presenting.
 
-Ported verbatim from anthill `anthill-product-ideator/references/anti-patterns.md` — domain knowledge unchanged.
-
 ---
 
 ## 1. "Uber for X" Syndrome

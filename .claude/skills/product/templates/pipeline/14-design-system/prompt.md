@@ -6,7 +6,7 @@ delegation_hint: "synthesise the design-system bundle (design-system.md + tokens
 
 # Step 6 — Design System
 
-**Goal:** translate the brand-book (step 5) into a concrete design system — actual hex values, type scale, spacing scale, component anatomy/states, accessibility floor — that step 15 (screen-atlas; absorbed step 7 per spec 045) and step 15 (screen-atlas; renamed per spec 045) consume to render screens consistently. This is where the *posture* the brand-book named (e.g. "Cool Brutalist", "Warm Humanist") becomes *spec* (e.g. `--color-canvas: oklch(0.10 0.005 240)`, `--space-2: 0.5rem`, `--radius-card: 2px`).
+**Goal:** translate the brand-book (step 5) into a concrete design system — actual hex values, type scale, spacing scale, component anatomy/states, accessibility floor — that step 15 (screen-atlas) consumes to render screens consistently. This is where the *posture* the brand-book named (e.g. "Cool Brutalist", "Warm Humanist") becomes *spec* (e.g. `--color-canvas: oklch(0.10 0.005 240)`, `--space-2: 0.5rem`, `--radius-card: 2px`).
 
 **Mode:** `synthesis` with `delegable: partial`. The path decision (catalog vs custom) is parent-side because it requires context the sub-agent shouldn't reinvent — does the brand-book name a catalog system explicitly? Did the founder declare a preference? Is there an existing DESIGN.md in the workspace? Once the path is decided, synthesis itself is fully delegable.
 
@@ -42,11 +42,11 @@ The parent decides this and tells the sub-agent in CONTEXT. Two paths:
 
 **Catalog path** — when one of:
 - The brand-book § Visual Direction names a catalog system explicitly (e.g. "Cool Brutalist anchored on Composio + Voltagent + Warp")
-- The founder declared a preference for a known design system (Linear / Vercel / Notion / etc — 73 vendored systems catalogued at `.claude/skills/product/references/od-catalog-index.json`)
+- The founder declared a preference for a known design system (Linear / Vercel / Notion / etc — 150 vendored systems catalogued at `.claude/skills/product/references/od-catalog-index.json`)
 - The product is in a category where a catalog system is a strong fit and the brand-book left visual direction open
 
 Catalog path procedure:
-1. `Read` `.claude/skills/product/references/od-catalog-index.json` to see the available 73 systems (each entry carries `name + category + mood + palette_primary + vendor_path`).
+1. `Read` `.claude/skills/product/references/od-catalog-index.json` to see the available 150 systems (each entry carries `name + category + mood + palette_primary + vendor_path`).
 2. Pick 1 primary system (anchor) + optionally 1–2 secondary systems for accent treatment (e.g. *Composio anchor + Warp partial-fit on terminal-block layout*).
 3. The `vendor_path` field of each chosen entry is the relative path to its `DESIGN.md` (e.g. `.claude/skills/product/design-systems/linear/DESIGN.md`).
 4. `Read` the catalog DESIGN.md(s). They are dense (~10–20 KB each, 9 sections, full token specs). Derive the project's `tokens.css` directly from the catalog DESIGN.md's hex/typography/spacing values.
@@ -150,13 +150,13 @@ Step 6 is mid-Identity. No gate yet. After a clean submit, `product_advance` mov
 - **Marketing site assets.** Future GTM step.
 - **Component testing / Storybook stories / docs site.** All downstream of the spec.
 
-## What this step replaces
+## Design notes
 
-This template synthesises two archived anthill skills (see `.claude/memory/anthill-archived.md`):
+This template synthesises two design-system disciplines into one 4-file bundle:
 
-- **`anthill-design-system`** — the bootstrap discipline: catalog OR custom, 9-section DESIGN.md, stack-adapted token output. The `/product` skill keeps the catalog/custom split, expands to a 4-file bundle (spec + tokens + components + optional JSON), and integrates the catalog lookup via the bundled `.claude/skills/product/references/od-catalog-index.json` + direct `Read` of `.claude/skills/product/design-systems/<system>/DESIGN.md` (anthill used `npx getdesign add`; spec 027 used MCP tools; spec 049 collapsed the indirection — the skill ships the vendor in-tree).
-- **`anthill-design-system-lead`** — the governance discipline: token semantic naming, primitive vs semantic distinction, component inventory with status, accessibility-as-a-hard-gate. The MCP port keeps the discipline; the inventory + governance posture flow through `components.md`.
+- **Bootstrap discipline** — catalog OR custom, semantic-token taxonomy, stack-adapted token output. The catalog/custom split is preserved; the catalog lookup uses the bundled `.claude/skills/product/references/od-catalog-index.json` + direct `Read` of `.claude/skills/product/design-systems/<system>/DESIGN.md` (the skill ships the vendor in-tree, no shell-out).
+- **Governance discipline** — token semantic naming, primitive vs semantic distinction, component inventory with status, accessibility-as-a-hard-gate. The inventory + governance posture flow through `components.md`.
 
-Anthill's runtime scaffolding — `.anthill/teams/design.md` reads, `npx getdesign` shell-out, `tailwind.config.patch.js` / `design-tokens.css` / `style-dictionary.config` stack-adaptation auto-generation, the deliverable-registry hook — does not port. Stack adaptation is deferred to consumer choice (the consuming codebase converts `tokens.css` to whatever its framework uses); the catalog lookup flows through MCP tools instead of a shell-out.
+Stack adaptation is deferred to consumer choice — the consuming codebase converts `tokens.css` to whatever its framework uses (Tailwind config, Style Dictionary, etc.). The catalog lookup uses in-tree vendor reads.
 
-**The audit-response handoff is new.** Anthill's design-system skills did NOT consume audit findings programmatically — the audit lived in `anthill-ux-audit` as an artifact, and any token tunes downstream were the designer's manual responsibility. The MCP port closes that loop: when step 4 emits the YAML frontmatter (its own port-improvement, see `04-ux-testing/schema.md`), step 6 reads it and applies `fix_skill_hint: "design-system"` findings inline, documenting each in the `## Audit Response` section. This is the audit-as-delegation-manifest pattern restored from the anthill comparison.
+**The audit-response handoff is the load-bearing port-improvement.** When step 4 emits its YAML frontmatter (see `04-validation/schema.md`), step 6 reads it and applies `fix_skill_hint: "design-system"` findings inline, documenting each in the `## Audit Response` section. This is the audit-as-delegation-manifest pattern — the audit doesn't drift to a designer's manual TODO list; it flows programmatically into the right artifact.

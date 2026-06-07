@@ -15,7 +15,7 @@ delegation_hint: "draft step-11 roadmap.md from step-8 PRD + step-9 system-desig
 **Two operating modes:**
 
 - **Canonical timeline-aware path** — when PRD frontmatter declares `validation_mode: tested` (or no `validation_mode` field — assume tested for revenue-generating / venture-scale products). Full phases with week ranges, milestones, dependency graph, risks + buffer per phase, v2 sketch.
-- **Bridge / priority-extraction path** — when PRD frontmatter declares `validation_mode: intuition` or `not-applicable`. Phase-grouped stories with placeholder durations, sentinel-delimited block (`<!-- anthill:bridge:begin -->` ... `<!-- anthill:bridge:end -->`) for idempotent regen. Preserves manual founder edits outside the sentinels across re-runs.
+- **Bridge / priority-extraction path** — when PRD frontmatter declares `validation_mode: intuition` or `not-applicable`. Phase-grouped stories with placeholder durations, sentinel-delimited block (`<!-- bridge:begin -->` ... `<!-- bridge:end -->`) for idempotent regen. Preserves manual founder edits outside the sentinels across re-runs.
 
 ---
 
@@ -60,7 +60,7 @@ The sub-agent's job is structural synthesis — fill the canonical roadmap templ
 
 The user-flow shape closes the "phase label tells you nothing about what the user gained" audit-smell — a non-engineer reading the H2 should know what was shipped without reading the table.
 
-Use `model: opus` for the sub-agent — sonnet sometimes flattens the slice-by-end-to-end-user-value discipline into horizontal-layer phases ("Phase 1: backend; Phase 2: frontend") which is the anthill-roadmap regression mode the discipline catches.
+Use `model: opus` for the sub-agent — sonnet sometimes flattens the slice-by-end-to-end-user-value discipline into horizontal-layer phases ("Phase 1: backend; Phase 2: frontend") which is the regression mode the discipline catches.
 
 **Deliverable concern tags (optional disciplinary signals).** Deliverable rows MAY carry a bracketed cross-functional concern tag at the end of the deliverable name: `[engineering]`, `[product+engineering]`, `[product]`, `[design]`, `[founder]`. These signal disciplinary pairing (e.g. a `[product+engineering]` row implies designer + engineer pair-implementation) and surface parallelisation opportunity without a separate column. Tags are OPTIONAL — omit when the team is single-discipline (solo founder coding) or when the Owner column already names the discipline. Allow-list is the 5 tags above; don't invent new ones (a 6th tag should land in this rule first via spec revision, not ad-hoc in roadmap output).
 
@@ -84,7 +84,7 @@ The sub-agent writes `roadmap.md` against this 8-required spine (full shape with
 
 3. **Phases** — the sequence. Count calibrated by product class (see § 5 below):
    - Per phase: **Goal** (one sentence — what end-to-end user value this slice delivers) + **Week range** (e.g. weeks 1-4) + **Deliverables table** + **Dependencies** + **Exit criteria**.
-   - Format (mirrors anthill-roadmap § Step 3 + step-10's table-discipline; phase title is user-flow shaped per § 3):
+   - Format (mirrors the canonical phased-roadmap shape + step-10's table-discipline; phase title is user-flow shaped per § 3):
      ```markdown
      ## Phase 1 — Sign up, land in an empty workspace (Weeks 1-4)
 
@@ -178,7 +178,7 @@ Mirrors step-9 + step-10 calibration ladder. **Phase count + roadmap depth scale
 | **Micro-Product / CLI helper / single-purpose tool** | Compact ~6 KB | 2-3 phases | Foundation + Build + Ship. § Milestones collapses to 2-3. § v2-Vision optional (some micro-products genuinely v1-and-done). § Open Decisions may have 1-2 rows only. |
 | **Mobile App (focused, 1 persona)** | Standard ~9 KB | 3-4 phases | Adds App-Store-Review phase (1-2 week buffer for first review). § Risks: review-rejection probability + remediation playbook is a load-bearing row. |
 | **Developer Tool / API-first** | Standard ~9 KB | 3-4 phases | Foundation + API/Core + SDK/Dashboard + Docs/Launch. § Dependencies emphasises external SDK consumers (early-access programs, beta-partner onboarding). |
-| **SMB SaaS (the spec 026 default)** | Full ~10-12 KB | 4-5 phases | Foundation + Killer Flow + Surrounding + Polish + Launch (sometimes Polish + Launch merge to 4). § Risks: 4 phase rows + buffer calibration. § Open Decisions: 2-4 rows typical. **Pick 5 phases when the killer flow has a separate migration / on-ramp demo worth separating from the post-import core flow (e.g. import-then-triage — Slice 2 = "import a workspace and see real issues", Slice 3 = "triage flow + command palette"); pick 4 phases when the killer flow is a single tightly-coupled demo (no separate on-ramp / migration step worth showing alone).** The trigger is whether the founder would record TWO distinct demo videos for closed-beta partners (one "look, your data lives here now", one "look, you can clear a sprint in 5 minutes") or ONE. Two demos → 5 phases; one demo → 4 phases. |
+| **SMB SaaS (the default)** | Full ~10-12 KB | 4-5 phases | Foundation + Killer Flow + Surrounding + Polish + Launch (sometimes Polish + Launch merge to 4). § Risks: 4 phase rows + buffer calibration. § Open Decisions: 2-4 rows typical. **Pick 5 phases when the killer flow has a separate migration / on-ramp demo worth separating from the post-import core flow (e.g. import-then-triage — Slice 2 = "import a workspace and see real issues", Slice 3 = "triage flow + command palette"); pick 4 phases when the killer flow is a single tightly-coupled demo (no separate on-ramp / migration step worth showing alone).** The trigger is whether the founder would record TWO distinct demo videos for closed-beta partners (one "look, your data lives here now", one "look, you can clear a sprint in 5 minutes") or ONE. Two demos → 5 phases; one demo → 4 phases. |
 | **Venture-Scale / Marketplace / multi-persona** | Expanded ~14-18 KB | 5-6+ phases | Foundation + Per-Persona-Onboarding (1-2 phases) + Killer Flow + Marketplace-Bootstrap + Polish + Launch. § Dependencies graph carries cross-persona ordering (supply side before demand side, typical). |
 
 Brief field missing or ambiguous → default to **SMB SaaS (Full, 4-5 phases)**. Mark the chosen class + phase count in `## Overview` opening sentence (`v1 roadmap for an SMB SaaS — 4-phase full template applied.`).
@@ -199,11 +199,11 @@ The bridge mode:
    - **Phase 3 — Optimization / Post-launch** ← all P2 (or post-launch / could-have) stories
 
    Empty phases are still emitted (with note `*No stories at this priority tier — Phase will be re-evaluated post-Phase N stability.*`).
-4. **Emits sentinel-delimited block.** All bridge-generated content sits between `<!-- anthill:bridge:begin -->` and `<!-- anthill:bridge:end -->`. On re-run, only the content between sentinels regenerates — manual founder edits OUTSIDE the sentinels (durations once Phase 1 ships, post-incident notes, executive narrative) are preserved verbatim.
+4. **Emits sentinel-delimited block.** All bridge-generated content sits between `<!-- bridge:begin -->` and `<!-- bridge:end -->`. On re-run, only the content between sentinels regenerates — manual founder edits OUTSIDE the sentinels (durations once Phase 1 ships, post-incident notes, executive narrative) are preserved verbatim.
 5. **NO timeline / durations / dates.** The bridge has no week ranges by default; `**Estimated duration:** TBD pre-delivery-plan` is the placeholder. The bridge does NOT estimate; only the canonical mode does.
 6. **NO buffer math, NO dependency graph (cross-phase only).** Phase-to-phase gates suffice: Phase 2 depends on Phase 1 success criteria; Phase 3 depends on Phase 2 stability.
 
-Bridge-mode required sections collapse to: `overview`, `horizon` (declares "TBD pre-delivery-plan"), `phases`, `dependencies`, `v2-vision` (collapses to "deferred — re-evaluate post-MVP"), `open-decisions`. § Milestones + § Risks degenerate to one-line `*Re-evaluated at /anthill-delivery-plan time*`.
+Bridge-mode required sections collapse to: `overview`, `horizon` (declares "TBD pre-delivery-plan"), `phases`, `dependencies`, `v2-vision` (collapses to "deferred — re-evaluate post-MVP"), `open-decisions`. § Milestones + § Risks degenerate to one-line `*Re-evaluated at delivery-plan time*`.
 
 The agent reports operating-mode at top of file: `**Mode:** bridge (priority-extraction; validation_mode: intuition)` — visible to downstream consumers.
 
@@ -237,48 +237,48 @@ Schema enforces section presence + Layer 1 contains/size floors (phase heading, 
 - **No meta-commentary section about the document's own discipline.** Do NOT write a `## Notes on this roadmap's sequencing discipline` or any equivalent. The phases + dependencies + risks + buffer math ARE the discipline; a section *about* them is noise. (Inherits step-9/10 CUT-2.)
 - **No "locked decisions" sub-section.** Time horizon, team shape, optional deadline are locked in running prose of § Horizon. Re-tabling them as a separate Locked H2 duplicates the running commitment. (Inherits step-9/10 CUT-1.)
 - **PRD `US-NN` cross-references in the deliverable Source column.** Every Phase deliverable row traces back to a PRD story / system-design section / cost-estimate line. This is the audit trail; without it, the roadmap is a wish list.
-- **Step-4 finding-ID lineage in the Source column.** The Source column MAY also cite step-4 (ux-testing) finding IDs (`F-NN`, `F-NN resolved`, `F-NN closed`) when the deliverable resolves a step-4 finding. Example: `prototype-v2 screens/07-command-palette.html, F-12 + F-13 resolved`. This adds the step-4 → step-11 lineage that step-9 + step-10 don't carry — closes the trace from observed-user-pain → shipped-fix. Skip when no step-4 finding applies; the citation is opportunistic, not mandatory.
+- **Step-4 finding-ID lineage in the Source column.** The Source column MAY also cite step-4 (validation) finding IDs (`F-NN`, `F-NN resolved`, `F-NN closed`) when the deliverable resolves a step-4 finding. Example: `prototype-v2 screens/07-command-palette.html, F-12 + F-13 resolved`. This adds the step-4 → step-11 lineage that step-9 + step-10 don't carry — closes the trace from observed-user-pain → shipped-fix. Skip when no step-4 finding applies; the citation is opportunistic, not mandatory.
 - **No metadata banner with pipe-separators at the top of the file.** Do NOT emit a header line in the shape `**Pipeline step:** 11 (Roadmap) | **Generated:** YYYY-MM-DD | **Mode:** canonical (...)` (or any other pipe-delimited metadata banner with `Status:` / `Reads:` / `Inputs locked at...` blocks). Ceremony with no payoff — the file's title + the inline `**Mode:**` declaration near § Overview already carry the operating-mode signal, and "Pipeline step: 11" is recoverable from the file's path. The single `**Mode:** canonical (timeline-aware; validation_mode: tested)` line near the top is fine; the metadata-banner shape is the anti-pattern.
 - **Exit criteria with ≥4 observable conditions format as a sub-bulleted list, not a single paragraph.** The bold `**Exit criteria:**` label introduces a sub-list (`- ...`) when 4+ conditions are listed. Wall-of-text paragraphs with 5+ semicolon-separated conditions are unscannable; the bulleted shape lets a reviewer (human or sub-agent) check each clause individually. Single-condition or 2-3-condition exit criteria may stay inline as a paragraph. Format example lives in `references/milestone-format.md` § Exit criteria + `references/phasing-discipline.md` § Exit criteria.
 
 ## What this step does NOT do
 
-- **Sprint planning.** Roadmap is phases/weeks; sprints are week-by-week tasks. Sprint planning is `/anthill-delivery-plan` (future MCP step) or `/sdd new <feature>` post-pipeline.
+- **Sprint planning.** Roadmap is phases/weeks; sprints are week-by-week tasks. Sprint planning is a future delivery-plan MCP step or `/sdd new <feature>` post-pipeline.
 - **Detailed task breakdowns.** Per-feature engineering specs come from `/sdd` post-pipeline. The roadmap names deliverables; the deliverables decompose to tasks in `/sdd`.
 - **Hiring plans.** Step 10 cost-estimate touched team cost; hiring sequence is post-handoff. The roadmap assumes the team shape locked at § 2; it does NOT plan when to hire.
 - **Post-launch growth roadmap.** Post-launch territory (future MCP step 18+ GTM). The v2-Vision section sketches direction; it does NOT plan launch + post-launch metrics tracking.
 - **Capacity / velocity modeling.** No story-point math, no velocity-from-prior-sprints. v1 is greenfield; velocity assumption is industry-default (40 hr/eng-week, 20% coordination overhead).
-- **Issue-board ingestion.** Anthill's `anthill-roadmap` ingests `.anthill/issues/issue-*.md` at Step 2b. The MCP doesn't have a fork-side issue tracker; issue ingest is deferred to a future MCP step. Consumer tracker integration (Linear, Jira, GitHub Issues) lives downstream of the pipeline.
+- **Issue-board ingestion.** The MCP doesn't have a consumer-side issue tracker; issue ingest is deferred to a future MCP step. Consumer tracker integration (Linear, Jira, GitHub Issues) lives downstream of the pipeline.
 
-## What this step ports vs diverges
+## Design notes — the disciplines this step keeps
 
-Step 11 ports **anthill-roadmap** (179 LOC SKILL + 51 LOC references — anti-patterns + checklist + examples) AND **anthill-roadmap-bridge** (189 LOC SKILL + 180 LOC references — phase-extraction). The MCP port keeps anthill's load-bearing disciplines (phase shape; exit criteria per phase; dependency DAG; risks-with-mitigations; slice = end-to-end user value Shape-Up style) and inherits its anti-patterns catalog (phases-without-exit-criteria, circular deps, no-owners, missing-risk-assessment).
+This step keeps the load-bearing roadmap disciplines (phase shape; exit criteria per phase; dependency DAG; risks-with-mitigations; slice = end-to-end user value Shape-Up style) and the canonical anti-patterns catalog (phases-without-exit-criteria, circular deps, no-owners, missing-risk-assessment).
 
-The MCP port diverges from anthill on six points worth naming:
+Six calibration points worth naming:
 
-1. **Two-mode unification.** Anthill ships TWO separate skills (`anthill-roadmap` for canonical, `anthill-roadmap-bridge` for intuition / not-applicable). The MCP port unifies into ONE template with PRD-`validation_mode`-keyed mode selection. Both paths share the same Layer-1 schema floor + section list (with bridge-mode degenerate sections explicitly noted). Removes the "which skill do I invoke?" decision from the founder; the PRD's `validation_mode` declaration drives the routing. The sentinel-delimited block (`<!-- anthill:bridge:begin -->` ... `<!-- anthill:bridge:end -->`) discipline is preserved for idempotent regen.
+1. **Two-mode unification.** ONE template with PRD-`validation_mode`-keyed mode selection — canonical timeline-aware path for `tested`, bridge / priority-extraction path for `intuition` / `not-applicable`. Both paths share the same Layer-1 schema floor + section list (with bridge-mode degenerate sections explicitly noted). Removes the "which skill do I invoke?" decision from the founder; the PRD's `validation_mode` declaration drives the routing. The sentinel-delimited block (`<!-- bridge:begin -->` ... `<!-- bridge:end -->`) discipline is preserved for idempotent regen.
 
-2. **Product-class calibration ladder.** Anthill ships 4 fixed phases (Foundation / Killer flow / Surrounding / Polish) as the universal shape. The MCP port calibrates phase count by product class — Micro 2-3 phases, Mobile / Dev Tool 3-4, SMB SaaS 4-5, Venture-Scale 5-6+. Closes the "one-mode template" audit-smell. Brief defaults to SMB SaaS Full (4-5 phases) when unspecified.
+2. **Product-class calibration ladder.** Phase count calibrates by product class — Micro 2-3 phases, Mobile / Dev Tool 3-4, SMB SaaS 4-5, Venture-Scale 5-6+. Closes the "one-mode template" audit-smell. Brief defaults to SMB SaaS Full (4-5 phases) when unspecified.
 
-3. **Per-phase buffer calibration.** Anthill anti-patterns.md says "at least 2 risks per phase" (magic number) and the canonical skeleton said "add 30% to estimates" (flat buffer). The MCP port calibrates buffer per-phase by unknowns-count (Foundation +10%, Killer Flow +20%, Polish +10% typical) and risk-count is "biggest unknown per phase" (one row, not 2 minimum). Closes the "magic numbers" audit-smell.
+3. **Per-phase buffer calibration.** Buffer calibrates per-phase by unknowns-count (Foundation +10%, Killer Flow +20%, Polish +10% typical); risk-count is "biggest unknown per phase" (one row, not a magic minimum). Closes the "magic numbers" / flat-30%-buffer audit-smell.
 
-4. **Cost-pressure phasing anchor.** Anthill-roadmap doesn't read a cost-estimate (anthill steps 10 + 11 are independent). The MCP step-11 reads step-10 § Build Cost RANGES as the phasing-by-cost-pressure input — front-loads expensive Foundation work when team is fresh, OR back-loads polish if launch date is fixed. Closes the cross-step contract gap that step-10's § Build Cost was opening.
+4. **Cost-pressure phasing anchor.** Step-11 reads step-10 § Build Cost RANGES as the phasing-by-cost-pressure input — front-loads expensive Foundation work when team is fresh, OR back-loads polish if launch date is fixed. Closes the cross-step contract gap that step-10's § Build Cost was opening.
 
-5. **§ Open Decisions with deciding signals (mirrors step-9 + step-10).** Anthill-roadmap has `## Open Questions` (questions without resolution mechanism — discipline gap). The MCP port replaces with `## Open Decisions` (decisions WITH a deciding signal that closes the deferral). Inherits step-9's `Deciding signal` column and step-10's `*Flip if:*` recommendation discipline.
+5. **§ Open Decisions with deciding signals (mirrors step-9 + step-10).** `## Open Decisions` carries decisions WITH a deciding signal that closes the deferral. Inherits step-9's `Deciding signal` column and step-10's `*Flip if:*` recommendation discipline.
 
-6. **Parent-collects-2-questions split (delegable: partial).** Anthill-roadmap is single-orchestrator (one agent does the interview + research + draft). The MCP port splits: parent collects time horizon + team shape live (2 questions); sub-agent synthesises structurally from prior artifacts. Closes the "single-orchestrator" audit-smell + mirrors step-10's interview-then-synthesize discipline.
+6. **Parent-collects-2-questions split (delegable: partial).** Parent collects time horizon + team shape live (2 questions); sub-agent synthesises structurally from prior artifacts. Closes the "single-orchestrator" audit-smell + mirrors step-10's interview-then-synthesize discipline.
 
-Anthill's `.anthill/issues/` ingestion (Step 2b) is NOT ported — the MCP doesn't have a fork-side issue tracker. Consumer tracker integration (Linear, Jira, GitHub Issues) is deferred to a future MCP step. Anthill's halt-protocol (`Halting: Missing prerequisite: ...`) translates to the MCP's `product_step_submit` validation error semantics (`{code: "schema-incomplete", missing_or_invalid: [...]}`). Resumability is `product_status` + `.state.json`.
+The halt-protocol translates to the MCP's `product_step_submit` validation error semantics (`{code: "schema-incomplete", missing_or_invalid: [...]}`). Resumability is `product_status` + `.state.json`.
 
 ### Calibration revisions (2026-05-16)
 
-Blind judge feedback on the step-11 dogfood scored the MCP template 30/30 vs anthill's canonical 17/30. Five disciplines from the lower-scoring template were nonetheless worth absorbing (KEEPs); two patterns the MCP template carried were worth cutting (CUTs). Inheritance from step-11 judge-feedback (mirrors step-9 + step-10's commit-body convention):
+Five disciplines from blind judge feedback on the step-11 dogfood are absorbed as KEEPs; two patterns are cut as CUTs (mirrors step-9 + step-10's commit-body convention):
 
 1. **KEEP — User-flow shaped phase names.** Phase H2 titles read as user-flow outcomes ("Sign up, land in an empty workspace") not phase labels ("Foundation"). Documented in § 3 Drafting + `references/phasing-discipline.md` § Phase naming. The label categories (Foundation / Killer Flow / Surrounding / Polish + Launch) remain valid fallback shorthand for compact roadmaps and for the Foundation phase specifically.
 2. **KEEP — Cross-functional concern tags on deliverable rows.** Optional `[engineering]` / `[product+engineering]` / `[product]` / `[design]` / `[founder]` tags signal disciplinary pairing without a separate column. Documented in § 3 Drafting + `references/phasing-discipline.md` § Phase shape. Optional — omit when single-discipline.
 3. **KEEP — Real-human acceptance in exit criteria.** At least one exit criterion per phase SHOULD name a concrete human role (closed-beta partner #N, a teammate, the founder) who can independently verify the outcome. Documented in § Voice & rigor + `references/phasing-discipline.md` § Exit criteria + `references/milestone-format.md`.
 4. **KEEP — 5-phase trigger for SMB SaaS sharpened.** Pick 5 phases when the killer flow has a separate migration / on-ramp demo worth recording separately (import-then-triage); pick 4 phases when the killer flow is a single tightly-coupled demo. Documented in § 5 product-class calibration ladder.
-5. **KEEP — Step-4 finding-ID lineage in Source columns.** Source column may cite `F-NN`, `F-NN resolved`, `F-NN closed` when the deliverable resolves a step-4 (ux-testing) finding. Adds the step-4 → step-11 lineage that step-9 + step-10 don't carry. Documented in § Voice & rigor + `references/phasing-discipline.md` § Source column.
+5. **KEEP — Step-4 finding-ID lineage in Source columns.** Source column may cite `F-NN`, `F-NN resolved`, `F-NN closed` when the deliverable resolves a step-4 (validation) finding. Adds the step-4 → step-11 lineage that step-9 + step-10 don't carry. Documented in § Voice & rigor + `references/phasing-discipline.md` § Source column.
 6. **CUT — Metadata banner with pipe-separators at top of file.** No `**Pipeline step:** 11 (Roadmap) | **Generated:** YYYY-MM-DD | **Mode:** canonical (...)` header — ceremony with no payoff. The single inline `**Mode:** canonical (timeline-aware; validation_mode: tested)` line is fine; the banner shape is the anti-pattern. Documented in § Voice & rigor.
 7. **CUT — Wall-of-text exit-criteria paragraphs.** When exit criteria carry ≥4 observable conditions, format as sub-bulleted list under the bold label, not single paragraph. Documented in § Voice & rigor + `references/milestone-format.md` + `references/phasing-discipline.md` § Exit criteria.
 

@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # .githooks/pre-commit
-# Native git pre-commit hook — secrets-scan capacity (spec 007).
+# Native git pre-commit hook — secrets-scan capacity.
 #
 # This hook runs in git commit's own process, AFTER staging is finalised, so
 # `gitleaks git --pre-commit --staged` always sees the real index — even when
 # the user ran a compound `git add ... && git commit ...` invocation. That
-# timing correction is the primary fix for the spec-006 bug; see
-# docs/specs/007-secrets-scan-timing/ for full design rationale.
+# timing correction is the primary fix for the original staging-timing bug.
 #
 # Companion / dependency:
 #   The override-marker grammar (`# OVERRIDE: <reason ≥10 chars>`) lives in the
@@ -19,9 +18,7 @@
 #   silently disables override support — not the secrets scan itself.
 #
 # Reference:
-#   .claude/rules/secrets-scan.md   — full discipline, both layers
-#   docs/specs/007-secrets-scan-timing/   — design, alternatives, risks
-#   docs/specs/006-secrets-scan/    — original spec this extends
+#   .agent0/context/rules/secrets-scan.md   — full discipline, both layers
 #
 # Lazarus vector note:
 #   This script is activated via `git config core.hooksPath .githooks` (a
@@ -67,7 +64,7 @@ if [ -z "$PROJECT_DIR" ]; then
   exit 0
 fi
 
-AUDIT_LOG="$PROJECT_DIR/.claude/secrets-audit.jsonl"
+AUDIT_LOG="$PROJECT_DIR/.agent0/secrets-audit.jsonl"
 
 # Ensure the audit-log parent directory exists before any append attempt.
 mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
@@ -110,12 +107,12 @@ append_audit() {
     --argjson override_reason "$reason_json" \
     --arg scan_mode "native-pre-commit" \
     --argjson staged_files_count "$staged_files_count" \
-    '{ts:$ts, session_id:null, agent_id:null, decision:$decision, finding_count:$finding_count, override_reason:$override_reason, scan_mode:$scan_mode, staged_files_count:$staged_files_count}')"
+    '{ts:$ts, session_id:null, agent_id:null, runtime:"native-git", decision:$decision, finding_count:$finding_count, override_reason:$override_reason, scan_mode:$scan_mode, staged_files_count:$staged_files_count}')"
 
   # Atomic append via flock when available; fall back to plain append otherwise.
   # Probe writability in a subshell BEFORE the bare `exec 9>...` redirect —
   # `exec 9>file 2>/dev/null` would permanently silence FD 2 for the rest of
-  # the script, eating every block message. See .claude/rules/delegation.md
+  # the script, eating every block message. See .agent0/context/rules/delegation.md
   # § Gotchas (the sticky exec redirect trap).
   if command -v flock >/dev/null 2>&1; then
     local lock_path="$AUDIT_LOG.lock"
@@ -149,7 +146,7 @@ fi
 # Count staged files via git diff --cached --name-only. Empty output means an
 # allow-empty commit (e.g. `git commit --allow-empty`); record that separately
 # so the audit log can distinguish "nothing to scan" from "scanned, found
-# nothing" — the spec-006 silent-failure mode produced the latter shape for
+# nothing" — the original silent-failure mode produced the latter shape for
 # compound commands that staged nothing before the commit; this shape makes
 # that unreproducible.
 staged_files_count="$(git diff --cached --name-only 2>/dev/null | wc -l | tr -d ' ')"
@@ -165,6 +162,80 @@ if [ "$staged_files_count" -eq 0 ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Memory projection backstop
+# ---------------------------------------------------------------------------
+# Non-mutating check: if staged project-memory files changed, project the
+# staged .agent0/memory/*.md corpus into a temp MEMORY.md and compare it with
+# the staged .agent0/memory/MEMORY.md. Never rewrites or stages files.
+run_memory_projection_check() {
+  local changed
+  changed="$(git diff --cached --name-only -- .agent0/memory 2>/dev/null | grep -E '^\.agent0/memory/.*\.md$' || true)"
+  [ -n "$changed" ] || return 0
+
+  local projector="$PROJECT_DIR/.agent0/tools/memory-project.sh"
+  local helper="$PROJECT_DIR/.agent0/tools/memory-query-helper.py"
+  if [ ! -x "$projector" ]; then
+    printf 'memory-pre-commit: projector missing or not executable: %s\n' "$projector" >&2
+    return 1
+  fi
+
+  local tmpdir projected staged_index files
+  tmpdir="$(mktemp -d -t memory-precommit-XXXXXX 2>/dev/null || mktemp -d)"
+  projected="$tmpdir/projected-MEMORY.md"
+  staged_index="$tmpdir/staged-MEMORY.md"
+  mkdir -p "$tmpdir/.agent0/memory" "$tmpdir/.agent0/tools" 2>/dev/null || true
+
+  files="$(git ls-files --cached -- .agent0/memory 2>/dev/null || true)"
+  printf '%s\n' "$files" | while IFS= read -r rel; do
+    case "$rel" in
+      .agent0/memory/*.md) ;;
+      *) continue ;;
+    esac
+    mkdir -p "$tmpdir/$(dirname "$rel")" 2>/dev/null || true
+    git show ":$rel" > "$tmpdir/$rel" 2>/dev/null || true
+  done
+
+  if [ -f "$helper" ]; then
+    cp "$helper" "$tmpdir/.agent0/tools/memory-query-helper.py" 2>/dev/null || true
+    chmod +x "$tmpdir/.agent0/tools/memory-query-helper.py" 2>/dev/null || true
+  fi
+  if git cat-file -e ":.agent0/memory.config.json" 2>/dev/null; then
+    git show ":.agent0/memory.config.json" > "$tmpdir/.agent0/memory.config.json" 2>/dev/null || true
+  elif [ -f "$PROJECT_DIR/.agent0/memory.config.json" ]; then
+    cp "$PROJECT_DIR/.agent0/memory.config.json" "$tmpdir/.agent0/memory.config.json" 2>/dev/null || true
+  fi
+
+  if ! AGENT0_PROJECT_DIR="$tmpdir" CLAUDE_PROJECT_DIR="$tmpdir" bash "$projector" --out "$projected" >/dev/null 2>&1; then
+    rm -rf "$tmpdir" 2>/dev/null || true
+    printf 'memory-pre-commit: projection failed; run `bash .agent0/tools/memory-maintain.sh finalize` and re-stage\n' >&2
+    return 1
+  fi
+
+  git show ":.agent0/memory/MEMORY.md" > "$staged_index" 2>/dev/null || true
+  if ! cmp -s "$projected" "$staged_index"; then
+    rm -rf "$tmpdir" 2>/dev/null || true
+    cat >&2 <<'EOF'
+pre-commit-blocked: MEMORY.md drift detected.
+
+Run:
+  bash .agent0/tools/memory-maintain.sh finalize
+  git add .agent0/memory/MEMORY.md
+
+Then retry the commit. The pre-commit hook is non-mutating and never
+rewrites or stages MEMORY.md for you.
+EOF
+    return 1
+  fi
+
+  rm -rf "$tmpdir" 2>/dev/null || true
+  return 0
+}
+
+if ! run_memory_projection_check; then
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
 # Phase 3: Gitleaks availability check
 # ---------------------------------------------------------------------------
 if ! command -v gitleaks >/dev/null 2>&1; then
@@ -177,7 +248,7 @@ fi
 # Phase 4: Gitleaks scan
 # ---------------------------------------------------------------------------
 # Use the current invocation shape: `gitleaks git --pre-commit --staged`
-# (the deprecated `gitleaks protect --staged` from spec 006 is NOT used here).
+# (the deprecated `gitleaks protect --staged` is NOT used here).
 # Run from repo root so relative file paths in the report are repo-relative.
 GITLEAKS_REPORT="$(mktemp -t gitleaks-XXXXXX.json 2>/dev/null || mktemp)"
 GITLEAKS_OUT="$(mktemp -t gitleaks-out-XXXXXX 2>/dev/null || mktemp)"
@@ -196,7 +267,7 @@ set -e
 # gitleaks v8 writes a JSON array of findings to the report path.
 # Use `if type == "array" then length else -1 end` — NOT `// empty` — so that
 # a literal `false` or a missing field does not silently collapse to 0.
-# See .claude/rules/delegation.md § Gotchas for the `// empty` collapse trap.
+# See .agent0/context/rules/delegation.md § Gotchas for the `// empty` collapse trap.
 finding_count=0
 if [ -s "$GITLEAKS_REPORT" ]; then
   finding_count="$(jq 'if type == "array" then length else -1 end' "$GITLEAKS_REPORT" 2>/dev/null || printf '%s' '-1')"
@@ -252,7 +323,7 @@ To bypass for a legitimate fixture or test vector, use one of:
        git commit -m "..." # OVERRIDE: <reason ≥10 chars explaining why>
      (The preflight hook parses the marker and injects CLAUDE_SECRETS_OVERRIDE_REASON.)
 
-See .claude/rules/secrets-scan.md and docs/specs/007-secrets-scan-timing/ for the full discipline.
+See .agent0/context/rules/secrets-scan.md for the full discipline.
 EOF
 
 rm -f "$GITLEAKS_REPORT" "$GITLEAKS_OUT" 2>/dev/null || true

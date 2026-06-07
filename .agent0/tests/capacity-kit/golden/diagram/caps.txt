@@ -1,0 +1,2 @@
+{"paid":false,"local":true,"node":"v24.11.1","mmdc":"npx -p @mermaid-js/mermaid-cli mmdc","chrome":"/usr/bin/google-chrome","formats":["svg","png","pdf"],"source_lang":"mermaid"}
+--exit:0

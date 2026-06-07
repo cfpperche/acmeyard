@@ -1,0 +1,7 @@
+diagram — capability check (local/free deterministic technical visuals)
+  [ ok ] node: v24.11.1
+  [ ok ] mmdc: npx -p @mermaid-js/mermaid-cli mmdc
+  [ ok ] chrome: /usr/bin/google-chrome
+  [info] source lang: mermaid (only, v1) | formats: svg(default)/png/pdf
+  [info] default out: assets/diagrams (tracked; --out for spec-owned docs/specs/NNN/diagrams) | manifest: assets/generated/.diagram-manifest.jsonl
+--exit:0

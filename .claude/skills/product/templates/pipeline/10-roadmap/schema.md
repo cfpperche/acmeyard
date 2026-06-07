@@ -2,15 +2,15 @@
 
 The submitted `roadmap.md` MUST contain the level-2 markdown headings below + meet the Layer 1 size/content floor in the JSON fenced block. Both checks fire on submit; missing sections OR Layer 1 failures produce `code: "schema-incomplete"` with the failure list. Single-artifact step — no `extra_files`.
 
-## Target (canonical size budget — reconciled per spec 056)
+## Size floor (anti-stub)
 
-This schema is the **single source of truth** for Step 10 size budgets. `delegation-briefs.md` and `pipeline-coverage.md` REFERENCE these numbers.
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains, enforced at submit by the Layer 1 block below.
 
-| Artifact | `min_size` | `max_size` | Calibration source |
-|---|---|---|---|
-| `roadmap.md` | 6 KB | 18 KB | 3-dogfood pass (045/048/Vetro) landed 7.9-14.6 KB; floor LOWERED from spec 026's 8 KB (compact products legitimately land below); ceiling 18 KB accommodates 3-4 phase deep version with dependency graph + per-phase risks |
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `roadmap.md` | 6 KB | below this the 8 required sections are not at honest depth |
 
-**Soft overshoot:** exceeding `max_size × 1.2` (≈ 22 KB) triggers sub-agent partial-result with `oversize_reason` naming what bloated.
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required sections (roadmap.md markdown headings)
 
@@ -30,7 +30,7 @@ Section names slugify by lowercasing + dashing — `## Open Decisions` → `open
 - `buffer` — optional dedicated H2; the per-phase buffer math may live inline in § Risks (a `**Buffer:**` paragraph row) OR as its own § Buffer H2. Either shape satisfies the schema. Bridge-mode roadmaps may omit § Buffer entirely (bridge has no week-math).
 - `team` — optional H2; team shape recap may live inline in § Horizon. Surface as its own H2 only when team-composition is the dominant constraint (e.g. multi-specialist team with role-specific phases).
 
-The schema does NOT structurally enforce the operating-mode (canonical timeline-aware vs bridge / priority-extraction). The prompt's `## How to conduct this step § 6` and `references/phase-extraction.md` enforce it discursively — a bridge-mode roadmap.md without sentinel block (`<!-- anthill:bridge:begin -->` ... `<!-- anthill:bridge:end -->`) is the regression mode the discipline catches at review time, not at submit time.
+The schema does NOT structurally enforce the operating-mode (canonical timeline-aware vs bridge / priority-extraction). The prompt's `## How to conduct this step § 6` and `references/phase-extraction.md` enforce it discursively — a bridge-mode roadmap.md without sentinel block (`<!-- bridge:begin -->` ... `<!-- bridge:end -->`) is the regression mode the discipline catches at review time, not at submit time.
 
 ## Layer 1 — file-level floor
 
@@ -40,7 +40,6 @@ The schema does NOT structurally enforce the operating-mode (canonical timeline-
     {
       "path": "roadmap.md",
       "min_size": 6144,
-      "max_size": 18432,
       "contains": [
         "## Overview",
         "## Horizon",
@@ -57,7 +56,7 @@ The schema does NOT structurally enforce the operating-mode (canonical timeline-
       "any_of_contains": [
         "**Buffer:**",
         "## Buffer",
-        "anthill:bridge:begin"
+        "bridge:begin"
       ]
     }
   ]
@@ -66,17 +65,17 @@ The schema does NOT structurally enforce the operating-mode (canonical timeline-
 
 ### Notes on the floors
 
-- **`roadmap.md` `min_size: 6144` (6 KB)** — lowered from spec 026's 8 KB per spec 056 calibration (compact-product variants legitimately land at 6-8 KB without an OVERRIDE marker). Floor anchored against the 8 required sections at honest depth. A roadmap with 4 phases (each with goal + deliverable table 4-6 rows + dependencies + exit criteria), 3-6 milestones, dependency graph for ≥3 phases, per-phase risks table (4 rows + buffer paragraph), v2-vision (3-5 bullets), and open-decisions (2-4 rows) lands at 10-12 KB for SMB SaaS Full. Micro-products may legitimately land under 8 KB (use `# OVERRIDE: compact-product: <class>` shape in submit context); 8 KB is the universal sanity line. The floor is lower than step-10's 10 KB because roadmap is narrative-shorter (no probability tables, no projections, no unit-economics math) — but the load-bearing literal anchors stay the same.
+- **`roadmap.md` `min_size: 6144` (6 KB)** — lowered from an earlier 8 KB declaration (compact-product variants legitimately land at 6-8 KB without an OVERRIDE marker). Floor anchored against the 8 required sections at honest depth. A roadmap with 4 phases (each with goal + deliverable table 4-6 rows + dependencies + exit criteria), 3-6 milestones, dependency graph for ≥3 phases, per-phase risks table (4 rows + buffer paragraph), v2-vision (3-5 bullets), and open-decisions (2-4 rows) lands at 10-12 KB for SMB SaaS Full. Micro-products may legitimately land under 8 KB (use `# OVERRIDE: compact-product: <class>` shape in submit context); 8 KB is the universal sanity line. The floor is lower than step-10's 10 KB because roadmap is narrative-shorter (no probability tables, no projections, no unit-economics math) — but the load-bearing literal anchors stay the same.
 
 - **The literal `## Phases` substring** — proves the phases section exists as an H2 (NOT inline as a sub-heading under § Horizon). The phases section is the spine; without an H2 anchor, the reader has no scan target.
 
 - **The literal `| Deliverable | Owner | Status |` substring** — proves at least one phase carries a structured deliverable table (`Deliverable | Owner | Status | Source`), not paragraph prose. Without this, the phase silently degrades into "we'll do auth, then features, then polish" — useless for sequencing discipline. Mirrors step-7's `| Token | Voice |` fix, step-9's `| Method | Path |` discipline, step-10's `| # | Assumption |` literal-anchor pattern. The literal row only appears as a real markdown table header.
 
-- **The literal `**Exit criteria:**` substring** — proves at least one phase carries explicit exit criteria. A roadmap with phases but no exit criteria is anthill anti-pattern #1 ("Phases without exit criteria"); Layer 1 catches it at file-shape level. The italic-bold structural element only appears as a real per-phase exit-criteria block (not loose prose mentioning "exit criteria").
+- **The literal `**Exit criteria:**` substring** — proves at least one phase carries explicit exit criteria. A roadmap with phases but no exit criteria is the canonical anti-pattern ("Phases without exit criteria"); Layer 1 catches it at file-shape level. The italic-bold structural element only appears as a real per-phase exit-criteria block (not loose prose mentioning "exit criteria").
 
 - **The literal `Deciding signal` substring** — proves at least one § Open Decisions row carries a deciding signal that closes the deferral. Mirrors step-9's `## Open Decisions § Deciding signal` column and step-10 § Recommendations `*Flip if:*` discipline at the roadmap layer — every deferred decision either HOLDS or FLIPS on a measurable signal. Step-11 calibration inherits this anchor pattern.
 
-- **`any_of_contains: ["**Buffer:**", "## Buffer", "anthill:bridge:begin"]`** — the OR-semantic check that catches three valid roadmap shapes: (a) canonical timeline mode with buffer inline (`**Buffer:**` paragraph in § Risks), (b) canonical timeline mode with dedicated § Buffer H2, (c) bridge mode (`anthill:bridge:begin` sentinel — buffer is degenerate since bridge has no week math). A roadmap that omits all three is one of two things: (i) canonical mode silently dropped the buffer calibration (regression mode — single-point estimates, anti-pattern), or (ii) bridge mode malformed (sentinel missing, idempotent regen broken). Layer 1 catches both. Step-9's `any_of_contains` invented-for-step-6/7-Audit-Response is the precedent; step-10 reused it for revenue-vs-NFP; step-11 reuses for canonical-vs-bridge.
+- **`any_of_contains: ["**Buffer:**", "## Buffer", "bridge:begin"]`** — the OR-semantic check that catches three valid roadmap shapes: (a) canonical timeline mode with buffer inline (`**Buffer:**` paragraph in § Risks), (b) canonical timeline mode with dedicated § Buffer H2, (c) bridge mode (`bridge:begin` sentinel — buffer is degenerate since bridge has no week math). A roadmap that omits all three is one of two things: (i) canonical mode silently dropped the buffer calibration (regression mode — single-point estimates, anti-pattern), or (ii) bridge mode malformed (sentinel missing, idempotent regen broken). Layer 1 catches both. Step-9's `any_of_contains` invented-for-step-6/7-Audit-Response is the precedent; step-10 reused it for revenue-vs-NFP; step-11 reuses for canonical-vs-bridge.
 
 - **No `required_glob`** — single-artifact step; nothing to glob.
 
@@ -104,12 +103,12 @@ The agent declares operating mode at top of `roadmap.md` as a single line: `**Mo
 Bridge mode degrades sections explicitly:
 - § Horizon → `**Total horizon:** TBD pre-delivery-plan` + team shape declared
 - § Phases → Phase 1 / 2 / 3 by priority tier (P0/P1/P2), each with **Stories** bulleted list + **Goal** + **Trigger to start** (no week ranges, no deliverable table, no exit criteria with week numbers)
-- § Milestones → `*Re-evaluated at /anthill-delivery-plan time*` placeholder
-- § Risks → `*Re-evaluated at /anthill-delivery-plan time*` placeholder; § Buffer absent (no week math to buffer)
+- § Milestones → `*Re-evaluated at delivery-plan time*` placeholder
+- § Risks → `*Re-evaluated at delivery-plan time*` placeholder; § Buffer absent (no week math to buffer)
 - § v2-Vision → may collapse to `*Deferred — re-evaluate post-MVP*`
 - § Open Decisions → 1-2 rows typical (validation-mode upgrade trigger; phase-1 success-criteria definition)
 
-Bridge mode wraps the regenerated content in `<!-- anthill:bridge:begin -->` ... `<!-- anthill:bridge:end -->` sentinels for idempotent regen.
+Bridge mode wraps the regenerated content in `<!-- bridge:begin -->` ... `<!-- bridge:end -->` sentinels for idempotent regen.
 
 ## Atomic write semantics
 

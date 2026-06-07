@@ -1,0 +1,2 @@
+{"paid_only":true,"paid_fal_key":true,"tiers_file":"<ROOT>/.agent0/tools/../skills/sound/references/sound-tiers.yaml","tiers_present":true,"confirm_threshold_usd":0.25,"ffmpeg":"ffmpeg"}
+--exit:0

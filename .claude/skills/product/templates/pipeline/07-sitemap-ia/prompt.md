@@ -8,7 +8,7 @@ delegation_hint: "produce sitemap.yaml — full screen inventory + IA decomposit
 
 **Goal:** produce `<out>/docs/sitemap.yaml` — the canonical screen inventory for the product. This file is **load-bearing** for Step 15 atlas (drives N screen-writer dispatches) AND **enforced mechanically** by the orchestrator (parses YAML, BLOCKS step if `required_categories` not satisfied without `deferred_categories` declaration).
 
-Per spec 045 Decision 5 + 13 (ported from spec 032): sitemap-IA is its own step (was inline in v2 Step 02 direction-writer). The dedicated step + schema enforcement is the **load-bearing mechanical fix** for the Pass-E silent-undercover bug — Steward shipped without `auth` / `admin` deeper / `error` beyond 404 because no step enforced category coverage.
+Per design discipline, Decision 5 + 13: sitemap-IA is its own step (was inline in v2 Step 02 direction-writer). The dedicated step + schema enforcement is the **load-bearing mechanical fix** for the Pass-E silent-undercover bug — Steward shipped without `auth` / `admin` deeper / `error` beyond 404 because no step enforced category coverage.
 
 **Mode:** `synthesis` with `delegable: true`. Sub-agent reads PRD + functional-spec + concept-brief and produces YAML output mechanically.
 
@@ -178,7 +178,7 @@ Each entry MUST have `reason` (non-empty, 1-2 sentences). The deferral becomes a
 - No duplicate paths.
 - All `covers_us` entries are valid US-NN refs from PRD (warning if orphan).
 - Every PRD US-NN with priority P0 OR P1 appears in ≥1 route's `covers_us` (warning if orphan US-NN).
-- Top of file comment: `# Sitemap schema per spec 045 Decision 13 — enforced by orchestrator after Step 07 returns`.
+- Top of file comment: `# Sitemap schema — enforced by orchestrator after Step 07 returns`.
 
 ## Validation flow (orchestrator side — informational; not in sub-agent's hands)
 
@@ -197,12 +197,10 @@ Each entry MUST have `reason` (non-empty, 1-2 sentences). The deferral becomes a
 
 ## Why this step is load-bearing
 
-Pass-E (spec 036 dogfood 2026-05-18) demonstrated the bug: Steward's sitemap.yaml (produced inline in old Step 02) listed only 5 routes — zero auth, only `/settings/policy` for admin, only `/not-found` for error. The atlas declared "PRD coverage 14/15" — but the silent gap was the ENTIRE auth category. Spec 045's promotion of sitemap-IA to own step + schema enforcement makes that bug structurally impossible.
+An earlier dogfood demonstrated the bug: a product's sitemap.yaml (produced inline in old Step 02) listed only 5 routes — zero auth, only `/settings/policy` for admin, only `/not-found` for error. The atlas declared "PRD coverage 14/15" — but the silent gap was the ENTIRE auth category. Promoting sitemap-IA to its own step + schema enforcement makes that bug structurally impossible.
 
 ## Cross-references
 
 - `.claude/skills/product/references/sitemap-schema.md` — binding schema (full validation rules)
 - `.claude/skills/product/references/delegation-briefs.md` § Step 07 — full sub-agent brief
 - `.claude/skills/product/references/pipeline-coverage.md` § Step 07 — size targets + lightening
-- `docs/specs/045-prototype-skill-pipeline-realign/spec.md` § Acceptance B.scenario "sitemap-IA enforces categories"
-- `docs/specs/032-pipeline-industry-alignment/spec.md` § Decisions 5 + 13 — industry rationale

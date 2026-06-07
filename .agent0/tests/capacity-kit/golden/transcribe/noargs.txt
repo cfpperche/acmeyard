@@ -1,0 +1,2 @@
+transcribe: no input file. usage: transcribe.sh <file> [flags]
+--exit:64

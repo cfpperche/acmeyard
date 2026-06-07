@@ -4,7 +4,7 @@ The operational playbook for step 2's Turn 1: discovery → 3 direction families
 
 ## OD vendor grounding — read `od-bridge.md` first
 
-The Open Design (OD) vendor bundle ships **inside the `/product` skill** (spec 027 ported to MCP; spec 049 re-homed to the skill): 73 named `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, 33 skill bundles + the canonical 5-school direction library at `.claude/skills/product/vendor/open-design/`, all pinned and checksum-verified.
+The Open Design (OD) vendor bundle ships **inside the `/product` skill**: 150 named `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, 33 skill bundles + the canonical 5-school direction library at `.claude/skills/product/vendor/open-design/`, all pinned and checksum-verified.
 
 **The grounded path is `references/od-bridge.md`.** It teaches the catalogue lookup (`.claude/skills/product/references/od-catalog-index.json`), the per-system `Read` sequence, and the mandatory DS-citation rule. Each direction is composed from 1-4 named vendored design systems and cites them by name in `REPORT.md` — replacing "agent invents palette/typography from training data" with "agent reads a vendored, pinned `DESIGN.md`".
 
@@ -66,7 +66,7 @@ When the OD vendor is available, seed from `<vendor_paths.skills>/web-prototype/
 ### Build phase rules (hard — any failure = fix pass before emit)
 
 1. All 6 palette tokens declared in `:root` (`--background` / `--foreground` / `--primary` / `--accent` / `--border` / `--muted`)
-2. **Recommended: enrich the token system beyond the 6 base palette tokens** for landing-page cohesion. Anthill's reference directions declare ~18 tokens; this richness is what makes sections feel like one designed product rather than independent fragments. Suggested extensions:
+2. **Recommended: enrich the token system beyond the 6 base palette tokens** for landing-page cohesion. Reference landing-page directions typically declare ~18 tokens; this richness is what makes sections feel like one designed product rather than independent fragments. Suggested extensions:
    - **Surface elevation:** `--surface-1` / `--surface-2` / `--surface-3` (progressively elevated card / panel / hover surfaces)
    - **Border weight:** `--border-subtle` (5-8% opacity) / `--border-std` (12-15% opacity) — semi-transparent variants of foreground
    - **Typography scale:** `--fs-display` (`clamp(36px, 5vw, 56px)` for fluid hero), `--fs-h2`, `--fs-h3`, `--fs-body` (15-16px), `--fs-meta` (12px)

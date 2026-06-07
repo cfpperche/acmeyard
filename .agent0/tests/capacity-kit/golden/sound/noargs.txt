@@ -1,0 +1,2 @@
+sound: no prompt. usage: sound.sh "<prompt>" --kind music|sfx [flags]
+--exit:64

@@ -1,0 +1,2 @@
+transcribe: unknown flag: --definitely-not-a-flag
+--exit:64

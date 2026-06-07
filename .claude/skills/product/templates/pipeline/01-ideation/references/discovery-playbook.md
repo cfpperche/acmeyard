@@ -2,8 +2,6 @@
 
 Structured web research methodology for the discovery sub-stage of ideation. Run 15-25 searches across 5 tracks before generating concepts. Findings consolidate into an Opportunity Map; concepts in the next sub-stage map back to at least one opportunity node.
 
-Ported from anthill `anthill-product-ideator/references/discovery-playbook.md`. Unchanged except minor wording — methodology is content-only and travels intact.
-
 ---
 
 ## OST Overlay — Define the outcome first

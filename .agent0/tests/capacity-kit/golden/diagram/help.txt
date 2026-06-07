@@ -1,0 +1,26 @@
+#
+# diagram — runtime-neutral, deterministic technical-visual generation. Spec 162.
+# Compiles a MERMAID source (file or inline text) -> SVG/PNG/PDF, LOCALLY and
+# FREE. The deterministic sibling of /video --mode code and the technical-visual
+# counterpart to /image (organic, paid). A /transcribe-class local utility:
+# provenance manifest (NOT a cost ledger), no FAL_KEY/tiers/cost gate.
+#
+# Render engine: mmdc (@mermaid-js/mermaid-cli) acquired via npx (no global
+# install), rendering in a SYSTEM headless Chrome via a generated puppeteer
+# config (PUPPETEER_SKIP_DOWNLOAD=1 so npx pulls only the JS package). When no
+# usable Chrome is found, the capacity DEGRADES (does not die): it preserves the
+# tracked source + runs a Chrome-less structural validation, returning
+# status=unavailable for the render step with an install hint.
+#
+# Usage:
+#   diagram.sh <source.mmd | "<mermaid text>"> [--kind flowchart|sequence|erd|class|state|architecture]
+#              [--format svg|png|pdf] [--out <dir>] [--theme default|dark|forest|neutral]
+#              [--json] [--exit-code]
+#   diagram.sh doctor | caps
+#
+# Result statuses (decoupled from exit code): ok | unavailable | error.
+# Default exit 0; --exit-code maps ok=0 unavailable=2 error=3.
+#
+# Test/override env: DIAGRAM_MMDC (mmdc command), DIAGRAM_CHROME_BIN (browser
+#   path; empty/"none" = force-absent), DIAGRAM_OUT_DEFAULT, DIAGRAM_MANIFEST.
+--exit:0

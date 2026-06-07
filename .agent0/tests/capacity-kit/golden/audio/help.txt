@@ -1,0 +1,29 @@
+#
+# audio — runtime-neutral, local-first text-to-speech (synthesis). Spec 160.
+# Sibling of /transcribe (recognition). Engines: Kokoro + Piper (local, free);
+# fal (paid, opt-in via --remote). NOT music/SFX, NOT voice clone (deferred).
+#
+# Local lane: speech is synthesized ON-DEVICE (text/audio never leaves the
+# machine; only weights/voices fetched once) -> manifest stayed_local:true.
+# Paid lane (--remote): text is sent to fal -> stayed_local:false (stated).
+#
+# Usage:
+#   audio.sh "<text>" [--engine kokoro|piper] [--remote] [--tier standard|premium]
+#            [--asset] [--voice <name>] [--lang <code>] [--format mp3|wav]
+#            [--quiet] [--json] [--exit-code]
+#   audio.sh doctor | caps
+#
+# Result statuses (decoupled from exit code): ok | unavailable | error.
+# Default exit 0 (advisory family); --exit-code maps ok=0 unavailable=2 error=3.
+#
+# Test/override env: AUDIO_PIPER_CMD, AUDIO_KOKORO_CMD, AUDIO_FFMPEG_BIN,
+#   AUDIO_FAL_REST, AUDIO_NO_ACQUIRE, AUDIO_DRAFT_DIR, AUDIO_ASSET_DIR,
+#   AUDIO_MANIFEST, AUDIO_TIERS, AUDIO_VOICE_CACHE, AUDIO_ESPEAK_OK.
+
+set -uo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+
+# --- defaults / args ---------------------------------------------------------
+SUBCMD=""; TEXT=""
+--exit:0

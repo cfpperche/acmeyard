@@ -1,6 +1,6 @@
 # Phasing discipline — slice = end-to-end user value, per-phase exit criteria, risk + buffer calibration
 
-How to phase v1 in `roadmap.md`. The load-bearing disciplines from anthill-roadmap + the calibration rules that make phasing smart, not rigid.
+How to phase v1 in `roadmap.md`. The load-bearing disciplines from canonical phased-roadmap practice + the calibration rules that make phasing smart, not rigid.
 
 ## Slice = end-to-end user value (Shape Up style)
 
@@ -254,7 +254,7 @@ Net buffer = weighted average across phases. For a 14-week plan-of-record: 4 × 
 
 ### Buffer is NOT 30% flat
 
-The anthill-roadmap canonical skeleton said "add 30% to estimates" (flat). This is the magic-number audit-smell — hides which phases have the real risk. The MCP port calibrates per-phase.
+A flat "add 30% to estimates" buffer is the magic-number audit-smell — it hides which phases have the real risk. This template calibrates per-phase.
 
 ### Buffer reporting shape
 
@@ -292,7 +292,7 @@ Mirrors step-9 + step-10 calibration ladder. Phase count scales with product com
 | **Micro-Product / CLI helper** | 2-3 | Foundation + Build + Ship |
 | **Mobile App (1 persona)** | 3-4 | Foundation + Killer Flow + Polish + App-Store-Review |
 | **Developer Tool / API-first** | 3-4 | Foundation + API/Core + SDK/Dashboard + Docs/Launch |
-| **SMB SaaS (the spec 026 default)** | 4-5 | Foundation + Killer Flow + Surrounding + Polish + Launch |
+| **SMB SaaS (the default)** | 4-5 | Foundation + Killer Flow + Surrounding + Polish + Launch |
 | **Venture-Scale / Marketplace** | 5-6+ | Foundation + Per-Persona-Onboarding (1-2) + Killer Flow + Marketplace-Bootstrap + Polish + Launch |
 
 Brief field missing or ambiguous → default to **SMB SaaS (4-5 phases)**. Mark the chosen phase count in § Overview opening sentence.
@@ -316,6 +316,6 @@ When in doubt, pick 4 phases and merge import-and-killer-flow into one. The 5-ph
 - **Circular dependencies** — covered above; DAG validation.
 - **Over-planning distant phases** — Phase 4 in week-1 doesn't need the same detail as Phase 1. Sketch later phases; detail current + next.
 - **Mixing product and engineering without labels** — label each deliverable's `Source` column with PRD US-NN (product) vs system-design § X (engineering). Closes the trace.
-- **Missing risk assessment** — one risk per phase MINIMUM. NOT "at least 2" (anthill anti-patterns.md magic-number); the constraint is "every phase has a named risk + mitigation".
+- **Missing risk assessment** — one risk per phase MINIMUM. NOT "at least 2" (a magic-number anti-pattern); the constraint is "every phase has a named risk + mitigation".
 - **Timeline without constraints** — § Horizon names team shape, velocity assumption, hard deadlines, external coordination triggers. Without these the timeline is decorative.
 - **Ignoring parallel work streams** — identify the independent phases that can overlap. Solo founders skip this; 2+ engineers MUST identify parallelism opportunities.

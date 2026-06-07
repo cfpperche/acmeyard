@@ -4,10 +4,15 @@
 
 `<out>/docs/sitemap.yaml`
 
-## Size targets
+## Size floor (anti-stub)
 
-- **Floor:** 2 KB (less means sitemap is too sparse — likely missed categories)
-- **Ceiling:** 5 KB hard (more means inventory is over-detailed for a prototype; trim secondary surfaces to Backlog)
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains.
+
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `sitemap.yaml` | 2 KB | below this the sitemap is too sparse — likely missed categories |
+
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Binding schema
 

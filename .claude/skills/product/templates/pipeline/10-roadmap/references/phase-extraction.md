@@ -100,7 +100,7 @@ Within a phase, extract each story as one bulleted line:
 
 **Goal:** <extracted from PRD's MVP definition / problem statement>
 
-**Success criteria:** <extracted from PRD's success metrics for P0; if absent, emit "Defined at /anthill-delivery-plan time">
+**Success criteria:** <extracted from PRD's success metrics for P0; if absent, emit "Defined at delivery-plan time">
 
 **Estimated duration:** TBD pre-delivery-plan
 
@@ -148,7 +148,7 @@ Look for:
 If goal cannot be extracted, emit:
 
 ```markdown
-**Goal:** <not declared in PRD — define at /anthill-delivery-plan time>
+**Goal:** <not declared in PRD — define at delivery-plan time>
 ```
 
 ## Success-criteria extraction (per phase)
@@ -162,7 +162,7 @@ Look for:
 If absent for Phase 1 (MVP), emit:
 
 ```markdown
-**Success criteria:** <not declared in PRD — define at /anthill-delivery-plan time>
+**Success criteria:** <not declared in PRD — define at delivery-plan time>
 ```
 
 For Phase 2 / Phase 3, success criteria are usually post-launch (telemetry-driven). Emit:
@@ -179,14 +179,14 @@ Look for explicit `target_date:`, `Estimated duration:`, `Sprint count:`, or `We
 **Estimated duration:** TBD pre-delivery-plan
 ```
 
-The bridge does NOT estimate durations — only `/anthill-delivery-plan` (Step 13 future) and the canonical timeline-aware path (§ 4 in prompt.md) compute timelines.
+The bridge does NOT estimate durations — only the future delivery-plan step and the canonical timeline-aware path (§ 4 in prompt.md) compute timelines.
 
 ## Sentinel block — idempotent regeneration
 
 All bridge-generated content sits between sentinels:
 
 ```markdown
-<!-- anthill:bridge:begin -->
+<!-- bridge:begin -->
 
 ## Phase 1 — MVP
 ... (generated content)
@@ -197,7 +197,7 @@ All bridge-generated content sits between sentinels:
 ## Dependencies
 ... (generated content)
 
-<!-- anthill:bridge:end -->
+<!-- bridge:end -->
 ```
 
 On re-run:

@@ -1,25 +1,29 @@
 ---
 name: product
-description: Foundation generator + design partner for the product lifecycle (idea → v1 → vN). 15-step industry-aligned pipeline produces all planning artifacts (concept brief / functional spec / UX audit / PRD-1pager / OST / sitemap-IA / system design / legal / roadmap / cost / GTM-launch / brand / design system) PLUS lo-fi mood + hi-fi screen-atlas absorbing brand+tokens. Output is a monorepo at user-specified path with semantic-named artifacts at `<out>/docs/` (no NN- prefix; PRD release-scoped via `prd/v1.md`; design system grouped). 4 phases - Discovery / Specification / Identity / Visual-contract - with 3 AskUserQuestion gates after steps 4 / 12 / 14. Standalone (templates bundled). Flags - `<idea>` `--stack=<next|expo>` `--out=<path>` `--from-step=NN` `--skip-prd` `--skip-brand`. See `references/{pipeline-coverage,state-machine,delegation-briefs}.md`. v0.3.0 per spec 048 (rename + layout).
+description: Foundation generator + design partner for the product lifecycle (idea → v1 → vN). 15-step industry-aligned pipeline produces every planning artifact (concept brief, functional spec, UX audit, PRD, OST, sitemap-IA, system design, legal, roadmap, cost, GTM, brand, design system) plus a visual contract (lo-fi mood + navigable screen-atlas + hi-fi killer-flow mood + fixture-spec), then scaffolds the SDD umbrella + foundation child spec the engineering build runs as. Does NOT generate a runnable app — the visual contract hands off to SDD. Output is a docs-first tree at a user-specified path. 5 phases - Discovery / Specification / Identity / Visual-contract / SDD-handoff - with 3 AskUserQuestion gates after steps 4/12/14. No stack code ships — Phase 5 reads system-design + roadmap to compute a stack-aware umbrella matrix; the foundation child's `/sdd plan` researches the declared stack. Flags - `<idea>` `--stack=<next|expo>` `--out=<path>` `--from-step=NN` `--skip-prd` `--skip-brand`. See `references/{pipeline-coverage,state-machine,delegation-briefs,sdd-handoff}.md`. v0.5.0.
 license: MIT
-compatibility: Designed for Claude Code. Body references `.claude/` conventional paths, dispatches Agent tool with 5-field handoffs (delegation-gate), uses AskUserQuestion at phase gates, optionally uses Playwright MCP for screenshots. Not portable to runtimes that lack these surfaces.
+compatibility: Designed for Claude Code. Body references `.claude/` conventional paths, dispatches Agent tool with 5-field handoffs (delegation-gate), uses AskUserQuestion at phase gates, optionally uses the agent-browser primitive for screenshots. Not portable to runtimes that lack these surfaces.
 metadata:
   agent0-portability-tier: cc-native
-  skill-version: "0.3.0"
+  skill-version: "0.5.0"
 argument-hint: "<idea>" --out=<path> [--stack=<next|expo>] [--from-step=NN] [--skip-prd] [--skip-brand]
 ---
 
 # /product — 15-step foundation generator + design partner
 
-Takes a founder's one-line idea and produces a complete v1-ready product foundation at `<--out>`: concept brief (with market sizing) → lo-fi prototype (mood + killer flow) → functional spec (with problem-validation interviews) → UX audit → PRD 1-pager → OST (Opportunity Solution Tree) → sitemap-IA (full screen inventory with required_categories enforcement) → system design (with RACI + risk + data-flow inventory) → legal posture (DPIA-triggered by data-flow, NOT end-of-pipeline) → roadmap (defines phases) → cost estimate (per-phase using roadmap) → GTM-launch → brand book → design system → hi-fi screen-atlas (absorbs brand+tokens, full PRD coverage). 4 fluid phases with 3 condensed user gates. **The output IS production layout** — semantic naming (no NN- prefix), PRD release-scoped at `docs/prd/v1.md` from day 1, design system grouped at `docs/design-system/`. Founder reads `docs/REPORT.md` for the temporal narrative, and the structure itself supports v2/v3/vN evolution without manual reorg.
+Takes a founder's one-line idea and produces a complete v1-ready product foundation at `<--out>`: concept brief (with market sizing) → lo-fi prototype (mood + killer flow) → functional spec (with problem-validation interviews) → UX audit → PRD 1-pager → OST (Opportunity Solution Tree) → sitemap-IA (full screen inventory with required_categories enforcement) → system design (with RACI + risk + data-flow inventory) → legal posture (DPIA-triggered by data-flow, NOT end-of-pipeline) → roadmap (defines phases) → cost estimate (per-phase using roadmap) → GTM-launch → brand book → design system → **visual contract** (navigable screen-atlas + hi-fi killer-flow mood + fixture-spec) → **mandatory SDD handoff** (scaffolds the umbrella + foundation child spec the engineering build runs as). 5 phases with 3 condensed user gates. **`/product` produces a docs-first foundation, NOT a runnable app** — semantic naming (no NN- prefix), PRD release-scoped at `docs/prd/v1.md`, design system grouped at `docs/design-system/`. The app build is the SDD workflow working the scaffolded specs. Founder reads `docs/REPORT.html` — a navigable, rendered reading surface regenerated at every gate — or `docs/REPORT.md` for the plain temporal narrative; the structure supports v2/v3/vN evolution without manual reorg.
 
-**v0.3.0 — spec 048 product-skill-foundation** — see `docs/specs/048-product-skill-foundation/` for the rename (`/prototype` → `/product`) + layout refactor (drop NN- prefix; semantic paths). Inherits the 15-step industry-aligned pipeline from spec 045 (which inherited 17 decisions from spec 032). v0.2.0 (spec 045 `/prototype` v3, NN-flat) is superseded; v0.1.0 (spec 036) was already superseded.
+**v0.5.0 product-stack-aware-handoff** — Agent0 stops shipping stack code. The bundled `templates/app-skeleton/{next,expo}/` directories and `references/stack-defaults.md` snapshot are deleted. Phase 5 now reads `docs/system-design.md § Stack/Services/Open Decisions` + `docs/roadmap.md` Fase 1 deliverables and computes a stack-aware umbrella matrix — infra children (one per unmatched Fase 1 deliverable) block-precede the per-phase visual children. The foundation child (`002-foundation`) is research-driven: its `/sdd plan` runs web research per `.agent0/context/rules/research-before-proposing.md` to determine the current canonical setup for the declared stack. Step 8 (system-design) receives `--stack` as a `**Stack hint from invocation:**` line — a default the product class either justifies or overrides; the final § Stack section is the binding contract. The 15-step pipeline is intact; only Phase 5 + Step 08 brief changed.
+
+**v0.4.0 product-ui-quality** — the v2/v3 36-route per-route screen-writer fan-out is **deleted**. `/product`'s visual-contract phase now ends at `screen-atlas.md` + a hi-fi killer-flow mood (static HTML) + `fixture-spec.md`, then **mandatorily hands off to SDD** — Phase 5 scaffolds an umbrella spec + the foundation child spec, the rest of the children listed in the umbrella's matrix. `/product` keeps its strength (design synthesis → visual contract) and stops doing what it did badly (blind-fan-out screen generation). v0.3.0 and earlier are superseded.
 
 **Required reading before execution:**
 - `references/pipeline-coverage.md` — what each of the 15 steps produces at standard tier
-- `references/state-machine.md` — `.state.json` v4 shape + 4-phase progression + resume support (breaking: refuses silent v3 → v4 upgrade)
-- `references/delegation-briefs.md` — 5-field briefs for all 16 sub-agent dispatches (15 step-specific + 1 per-stack screen-writer)
-- `references/quality-checklist.md` — per-step gate criteria the skill checks before declaring a step complete
+- `references/state-machine.md` — `.state.json` v5 shape + 5-phase progression + resume support (breaking: refuses silent v4 → v5 upgrade)
+- `references/delegation-briefs.md` — 5-field briefs for every sub-agent dispatch (one per pipeline step; Step 15 = 15a-atlas / 15b-hi-fi-mood / 15c-fixture-spec; the shared mood-screen-writer template)
+- `references/sdd-handoff.md` — the Phase 5 contract: how to scaffold the umbrella spec + foundation child from the pipeline artifacts
+- `references/quality-judge.md` — the quality judge: when it runs, rubric assembly, the verdict shape, the verdict→gate routing
+- `references/quality-checklist.md` — the quality judge's semantic rubric (per-step + visual-contract criteria) + the deterministic orchestrator gates
 - `references/sitemap-schema.md` — `required_categories` enforcement + per-route field set (load-bearing — orchestrator BLOCKS Step 07 if uncovered category found without `deferred_categories` declaration)
 
 ## Argument parsing
@@ -31,9 +35,9 @@ User invokes as `/product "<idea>" --out=<path> [flags]`. The raw argument strin
 3. Optional flags (any order after idea): `--stack=<name>` (next | expo; default: web stack inferred from idea → next), `--from-step=NN` (resume from step N in range 1-15), `--skip-prd` (omit Step 05 dispatch — degenerate; PRD feeds Steps 06-15), `--skip-brand` (omit Step 13 + fall back to `templates/default-tokens.css`).
 4. Compute `slug` = kebab-case from idea (lowercase, alphanumeric + hyphens, max 40 chars).
 
-## Phase 0 — Setup + idempotency check + resume detection
+## Phase 0 — Setup + idempotency check + resume detection — 🔒 Low freedom: deterministic file scan + harness filter
 
-1. **Idempotency check (spec 059 — harness-aware)** — list files at `<out>`. Filter out the **Agent0 harness allowlist** (these are exempt; a freshly-bootstrapped Agent0 fork is "fresh" from `/product`'s perspective):
+1. **Idempotency check** — list files at `<out>`. Filter out the **Agent0 harness allowlist** (these are exempt; a freshly-bootstrapped Agent0 consumer project is "fresh" from `/product`'s perspective):
 
    ```
    .claude/        .githooks/         .gitignore
@@ -42,16 +46,18 @@ User invokes as `/product "<idea>" --out=<path> [flags]`. The raw argument strin
 
    Compute `<remaining>` = files at `<out>` MINUS the harness allowlist above (recursive — `.claude/**`, `.githooks/**`, `.git/**` all count as harness).
 
-   - **If `<remaining>` is empty** (or `<out>` doesn't exist): proceed to step 2 (Init) — no prompt, no rm, harness preserved. This is the path for `mkdir mei-saas && sync-harness mei-saas && /product --out=mei-saas`, the natural Agent0-disciplined-from-day-1 founder workflow.
+   - **If `<remaining>` is empty** (or `<out>` doesn't exist): proceed to step 2 (Init) — no prompt, no rm, harness preserved. This is the path for `mkdir <consumer project> && sync-harness <consumer project> && /product --out=<consumer project>`, the natural harness-disciplined-from-day-1 founder workflow.
    - **If `<remaining>` is non-empty:**
-     - If `--from-step=NN` was passed AND `<out>/docs/.state.json` exists: read state, validate (a) `version == 4` — if v3 found, abort with `state v3 found — pre-spec-048 run; clear --out dir or run fresh /product`; if v2 found, abort with `state v2 found — pre-spec-045 run; clear --out dir or run fresh /product`; (b) `slug`/`idea`/`flags.stack` match the invocation; if mismatch, abort with `state mismatch — clear --out dir or pick different --from-step`. If both pass, jump to step NN.
-     - Else (no `--from-step` OR no `.state.json`): prompt `<out> exists with prior /product artifacts. Overwrite? (y/N) ▷`. On `y` → `rm -r <out>` (NOT `rm -rf` — governance-gate blocks combined flags; note this WILL also remove any harness present — founder re-syncs via `sync-harness.sh` after). On `n` / no answer → abort cleanly with `aborted; pick a different --out or rm the existing dir yourself`. Exit 0.
+     - If `--from-step=NN` was passed AND `<out>/docs/.state.json` exists: read state, validate (a) `version == 5` — if v4 found, abort with `state v4 found — older /product run; clear --out dir or run fresh /product`; if v3 found, abort with `state v3 found — older /product run; clear --out dir or run fresh /product`; if v2 found, abort with `state v2 found — older /product run; clear --out dir or run fresh /product`; (b) `slug`/`idea`/`flags.stack` match the invocation; if mismatch, abort with `state mismatch — clear --out dir or pick different --from-step`. If both pass, jump to step NN.
+     - Else (no `--from-step` OR no `.state.json`): prompt `<out> exists with prior /product artifacts. Overwrite the non-harness artifacts? (.git/ history and the Agent0 harness are preserved) (y/N) ▷`. On `y` → run `bash .claude/skills/product/scripts/clear-target.sh <out>`, which removes every top-level entry NOT in the harness allowlist (the `<remaining>` set) — `.git/` history and the bootstrapped harness survive; the removed paths surface as deletions in the operator's post-run `git diff` (the audit trail). On `n` / no answer → abort cleanly with `aborted; pick a different --out or rm the existing dir yourself`. Exit 0.
 
-   **Harness allowlist drift:** the 7-path list above mirrors `.claude/tools/sync-harness.sh`'s manifest as of spec 059 (2026-05-19). If the manifest gains a new path (e.g. `.envrc` someday), audit this list too — otherwise the new harness file would falsely trigger the overwrite prompt.
+   **Harness allowlist drift:** the 7-path list above is mirrored in two other places — `.agent0/tools/sync-harness.sh`'s manifest, and the `ALLOWLIST` constant in `.claude/skills/product/scripts/clear-target.sh` (the script the overwrite invokes). If the manifest gains a new path (e.g. `.envrc` someday), audit all three — otherwise the new harness file would falsely trigger the overwrite prompt, or be deleted outright by `clear-target.sh`.
 
-2. **Init** — `mkdir -p <out>/docs/screens <out>/docs/prd <out>/docs/design-system`; write fresh `<out>/docs/.state.json` per `state-machine.md` v4 shape with `version=4, phase="discovery", step=0, started_at=<ISO>, gates_passed=[], completed_steps=[], blocked_steps=[], iterations={discovery:0, specification:0, identity:0}, completed_at=null, target_language=null`. **Artifact layout discipline:** EVERY skill-produced output writes under `<out>/docs/` — pipeline deliverables semantic-named (`docs/concept-brief.md`, `docs/sitemap.yaml`, `docs/system-design.md`, etc. — NO `NN-` prefix per spec 048), PRD release-scoped at `docs/prd/v1.md`, design system grouped at `docs/design-system/{tokens.css, components.md, README.md}`, the run report at `docs/REPORT.md`, the state file at `docs/.state.json`. The `<out>/` root holds ONLY the runtime tree (`app/`, `lib/`, `node_modules/`) and build config (`package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `next.config.ts`, `biome.json`, `tsconfig.json`, `postcss.config.mjs`, `.gitignore`). Rule: if the founder didn't write it and Next.js / Expo doesn't expect it at root, it lives under `docs/`. Temporal ordering of pipeline steps survives via REPORT.md + .state.json; semantic naming wins for the founder's day-to-day mental model. **`.gitignore` append-aware (spec 059):** when the runtime skeleton step writes `<out>/.gitignore` and the file already exists (e.g. from an Agent0 harness bootstrap), do NOT overwrite. Read the existing file, append the Next.js (or Expo) rules under a marker line `# --- /product (<stack>) ---`, preserving everything above verbatim. On re-runs of `/product` on the same `<out>`, locate the existing marker and REPLACE the region from the marker to EOF with the fresh rules — file stays idempotent. If the marker is absent (founder edited it out), append fresh with a new marker.
+2. **Init** — `mkdir -p <out>/docs/screens/hifi <out>/docs/prd <out>/docs/design-system <out>/docs/specs <out>/docs/.quality`; write fresh `<out>/docs/.state.json` per `state-machine.md` v5 shape with `version=5, phase="discovery", step=0, started_at=<ISO>, gates_passed=[], completed_steps=[], blocked_steps=[], iterations={discovery:0, specification:0, identity:0}, quality_verdicts={}, completed_at=null, target_language=null`. **Artifact layout discipline:** `/product` produces a docs-first foundation, NOT a runnable app. EVERY skill-produced output writes under `<out>/docs/` — pipeline deliverables semantic-named (`docs/concept-brief.md`, `docs/sitemap.yaml`, `docs/system-design.md`, etc. — NO `NN-` prefix), PRD release-scoped at `docs/prd/v1.md`, design system grouped at `docs/design-system/{tokens.css, components.md, README.md}`, lo-fi mood at `docs/screens/`, hi-fi mood at `docs/screens/hifi/`, the SDD specs at `docs/specs/`, the run report at `docs/REPORT.md`, the state file at `docs/.state.json`. The `<out>/` root holds only `docs/` and whatever Agent0 harness was bootstrapped (no `.mcp.json` is seeded — spec 153). The runtime tree (`app/`, `lib/`, `package.json`, `node_modules/`, build config) does NOT exist after `/product` — the SDD foundation child (Phase 5) scaffolds it. Temporal ordering of pipeline steps survives via REPORT.md + .state.json; semantic naming wins for the founder's day-to-day mental model.
 
-## Phase 0.5 — Target language resolution (spec 054)
+3. **No MCP seed (spec 153).** `/product` does NOT write a live `<out>/.mcp.json`. The Phase 4 visual check drives the `agent-browser` primitive directly over `file://` (no server, no MCP, no session restart — see Phase 4 below), and SDD-child sessions inherit the same primitive from the bootstrapped harness. Playwright/Chrome DevTools MCP survive only as the opt-in `.mcp.json.example` template a founder may wire up by hand for their own use — never seeded by the pipeline.
+
+## Phase 0.5 — Target language resolution — 🔒 Low freedom: detect or read user-supplied locale
 
 Resolves `target_language` BEFORE Step 01 dispatches so every downstream sub-agent generates user-facing text in the right language. Runs ONCE per fresh run (skipped on `--from-step` resume — state already carries the value).
 
@@ -65,24 +71,46 @@ Resolves `target_language` BEFORE Step 01 dispatches so every downstream sub-age
    - The (Recommended) label uses whichever the heuristic proposed.
 3. **Store** — write `target_language` into `<out>/docs/.state.json` (BCP-47 string). This is now the canonical signal for every brief substitution + brand-book Step 13 § Language section.
 
-**On `--from-step` resume:** read `.state.json.target_language`. If null (pre-spec-054 state), run the heuristic + ask. If present, use as-is (no re-ask).
+**On `--from-step` resume:** read `.state.json.target_language`. If null (older state without language field), run the heuristic + ask. If present, use as-is (no re-ask).
 
 **Override:** founder can edit `.state.json.target_language` between phases — downstream sub-agents read the current value at dispatch time, so changes mid-run propagate to subsequent steps (but artifacts already written stay in their original language until re-iterated).
 
-## Phase 1 — Discovery (pipeline steps 01-04)
+## Quality judge — runs after every step — 🔒 Low freedom: canonical rubric, deterministic verdict
+
+After a phase's step producers return, the orchestrator grades each step's artifact(s) with the **quality judge** — an independent `opus` sub-agent — before building the report and reaching the gate. The judge is the scope/quality verdict that replaced the retired size budget; it answers *"is this artifact correctly scoped, complete, and coherent for its declared job?"*. Full contract: `references/quality-judge.md`. Each phase's "Update `.state.json`" step invokes this routine over that phase's steps.
+
+For each **judge-unit** in the phase (steps 01-14 = the step; Step 15 = `15a-screen-atlas` / `15b-hifi-mood` / `15c-fixture-spec`):
+
+1. **Anti-stub pre-filter.** `wc -c` each of the step's required artifacts against the `min_size` in `templates/pipeline/<NN-step>/schema.md § Size floor`. Below floor → the artifact is a **stub**: re-dispatch the step's producer with a brief naming the stubbed artifact, and do NOT spend a judge call on it. (A 200 KB runaway is circuit-broken upstream by the producer brief's catastrophe cap — the judge never receives one.)
+1b. **Craft-floor pre-check (judge-units `02-prototype` + `15b-hifi-mood` ONLY).** Before dispatching the judge for these two authored-visual units, run the deterministic anti-slop check over the unit's HTML artifacts and capture its JSON: `bun .claude/skills/product/scripts/craft-floor-check.ts --design <bound design-systems/<vendor>/DESIGN.md> <html...> --json > <out>/docs/.quality/craft-floor-<step_label>.json`. Artifacts: `02-prototype` → `<out>/docs/direction-*.html`; `15b-hifi-mood` → `<out>/docs/screens/hifi/*.html`. This is advisory plumbing — it never blocks; it just produces findings the judge reads. Skip entirely for all other judge-units. (See `references/craft-floor.md`.)
+2. **Dispatch the judge.** One `Agent` call per judge-unit per `references/delegation-briefs.md § Quality judge` — `model: opus`, `subagent_type: general-purpose`. Substitute `{{step_label}}`, `{{artifact_paths}}` (the step's outputs), `{{schema_dir}}` (`.claude/skills/product/templates/pipeline/<NN-step>/`), `{{rubric_section}}` (the `### NN — <name>` heading in `quality-checklist.md`), `{{verdict_path}}` (`<out>/docs/.quality/<step_label>.json`), `{{out}}`. **For `02-prototype` / `15b-hifi-mood`, also pass the craft-floor JSON path from step 1b** so the judge grades `craft-floor` against `summary.active_p0` (fail iff > 0) rather than re-discovering tells. Judge calls within a phase are independent — read-only on the artifacts, each writing a distinct verdict path — so dispatch them in parallel, **cap 5 concurrent**. No worktree isolation needed (no overlapping writes).
+3. **Merge the verdict.** Read each `<out>/docs/.quality/<step_label>.json`, stamp `model` with the dispatched model, and write it into `<out>/docs/.state.json` `quality_verdicts[<step_label>]` (a map — a re-judged step overwrites its key).
+4. **Route by `outcome`** (per `quality-judge.md § Verdict → gate routing`):
+   - `pass` — recorded only.
+   - `concern` — recorded; surfaces in `REPORT.md § Quality concerns` (advisory, no gate action).
+   - `fail` — recorded; surfaces in `REPORT.md § Quality concerns`; AND flags the phase's downstream gate (below).
+
+**Verdict → phase-gate routing.** At a phase gate (`gate_discovery` / `gate_specification` / `gate_identity`), before invoking `AskUserQuestion`, collect every `quality_verdicts` entry for that phase's steps. If any has `outcome: "fail"`, the gate's **recommended** option is `iterate`, and the `iterate` sub-prompt is pre-filled with the failed steps + their failed criteria — the human still chooses `continue` / `iterate` / `abort` (the judge never decides). If none failed, `continue` stays recommended. The iteration soft-cap (`state-machine.md § Gate UX` — warn at 3, force-abort at 5) still bounds the loop.
+
+**Phase 4 has no gate** — a `15a`/`15b`/`15c` `fail` cannot pre-populate a gate, so it surfaces in `REPORT.md § Quality concerns` and the Phase 5 terminal handoff message.
+
+The judge never autonomously BLOCKs or aborts — deterministic structural BLOCK/abort stays the `schema.md` Layer 1 + orchestrator job (`delegation-briefs.md § Failure handling`). A judge `fail` is orthogonal to BLOCKED: a step in `completed_steps` can still carry a `fail` verdict.
+
+## Phase 1 — Discovery (pipeline steps 01-04) — 🔓 Medium freedom: content adapts to detected scope
 
 **Read `references/delegation-briefs.md` § "Phase 1 — Discovery" BEFORE dispatching.** Each Agent call uses the 5-field template there.
 
 1. **Step 01 — Ideation** (BLOCKING) — dispatch Sub-agent A per § Step 01 brief. **model: opus.** Returns `<out>/docs/concept-brief.md` (includes market sizing TAM/SAM/SOM section per Decision 6). If BLOCKED: ABORT the entire run.
 2. **Step 02 — Prototype v1 (lo-fi)** — dispatch direction-writer per § Step 02 brief. Returns `<out>/docs/direction-a.html` + 3-5 killer-flow HTML mood screens at `<out>/docs/screens/NN-<name>.html`. Note: sitemap is NO LONGER produced at Step 02 (moved to its own Step 07 — sitemap-IA). Step 02 outputs are pure mood/visual exploration of the killer flow.
-3. **Steps 03 + 04 — parallel fan-out** — once Step 02 returns (both need `direction-a.html` + `screens/`), dispatch TWO sub-agents in ONE MESSAGE (parallel tool calls) per § Step 03 + § Step 04 briefs. All `sonnet`. Step 03 (functional-spec) extends with § Problem-Validation Interviews per Decision 6.
-4. **Update `.state.json`** — append to `completed_steps`; any BLOCKED to `blocked_steps`.
-5. **Gate — `gate_discovery`** — `AskUserQuestion` with 3 options:
+3. **Step 03 alone, then Step 04 alone** (NOT parallel). Step 03 produces `functional-spec.md`; Step 04's CONTEXT explicitly reads `functional-spec.md` (audit input), so the two dispatches MUST NOT share a single message. Dispatch Step 03 per § Step 03 brief (`sonnet`; extends with § Problem-Validation Interviews per Decision 6); after Step 03 returns, dispatch Step 04 per § Step 04 brief (`sonnet`).
+4. **Update `.state.json`, then run the quality judge** — append to `completed_steps`; any BLOCKED to `blocked_steps`; then run the **quality judge** over Steps 01-04 per § Quality judge (anti-stub pre-filter → judge dispatch → merge verdicts into `quality_verdicts` → route).
+5. **Build the HTML report** — run `bun .claude/skills/product/scripts/build-report.ts --out=<out> --slug=<slug> --stack=<stack>`. Regenerates `<out>/docs/REPORT.html` — the navigable reading surface for every artifact produced so far (steps not yet run render as greyed-out "not yet generated"). Best-effort: if `bun` is unavailable or the script errors, emit a one-line `report-html-skipped: <reason>` advisory and continue — this never blocks the gate.
+6. **Gate — `gate_discovery`** — `AskUserQuestion` with 3 options. Tell the user to review the artifacts in `<out>/docs/REPORT.html` (open in a browser) before choosing. Per § Quality judge, if any Step 01-04 `quality_verdicts` entry has `outcome: "fail"`, the **recommended** option is pre-set to `iterate` (citing the failed step + criterion); otherwise `continue` is recommended:
    - `continue` → proceed to Phase 2 — Specification (append `discovery` to `gates_passed`).
    - `iterate` → user names which step(s) to re-dispatch (sub-prompt). Re-dispatches with augmented brief. Increment `iterations.discovery`. Re-gate after.
    - `abort` → exit cleanly; set `flags.from_step = current_step`; print resume command.
 
-## Phase 2 — Specification (pipeline steps 05-12)
+## Phase 2 — Specification (pipeline steps 05-12) — 🔓 Medium freedom: artifact content adapts to phase-1 outputs
 
 The biggest phase (8 steps). Internal dispatch DAG follows dependency order; some parallelize, others are strictly serial.
 
@@ -91,106 +119,131 @@ The biggest phase (8 steps). Internal dispatch DAG follows dependency order; som
 3. **Step 07 acceptance check** — orchestrator parses returned `<out>/docs/sitemap.yaml` and enforces `references/sitemap-schema.md` § required_categories: every category in `[marketing, auth, primary, admin, error]` must have ≥1 route OR be explicitly listed in top-level `deferred_categories: [{name, reason}]`. **If any required category has 0 routes AND no deferral, BLOCK Step 07 + re-dispatch with augmented brief naming the missing category(ies).** This is the load-bearing mechanical fix for the Pass-E silent-undercover bug.
 4. **Step 08 — System design** (depends on Step 05 PRD + Step 07 sitemap). Dispatch per § Step 08 brief. Returns `<out>/docs/system-design.md` + `<out>/docs/security.md` + `<out>/docs/data-flow.json` (the data-flow inventory consumed by Step 09 legal for DPIA trigger). Extended with § RACI Matrix + § Risk Register per Decision 10.
 5. **Step 09 — Legal posture** (depends on Step 08 data-flow inventory — shift-left per Decision 4). Dispatch per § Step 09 brief. Reads `<out>/docs/data-flow.json` for DPIA trigger; if data-flow includes sensitive categories (PII / health / minors / financial), DPIA section becomes mandatory. Returns `<out>/docs/legal-posture.md`.
-6. **Step 10 — Roadmap** (depends on Step 05 PRD priorities + Step 08 dependencies). Dispatch per § Step 10 brief. Returns `<out>/docs/roadmap.md` with phase definitions that **drive** the next step's cost calculation. **Cost↔roadmap swap per spec 045 — roadmap dispatches BEFORE cost so cost calculates per-phase from real phase boundaries instead of inventing implicit ones.**
+6. **Step 10 — Roadmap** (depends on Step 05 PRD priorities + Step 08 dependencies). Dispatch per § Step 10 brief. Returns `<out>/docs/roadmap.md` with phase definitions that **drive** the next step's cost calculation. **Cost↔roadmap ordering — roadmap dispatches BEFORE cost so cost calculates per-phase from real phase boundaries instead of inventing implicit ones.**
 7. **Steps 11 + 12 — parallel fan-out** — dispatch TWO sub-agents in ONE MESSAGE per § Step 11 (cost) + § Step 12 (gtm-launch) briefs. Step 11 reads Step 10 roadmap (for phase boundaries) + Step 09 legal (for review budget) + Step 08 system-design (for integration line items). Step 12 reads Step 10 (for launch timing) + Step 09 (for compliance signals).
-8. **Update `.state.json`**.
-9. **Gate — `gate_specification`** — `AskUserQuestion` (same 3-option shape).
+8. **Update `.state.json`, then run the quality judge** — record completed/blocked steps; then run the **quality judge** over Steps 05-12 per § Quality judge.
+9. **Build the HTML report** — run `build-report.ts` as in Phase 1 step 5; regenerates `<out>/docs/REPORT.html`. Best-effort, never blocks.
+10. **Gate — `gate_specification`** — `AskUserQuestion` (same 3-option shape). Point the user at `<out>/docs/REPORT.html` to review before choosing. Per § Quality judge, a `fail` among the Step 05-12 `quality_verdicts` pre-sets the recommended option to `iterate`.
 
-## Phase 3 — Identity (pipeline steps 13-14)
+## Phase 3 — Identity (pipeline steps 13-14) — 🔓 Medium freedom: brand/design content adapts to product domain
 
 Strictly serial — design system depends on brand.
 
 1. **Step 13 — Brand book.** Dispatch per § Step 13 brief. Returns `<out>/docs/brand-book.md`. If `--skip-brand`: skip dispatch, `cp templates/default-tokens.css <out>/docs/design-system/tokens.css` + write minimal `<out>/docs/brand-book.md` with neutral tone. **Brand moves to Phase 3 per Decision 3 (PRD-first ordering)** — brand-book now consumes a finalized PRD + sitemap + system-design, NOT a half-formed concept brief.
 2. **Step 14 — Design system.** Dispatch per § Step 14 brief. Reads brand-book + audit findings (Step 04) + sitemap inventory (Step 07). Returns 3 files: `docs/design-system/tokens.css`, `docs/design-system/components.md`, `docs/design-system/README.md`.
-3. **Update `.state.json`**.
-4. **Gate — `gate_identity`** — `AskUserQuestion`.
+3. **Update `.state.json`, then run the quality judge** — record completed/blocked steps; then run the **quality judge** over Steps 13-14 per § Quality judge.
+4. **Build the HTML report** — run `build-report.ts` as in Phase 1 step 5; regenerates `<out>/docs/REPORT.html`. Best-effort, never blocks.
+5. **Gate — `gate_identity`** — `AskUserQuestion`. Point the user at `<out>/docs/REPORT.html` to review before choosing. Per § Quality judge, a `fail` among the Step 13-14 `quality_verdicts` pre-sets the recommended option to `iterate`.
 
-## Phase 4 — Visual contract (pipeline step 15)
+## Phase 4 — Visual contract (pipeline step 15) — 🔓 Medium freedom: screen atlas size adapts to sitemap scope
 
-NO GATE — Phase 4 closes the pipeline; the `/sdd new <slug>` handoff is the implicit "next" gate.
+NO GATE — Phase 4 closes the visual-contract phase; Phase 5 (the mandatory SDD handoff) is the pipeline's terminal step.
 
-1. **Step 15 — Screen atlas** (Sub-agent (a)) — dispatch per § Step 15 brief. Returns `<out>/docs/screen-atlas.md` (atlas index) AND **one `<out>/app/(<chrome>)/layout.tsx` per distinct `chrome` value with ≥1 route assigned** (per spec 055 — chrome is orthogonal to category and drives route-group placement). For a typical 4-chrome sitemap (app + marketing + booking + auth), atlas writes 4 layouts; `chrome: chromeless` routes get no layout. **Absorbs the responsibilities of deleted Step 7 (prototype-v2 brand-tuned)** per Decision 8 + 14 — the atlas IS the brand+tokens-applied hi-fi pass; there is no separate intermediate prototype. **Per spec 052, atlas MUST run BEFORE the per-route screen-writers** (they consume the layout files atlas writes; chrome inheritance is implicit via Next.js nested-layout cascade — pages no longer invent their own shell).
-2. **Step 15 — Per-route screen writers** (Sub-agent (b)) — dispatch N screen-writers in parallel (cap=5) per § Per-stack screen-writer **AFTER atlas Sub-agent (a) returns** (atlas-first sequence, spec 052). N = full sitemap inventory at standard tier (covers all `required_categories` routes plus legal-mandatory surfaces from Step 09 — consent dialog if applicable from DPIA-trigger). **Path resolution per route uses `chrome` field (spec 055), NOT `category`** — writers place pages under `app/(<chrome>)/<route>/page.tsx`; routes missing `chrome` apply the default-inference table from `references/sitemap-schema.md § chrome`.
+The v2/v3 per-route screen-writer fan-out is **deleted**. `/product` writes NO `app/` tree, NO `page.tsx` / `layout.tsx`, runs NO `pnpm install` / build verification / dev-server smoke-test. The runnable app is built by the SDD children scaffolded in Phase 5. Step 15 dispatches the three sub-agents in **two waves**: wave A = 15a + 15c **in one message** (parallel — distinct output paths, no shared inputs); wave B = 15b after 15c returns (the Mood-screen-writer brief in hi-fi mode reads `fixture-spec.md`, so 15b CANNOT share a message with 15c). Then run a best-effort visual check, then authors REPORT.md.
 
-   **Fan-out execution (spec 057 — wave + cascade discipline):**
+1. **Wave A — dispatch Step 15a + Step 15c in one message** (two parallel `Agent` calls per `references/delegation-briefs.md § Phase 4`):
+   - **Step 15a — Screen atlas** — per § Step 15a brief. Returns `<out>/docs/screen-atlas.md` — the navigable visual-contract document indexing every sitemap route, PRD coverage, states coverage, the killer-flow walkthrough. **No `app/` writes, no layout files.**
+   - **Step 15c — Fixture spec** — per § Step 15c brief. Returns `<out>/docs/fixture-spec.md` — one persona, one coherent entity set, internally consistent dates.
 
-   - **Wave structure:** if sitemap has > 5 routes, fan-out is split into waves of cap=5. Wave 1 dispatches 5 screen-writers in ONE message (parallel `Agent` calls); on return, wave 2 dispatches the next 5; etc. A wave "returns" when all its sub-agents reach DONE or fail.
-   - **Between-wave biome sweep (MANDATORY, always-on per spec 057 OQ-3):** before dispatching wave K+1, run `cd <out> && node_modules/.bin/biome check --write .` (parent-side, exempt from post-edit validator). Cost ~25ms per pass; benefit each wave starts from a clean lint state, breaking the validator-cascade where sub-agents in wave K+1 inherit dirty siblings from wave K. NOT conditional — runs even on clean waves to keep state hygiene uniform.
-   - **Degrade-to-parent-write trigger (N=1 same-wave per spec 057 OQ-1):** if ANY sub-agent in the current wave hits `CLAUDE_DELEGATION_LOOP_BUDGET` exhaustion, the orchestrator IMMEDIATELY cancels any in-flight siblings in the SAME wave (don't wait for them to also burn budget) AND switches all remaining routes (this wave + subsequent waves) to parent-write. **Why N=1 not N=2:** sub-agents in the same wave share lint state via repo-wide `biome check`; the first failure is a strong predictor that siblings will also fail. Waiting for N=2 wastes 4 sub-agents of throughput before degrading.
-   - **Parent-write fallback shape:** parent reads `delegation-briefs.md § Per-stack screen-writer` (same brief verbatim — execution-strategy-agnostic per spec 057 OQ-2) and emits `page.tsx` directly via `Write`. Parent edits are exempt from the post-edit validator (actor-detection in `.claude/hooks/post-edit-validate.sh`), so the cascade can't trip on parent-writes. Each parent-written route is recorded for the REPORT degradations section.
-   - **Logging:** for each degraded route, append `{route, wave, reason, attempts}` to an in-memory list. Phase 4 § Build health authoring (step 5) populates `## Build health § Fan-out degradations` section in REPORT.md per `templates/report.md.tmpl`.
+   **Wave B — after Step 15c returns, dispatch Step 15b:**
+   - **Step 15b — Hi-fi killer-flow mood** — dispatch the § Mood-screen-writer brief in **hi-fi mode** (`{{mood_tier}}=hi-fi`), once per killer-flow screen. The screens are the same 3-5 the Step 02 lo-fi mood covered — read them from `<out>/docs/screens/` + Step 02's REPORT § Turn 2 Plan. The hi-fi brief reads `fixture-spec.md` for on-brand data, which is why 15b runs after 15c (not parallel with it). Cap 5 concurrent across the killer-flow screens themselves. Returns `<out>/docs/screens/hifi/<NN>-<name>.html` × 3-5 — brand+tokens-applied, mobile-first static HTML.
+2. **Update `.state.json`, then run the quality judge** — append `15-screen-atlas` to `completed_steps`; record any BLOCKED to `blocked_steps` (per `delegation-briefs.md § Failure handling`: 15a BLOCKED → ABORT the run; 15b / 15c BLOCKED → degrade gracefully, Phase 5 still runs). Then run the **quality judge** over the three judge-units `15a-screen-atlas` / `15b-hifi-mood` / `15c-fixture-spec` per § Quality judge. Phase 4 has no gate — a `fail` surfaces in `REPORT.md § Quality concerns` + the Phase 5 handoff message, not a gate `iterate`.
+3. **Best-effort visual check (agent-browser, spec 153).** Drive the `agent-browser` primitive directly — it navigates `file://` natively, so there is NO localhost HTTP server and NO MCP. Sweep the hi-fi screens with a single `audit` in `--structure optional` mode (hi-fi mood screens are fragments that legitimately have no single `h1` / `main` landmark, so the strict structural gate would false-fail them):
 
-3. **Stitch step — wire token import + verify.** Stack-specific:
-   - **Next.js:** Verify `<out>/app/globals.css` contains the token import via strict regex: `grep -qE '^@import.*docs/.*tokens\.css' <out>/app/globals.css`. The bundled `templates/monorepo-skeleton/next/app/globals.css` SHIPS this line as line 1 (`@import "../docs/design-system/tokens.css";` — relative path to the Step-14 deliverable; **note path change vs v2** which had `../docs/06-tokens.css`) — if missing, prepend via `sed -i '1i @import "../docs/design-system/tokens.css";' <out>/app/globals.css`. DO NOT use a loose-substring `grep -q 'tokens.css'` (matched comments — root cause of 2026-05-17 dogfood render-raw bug).
-   - **Expo:** Tokens consumed via `tailwind.config.js` → no inline import needed.
+   ```bash
+   # availability gate — fail-closed, never degrades to MCP
+   if [ "$(bash .agent0/tools/agent-browser.sh route)" = "primary" ]; then
+     PATHS="$(cd <out>/docs/screens/hifi && ls *.html | paste -sd,)"
+     bash .agent0/tools/agent-browser.sh audit "file://<out>/docs/screens/hifi" \
+       --paths "$PATHS" --structure optional --max-console 0 \
+       --out <out>/docs/.quality/visual-audit
+   fi
+   ```
 
-3.5. **Stitch step — substitute `app/layout.tsx` placeholders** (Next.js only, spec 051 fix). The skeleton ships `title: "PROTOTYPE_SLUG"` + `<html lang="en">` as markers; both MUST be substituted or every prototype leaks the placeholder in browser tabs + ships the wrong locale.
-   - **Title:** prefer `<out>/docs/brand-book.md` § `## Product Name` body line; fall back to `.state.json` `.idea`.
-   - **Lang:** read `.state.json.target_language` (resolved at Phase 0.5 per spec 054). If `pt-BR` / `es-*` / non-`en` → substitute `lang="<value>"`; else keep `lang="en"`. (Heuristic + ask shifted upstream to Phase 0.5 so this step is just an apply.)
-   - **Apply via python3** (not sed — idea string can contain `&|/'"$\` that break sed): read `<out>/app/layout.tsx`, `.replace('PROTOTYPE_SLUG', title)` + conditional `.replace('lang="en"', f'lang="{target_language}"')`, write back.
-   - **Verify:** `grep -L PROTOTYPE_SLUG <out>/app/layout.tsx` must show no match; browser tab on hard-refresh must show the resolved title.
-4. **Build verification:**
-   - Install: `cd <out> && pnpm install --frozen-lockfile` (next) or `bun install` (expo). MUST include OVERRIDE marker for supply-chain hook:
-     ```
-     # OVERRIDE: /product Phase 4 build verification — bundled-template install per spec 048
-     cd <out> && pnpm install --frozen-lockfile
-     ```
-   - Typecheck: `cd <out> && node_modules/.bin/tsc --noEmit` (direct bin path; pnpm v11 deps-status can block `pnpm typecheck`).
-   - Lint: `cd <out> && node_modules/.bin/biome check .` (same reason).
-   - **Dev-server smoke-test (spec 052 — closes spec-051's verification gap):** `pnpm dev --port 3099 &` in background; poll stdout for "Ready" (30s timeout); for each unique sitemap category (skip `error` — Next.js handles), pick ONE representative route + `curl -sS -o /tmp/probe.html -w '%{http_code} %{time_total}' http://localhost:3099<route>` (10s timeout). Mark ✓ if HTTP 200 AND body lacks `__next-dev-overlay-error` / `nextjs__container_errors`. Kill PID cleanly. Failures do NOT abort (tsc/biome posture).
-   - Capture per-step exit codes + durations + smoke-test per-route results for `<out>/docs/REPORT.md` § "Build health" (new subsection § "Dev-server smoke-test" — one row per probed route: category | route | HTTP | latency_ms | result; failures additionally surface in § "Action required").
-5. **Author `<out>/docs/REPORT.md` inline.** Read `templates/report.md.tmpl`, substitute placeholders from `<out>/docs/.state.json` + Phase outputs. See `quality-checklist.md` for the per-step gate criteria scoring.
+   The sweep writes `<out>/docs/.quality/visual-audit/report.{md,json}` + per-screen screenshots at 375 px and 1280 px, and records a horizontal-overflow result (`scrollWidth > clientWidth`) and console-error count per screen. Read `report.json` and record pass/fail + any overflow flags per screen for REPORT.md § Visual check.
 
-## Phase 5 — Handoff message
+   - **`route` ≠ `primary`** (agent-browser unavailable) — emit `visual-gate-skipped: agent-browser unavailable — install agent-browser to enable the visual check (no MCP fallback, spec 153)` and record the skip **prominently** in REPORT.md § Visual check. Do NOT seed or mention any MCP. **Best-effort — never blocks, never aborts.**
+4. **Author `<out>/docs/REPORT.md` inline.** Read `templates/report.md.tmpl`, substitute placeholders from `<out>/docs/.state.json` + the phase outputs. Fill the `## Quality concerns` section from `.state.json` `quality_verdicts` — every `concern`/`fail` criterion with its `note`, plus each judge-unit's `scope_assessment` (per `quality-judge.md § Verdict → gate routing`). See `quality-judge.md` + `quality-checklist.md` for the rubric.
 
-Print to chat:
+## Phase 5 — Mandatory SDD handoff — 🔒 Low freedom: umbrella matrix template + foundation child scaffold
+
+`/product` does not end at a chat message — it scaffolds the engineering entry point. **Read `references/sdd-handoff.md` before executing this phase** — it is the full contract for what to write and how to fill it from the pipeline artifacts.
+
+> **Reconcile with the visual-contract acceptance gate (spec 155).** The `screen-atlas.md` + `fixture-spec.md` this pipeline produces are the **design-time** visual contract (the intended UI). When the scaffolded SDD children build the UI, their visual acceptance is the **implementation-evidence** counterpart — a `UI impact: render|interaction|flow` declaration + an `agent-browser.sh verify-contract` pass checked against that design intent. The fixture-spec is source material the implementation contract is verified against, not a duplicate. See `.agent0/context/rules/visual-contract.md`.
+
+1. **Scaffold the umbrella spec** at `<out>/docs/specs/001-<slug>/` — copy the four `.claude/skills/sdd/templates/*.tmpl` files, substitute `{{NNN}}=001` / `{{SLUG}}=<slug>` / `{{DATE}}`, then FILL `spec.md` per `sdd-handoff.md § The umbrella spec` and § What Phase 5 produces. **Read `docs/system-design.md` (especially § Stack, § Services, § Trade-off Triggers / Open Decisions) + `docs/roadmap.md` Fase 1 `| Deliverable | Owner | Status |` rows before computing the matrix.** Emit infra children for Fase 1 deliverables that don't map to any per-phase visual child — block-precede numbering (children #3..M are infra, then per-phase visual children #(M+1)..N). Every Fase 1 row maps to a child OR appears in umbrella OQs as `**Deferral reason:**` — no Fase 1 deliverable is silently orphaned. Copy every row from `docs/system-design.md § Trade-off Triggers → Open Decisions` into the umbrella `## Open questions` prefixed `**Architecture — <topic>:**` (see `sdd-handoff.md § Open questions migration` for the shape). Header is `**Type:** umbrella`; fill `## Standing constraints` per `sdd-handoff.md § Standing constraints` (stack-conditional styling / no inline `style` for layout / mobile-first / fixture coherence / agent-browser visual verification). `plan.md` / `tasks.md` / `notes.md` stay as template scaffolds — the matrix in `spec.md` is the umbrella's tracking surface.
+2. **Scaffold the foundation child** at `<out>/docs/specs/002-foundation/` — copy the four templates, substitute `{{NNN}}=002` / `{{SLUG}}=foundation` / `{{DATE}}`, then FILL `spec.md` per the rewritten `sdd-handoff.md § Child #1` (research-driven). The foundation child's `spec.md § Context` mandates research at `/sdd plan` time per `.agent0/context/rules/research-before-proposing.md` — no Agent0 template is consumed. § Acceptance is stack-neutral (dev server starts clean, typecheck/lint exit 0, token utility resolves). `plan.md` / `tasks.md` / `notes.md` stay as scaffolds — the founder runs `/sdd plan` then `/sdd tasks` on this child.
+3. **Children #2..N are matrix rows only** — listed in the umbrella's child-spec matrix, NOT pre-scaffolded. Child #2 (component-library) names `docs/design-system/components.md` as its input spec. Children #3..M (when present) are infra, derived from `docs/roadmap.md` Fase 1 unmatched deliverables; children #(M+1)..N are per-phase visual children sliced by `docs/roadmap.md` phases. If `docs/roadmap.md` has no usable phase structure, fall back to a single `app-build` child per `sdd-handoff.md § Fallback`.
+4. **Finalize `<out>/docs/.state.json`** — set `phase="sdd-handoff"`, `completed_at=<ISO timestamp>`.
+5. **Build the terminal HTML report** — run `bun .claude/skills/product/scripts/build-report.ts --out=<out> --slug=<slug> --stack=<stack>`. This is the final regeneration — `<out>/docs/REPORT.html` now covers the full 15-step pipeline plus the SDD-handoff specs. Best-effort: a `bun`/script failure emits a one-line `report-html-skipped: <reason>` advisory and does not abort the run.
+6. **Print the handoff message:**
 
 ```
-Prototype ready at <out>/.
+Product foundation ready at <out>/.
 
   Pipeline coverage: 15/15 steps completed (or N/15 if any BLOCKED — see docs/REPORT.md § Blocked steps).
-  Run: cd <out> && pnpm dev   (open http://localhost:3000)
-  Report: <out>/docs/REPORT.md
+  Report:        <out>/docs/REPORT.md
+  Report (HTML): <out>/docs/REPORT.html          <-- navigable reading surface (open in a browser)
   Concept brief: <out>/docs/concept-brief.md
-  PRD: <out>/docs/prd/v1.md
-  Sitemap: <out>/docs/sitemap.yaml
-  Atlas: <out>/docs/screen-atlas.md
-  Full pipeline artifacts: <out>/docs/ (01..15 enumerated)
+  PRD:           <out>/docs/prd/v1.md
+  Sitemap:       <out>/docs/sitemap.yaml
+  Screen atlas:  <out>/docs/screen-atlas.md      <-- the visual contract
+  Hi-fi mood:    <out>/docs/screens/hifi/        <-- 3-5 rendered killer-flow screens
+  Fixture spec:  <out>/docs/fixture-spec.md
+  Full pipeline artifacts: <out>/docs/
 
   Phase wall-clock: <total elapsed from started_at to completed_at>
   Gate iterations: discovery=<n> specification=<n> identity=<n>
+  Quality concerns: <count of concern+fail criteria across all quality_verdicts> (see docs/REPORT.md § Quality concerns)
 
-  Engineering handoff: /sdd new <slug>
+  ENGINEERING HANDOFF — the app build runs as SDD specs (no runnable app was generated):
+    Umbrella:         <out>/docs/specs/001-<slug>/spec.md      (Type: umbrella — tracks the whole v1 build)
+    Infra children:   <out>/docs/specs/003-* … 00N-*           (N infra children — backbone first, per the umbrella matrix)   <-- conditional: only when infra children exist; omit entirely for simple-visual case
+    Start here:       <out>/docs/specs/002-foundation/         (child #1 — research-driven; /sdd plan researches the stack declared in docs/system-design.md § Stack)
+
+  Next: work the foundation child (/sdd plan -> /sdd tasks -> implement),
+  then materialize each umbrella child-matrix row via /sdd new <phase-slug>.
 ```
-
-Then update `<out>/docs/.state.json` with `completed_at` ISO timestamp.
 
 ## Worked example — parallel dispatch in a single message
 
-True parallelism (no FS race) happens at: Phase 1 Step 03+04 (both read Step 02 output that's already on disk), Phase 2 Step 06+07 (both read Step 05 PRD), Phase 2 Step 11+12 (both read Step 09 legal + Step 10 roadmap). Steps with strict serial dependencies (05 → 06+07 → 08 → 09 → 10 → 11+12) must NOT be dispatched together — they'd race the FS.
+True parallelism (no FS race) happens when sub-agents have **no shared input AND distinct output paths**: Phase 2 Step 06+07 (both read Step 05 PRD only), Phase 2 Step 11+12 (both read Step 09 legal + Step 10 roadmap), and **Phase 4 wave A — Step 15a + Step 15c** (atlas / fixture-spec — no shared input, distinct output paths). Steps with strict serial dependencies (05 → 06+07 → 08 → 09 → 10 → 11+12) must NOT be dispatched together — they'd race the FS.
 
-Example (4 calls, Phase 2 Step 11+12 plus Step 15 per-route screen-writers):
+**Anti-parallelism — sub-agents whose CONTEXT names another's DELIVERABLE**:
+- **Step 03 → Step 04**: Step 04's brief CONTEXT explicitly reads `functional-spec.md` (Step 03's deliverable). Dispatch Step 03 alone first; after it returns, dispatch Step 04 alone.
+- **Step 15c → Step 15b**: the Mood-screen-writer brief in hi-fi mode CONTEXT explicitly reads `fixture-spec.md` (Step 15c's deliverable). Dispatch Step 15a + Step 15c in one message (wave A — safe); after Step 15c returns, dispatch Step 15b (wave B — serial).
+
+Example (Phase 4 wave A — 2 parallel calls for Step 15a + 15c):
 
 ```
-[single assistant message with four <tool_use> blocks]:
+[single assistant message with two <tool_use> blocks]:
   <tool_use name="Agent" id="A1">
     subagent_type: general-purpose
     model: sonnet
-    description: Step 11 — cost-writer
-    prompt: <TASK + CONTEXT + CONSTRAINTS + DELIVERABLE + DONE_WHEN per delegation-briefs.md § Step 11>
+    description: Step 15a — screen-atlas
+    prompt: <TASK + CONTEXT + CONSTRAINTS + DELIVERABLE + DONE_WHEN per delegation-briefs.md § Step 15a>
   </tool_use>
   <tool_use name="Agent" id="A2">
     subagent_type: general-purpose
     model: sonnet
-    description: Step 12 — gtm-launch-writer
-    prompt: <... per § Step 12>
+    description: Step 15c — fixture-spec
+    prompt: <... per § Step 15c>
   </tool_use>
-  ...
 ```
 
-Dispatching serially (one Agent call per message) is a v1 orchestration bug. Wall-time penalty alone (~3x for a quad) makes parallel-where-safe critical.
+Then in a SECOND message (after A2 returns), wave B dispatches the killer-flow fan-out:
 
-**Anti-pattern**: do NOT dispatch Step 02 + Step 03 + Step 04 in one message (spec 036 SKILL.md had this false-positive worked example). Step 03 and Step 04 CONTEXT both reference `<out>/docs/direction-a.html` + `<out>/docs/screens/` — those files don't exist when Step 02 hasn't returned. The de-facto-correct dispatch is Step 02 alone first, then Step 03+04 parallel.
+```
+[single assistant message with up to 5 <tool_use> blocks — one per killer-flow screen]:
+  <tool_use name="Agent" id="B1..B5">
+    description: Step 15b — hi-fi mood screen <NN> (one call per killer-flow screen, cap 5)
+    prompt: <... per § Mood-screen-writer, {{mood_tier}}=hi-fi — reads fixture-spec.md from A2>
+  </tool_use>
+```
+
+Dispatching serially when safe to parallelize (one Agent call per message for sub-agents with no shared input) is a v1 orchestration bug. Wall-time penalty alone (~3× for a quad) makes parallel-where-safe critical.
+
+**Anti-pattern**: do NOT dispatch Step 02 + Step 03 + Step 04 in one message. Step 03 and Step 04 CONTEXT both reference `<out>/docs/direction-a.html` + `<out>/docs/screens/` — those files don't exist when Step 02 hasn't returned. The de-facto-correct dispatch is Step 02 alone first, then Step 03 alone, then Step 04 alone (Step 04 reads Step 03's `functional-spec.md`).
 
 ## Unknown / extra subcommand
 
@@ -200,14 +253,42 @@ This skill does not have subcommands beyond the initial invocation. If `$ARGUMEN
 /product "<idea>" --out=<path> [--stack=<name>] [--from-step=NN] [--skip-prd] [--skip-brand]
 ```
 
+## Eval Scenarios
+
+### Eval 1: Happy path — full multi-phase product
+
+**Input:** User says `/product "ERP para salões de beleza Acme Yard" --stack=next --out=/home/user/acme-yard`.
+
+**Expected:** Phase 0 idempotency check — `<out>` empty or harness-only → proceed. Phase 0.5 locale resolved from idea language (pt-BR). Phase 1 dispatches Discovery steps 01-04 in parallel; Phase 2 fans out steps 05-12 (specification) with the quality judge gating each handoff; Phase 3 builds identity (steps 13-14); Phase 4 produces the screen atlas + hi-fi killer-flow mood (5-screen concurrency cap respected); Phase 5 scaffolds the SDD umbrella spec + foundation child child reading system-design.md to compute the stack-aware matrix. Output is a docs-first tree under `<out>` plus an SDD umbrella; NO app code, NO `pnpm install`, NO build verification.
+
+**Failure indicators:** Pipeline ships a runnable app tree (`app/` / `apps/` / `package.json` at root). Mood-screen-writer fan-out exceeds 5 concurrent. Artifact rejected by quality judge but pipeline continues to next phase. `<out>` overwritten despite containing non-harness pre-existing files (idempotency check skipped). Visual contract dispatched before specification phase completes.
+
+### Eval 2: MVP — selective skip flags
+
+**Input:** User says `/product "MVP SaaS for solo entrepreneurs" --out=./mvp-saas --skip-brand`.
+
+**Expected:** Phase 0/0.5 same as Eval 1. Brand step (within Phase 3) skipped with a one-line `--skip-brand active` advisory; downstream steps that would normally read brand artifacts (design-system step 14, atlas step 15) emit explicit warning that they're falling back to neutral defaults. PRD still ships (no `--skip-prd`); roadmap + cost + GTM all reference US-NN from the PRD. Pipeline still concludes with Phase 5 SDD handoff.
+
+**Failure indicators:** Brand step silently skipped without downstream warning. PRD also dropped (user didn't pass `--skip-prd`). Design system step invents a brand from thin air instead of using neutral defaults. Phase 5 umbrella omits the foundation child because brand artifacts are missing.
+
+### Eval 3: Resume mid-pipeline via `--from-step=NN`
+
+**Input:** User says `/product "<idea>" --out=./existing-product --from-step=07` after a prior run aborted mid-pipeline.
+
+**Expected:** Phase 0 idempotency detects non-empty `<out>`; resume-detection logic reads `<out>/docs/REPORT.md` (or equivalent state marker) to confirm steps 01-06 are present and valid. Pipeline restarts AT step 07 (sitemap-IA), reading already-produced step 01-06 artifacts as context. Steps before 07 NOT re-dispatched. Sitemap schema enforcement check from § Notes still applies (any `required_categories` member with 0 routes AND no `deferred_categories` declaration → BLOCK). Quality judge gates resumption verdict.
+
+**Failure indicators:** Phase 0 wipes `<out>` despite valid prior artifacts. Steps before 07 re-dispatched (token waste). Step 07 dispatched without reading step 06 (system-design.md) output. Sitemap schema check skipped on resume path.
+
 ## Notes
 
-- **Spec 033 compliance is non-skippable.** Run `bash .claude/skills/skill/scripts/validate.sh .claude/skills/product` before commit; exit 0 required.
-- **Validator scope is REPO-WIDE.** One bad biome format blocks subsequent sub-agents. Mitigation: parent-side `node_modules/.bin/biome check --write .` between EVERY phase boundary (per spec 048 Pass E finding — compresses worst-case wall-time from ~11hr to ~90-120min).
-- **Concurrency cap 5** for screen-writer fan-outs (Steps 02 / 15). Proven non-OOM on 17-route dogfood. Re-evaluate if Phase 4 with 12+ atlas screens surfaces context pressure.
+_Consumer-extension surface — append consumer-local bullets to this section. Sync flags the file as `!! customized` (sha-compare is section-blind), but the conflict region is mechanically this section: take new upstream verbatim, re-add consumer bullets at the end. See `.agent0/context/rules/harness-sync.md` § Consumer-extension convention._
+
+- **Skill compliance is non-skippable.** Run `bash .claude/skills/skill/scripts/validate.sh .claude/skills/product` before commit; exit 0 required.
+- **`/product` ends at the visual contract — it does NOT generate a runnable app.** Phase 4 produces `screen-atlas.md` + the hi-fi killer-flow mood (static HTML) + `fixture-spec.md`; Phase 5 scaffolds the SDD umbrella + foundation child. No `app/` tree, no `pnpm install`, no build verification. The app build is the founder working the scaffolded SDD specs. This is the deliberate fix for the v2/v3 36-route fan-out whose output quality collapsed (2026-05-19/20 dogfood).
+- **Concurrency cap 5** for the mood-screen-writer fan-outs (Step 02 lo-fi, Step 15b hi-fi — both 3-5 screens, killer flow only). Proven non-OOM on a 17-route dogfood.
 - **Output dir is `--out=<path>`**, NOT hardcoded `/tmp/`.
-- **Standalone skill.** Bundled templates at `templates/pipeline/01-ideation/` … `15-screen-atlas/` derived from spec 032's 17 decisions. The MCP `packages/mcp-product-pipeline/` (specs 025-027) was discontinued 2026-05-19 — `/product` is the canonical delivery of the 15-step pipeline.
+- **Standalone skill.** Bundled templates at `templates/pipeline/01-ideation/` … `15-screen-atlas/`. `/product` is the canonical delivery of the 15-step pipeline.
 - **`--skip-prd` is degenerate.** PRD feeds Steps 06-15 (OST/sitemap/system-design/legal/roadmap/cost/GTM/brand/design-system/atlas all reference US-NN). Skipping produces a partial pipeline with downstream gaps marked in REPORT.md. Not recommended.
-- **OD vendor bundled inside the skill (spec 049).** 73 named `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, 33 skill bundles + 5-school prompts + frames + templates at `.claude/skills/product/vendor/open-design/`, sync engine at `.claude/skills/product/scripts/sync-open-design.ts` (`--check` / `--bump` / `--apply` / `--verify`). Apache-2.0 attribution preserved in `vendor/open-design/{LICENSE,NOTICE}`. Lightweight catalogue at `.claude/skills/product/references/od-catalog-index.json` (name + mood + palette + path) — Step 14 design-system brief reads it to pick 1-2 catalog vendors, then `Read`s the chosen `DESIGN.md` path directly. No MCP tool indirection; the skill is self-contained.
-- **Sub-agent oversize discipline (spec 065).** Each step's brief CONSTRAINTS inlines the two-threshold overshoot cascade per `.claude/rules/artifact-budgets.md`: `target_max × 1.2 → partial-result with oversize_reason` (soft, sub-agent has agency); `target_max × 1.8 → STOP, emit partial-result, no further production` (hard, no agency). Trim-loop and re-emit-at-smaller-scope are forbidden — both are "redo to fit budget" antipatterns. Multipliers (`1.2` soft / `1.8` hard) declared uniformly in `references/pipeline-coverage.md` § Per-step table.
-- **Sitemap schema enforcement is mechanical** (per spec 045 Decision 5 + 13). Orchestrator parses `<out>/docs/sitemap.yaml` after Step 07 returns; if any `required_categories` member has 0 routes AND no `deferred_categories: [{name, reason}]` declaration, Step 07 is BLOCKED. This is the load-bearing fix for the "atlas under-cover" bug Pass E demonstrated (Steward shipped without auth/admin/error screens silently).
+- **OD vendor bundled inside the skill.** 150 named `DESIGN.md` design systems at `.claude/skills/product/design-systems/<vendor>/DESIGN.md`, plus 5-school prompts + frames + templates at `.claude/skills/product/vendor/open-design/`, sync engine at `.claude/skills/product/scripts/sync-open-design.ts` (`--check` / `--bump` / `--apply` / `--verify`). _(The `skills/` design-template bundle tree was dropped 2026-06-03 — spec 145 — as pipeline-unread; consumed OD content is `design-systems/` + the catalogue.)_ Apache-2.0 attribution preserved in `vendor/open-design/{LICENSE,NOTICE}`. Lightweight catalogue at `.claude/skills/product/references/od-catalog-index.json` (name + mood + palette + path) — Step 14 design-system brief reads it to pick 1-2 catalog vendors, then `Read`s the chosen `DESIGN.md` path directly. No MCP tool indirection; the skill is self-contained.
+- **Artifact size discipline.** Artifact size is NOT a scope/quality signal — scope, completeness, and right-sizing are graded by the **quality judge** (§ Quality judge; `references/quality-judge.md`). The only size mechanisms left: each step's brief inlines the uniform 200 KB **catastrophe cap** (a token-runaway circuit-breaker per `.agent0/context/rules/artifact-budgets.md`), and each `schema.md § Size floor` carries a `min_size` anti-stub floor (the judge's `wc -c` pre-filter enforces it). The retired `× 1.2 / × 1.8` overshoot cascade and the per-step KB budget are gone. Trim-loop and re-emit-at-smaller-scope stay forbidden.
+- **Sitemap schema enforcement is mechanical**. Orchestrator parses `<out>/docs/sitemap.yaml` after Step 07 returns; if any `required_categories` member has 0 routes AND no `deferred_categories: [{name, reason}]` declaration, Step 07 is BLOCKED. This is the load-bearing fix for the "atlas under-cover" bug Pass E demonstrated (Steward shipped without auth/admin/error screens silently).

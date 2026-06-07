@@ -1,0 +1,6 @@
+{
+  "_comment": "spec-152 browser primitive policy. Copy to .agent0/browser-policy.json to override the wrapper's built-in safe defaults (mode=audit; localhost/127.0.0.1 allowlisted; file:// always local). The wrapper reads .agent0/browser-policy.json if present, else uses these same defaults — no file is required. See .agent0/context/rules/browser-primitive.md § Security.",
+  "mode": "audit",
+  "allowlist": ["localhost", "127.0.0.1"],
+  "sensitive_actions": ["upload", "download", "eval", "cookies", "storage", "network", "pdf"]
+}

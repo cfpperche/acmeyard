@@ -7,17 +7,17 @@ Step 9 submits a **three-artifact bundle**: `system-design.md` (primary `content
 
 A failure in either layer produces `code: "schema-incomplete"` with the precise failure list; nothing is written until the whole bundle passes.
 
-## Target (canonical size budget — reconciled per spec 056)
+## Size floor (anti-stub)
 
-This schema is the **single source of truth** for Step 08 size budgets. `delegation-briefs.md` and `pipeline-coverage.md` REFERENCE these numbers.
+The size **ceiling** is retired — artifact scope is judged by the quality judge (`references/quality-judge.md`), not a byte count. Only the `min_size` **floor** remains, enforced at submit by the Layer 1 block below.
 
-| Artifact | `min_size` | `max_size` | Calibration source |
-|---|---|---|---|
-| `system-design.md` (bridge-floor + RACI + Risk Register) | 15 KB | 42 KB | 3-dogfood pass (045/048/Vetro) landed 15-40 KB; floor LOWERED from spec 026's 20 KB (dogfood-v3 legitimately landed at 15.2 KB); ceiling 42 KB accommodates the 8 required H2 sections + RACI + risk register at venture-scale depth |
-| `architecture.json` | 256 B | (unbounded) | unchanged — compact JSON graph |
-| `security.md` | 3 KB | 10 KB | unchanged floor; ceiling added for STRIDE-lite + AI section combined |
+| Artifact | `min_size` floor | Floor rationale |
+|---|---|---|
+| `system-design.md` (bridge-floor + RACI + Risk Register) | 15 KB | below this the 11 required sections are not at honest depth |
+| `architecture.json` | 256 B | catches `{}` / near-empty graph regressions |
+| `security.md` | 3 KB | below this the threat model was punted |
 
-**Soft overshoot:** exceeding `max_size × 1.2` (≈ 50 KB for `system-design.md`) triggers sub-agent partial-result with `oversize_reason` naming what bloated.
+A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-budgets.md`.
 
 ## Required sections (markdown headings in `system-design.md`)
 
@@ -49,7 +49,6 @@ Section names slugify by lowercasing + dashing the H2 title — `## Data Model` 
     {
       "path": "system-design.md",
       "min_size": 15360,
-      "max_size": 43008,
       "contains": [
         "## Overview",
         "## Stack",
@@ -101,15 +100,15 @@ Section names slugify by lowercasing + dashing the H2 title — `## Data Model` 
 
 ### Notes on the floors
 
-- **`system-design.md` `min_size: 15360` (15 KB)** — lowered from spec 026's 20 KB per spec 056 calibration (dogfood-v3 legitimately landed at 15.2 KB; the old 20-KB floor would have BLOCKED it). Floor anchored against the 11 required sections at honest depth. Step 3's `architecture.md` floor is 4 KB for 4 sections (the *skeleton*); step 9 deepens those 4 sections AND adds 7 new ones (services, APIs, deployment, non-functional, evaluation, alternatives, triggers-and-open-decisions). A 5x multiplier on section count + design rigor (evaluation table, trade-offs, alternatives with reason, decision-triggers digest) lands at 20 KB minimum. SMB SaaS and venture-scale typically 22-28 KB; micro-products may legitimately land under (use the `# OVERRIDE: compact-product: <class>` shape in the prompt's submit context).
+- **`system-design.md` `min_size: 15360` (15 KB)** — lowered from an earlier 20 KB declaration (dogfood-v3 legitimately landed at 15.2 KB; the old 20-KB floor would have BLOCKED it). Floor anchored against the 11 required sections at honest depth. Step 3's `architecture.md` floor is 4 KB for 4 sections (the *skeleton*); step 9 deepens those 4 sections AND adds 7 new ones (services, APIs, deployment, non-functional, evaluation, alternatives, triggers-and-open-decisions). A 5x multiplier on section count + design rigor (evaluation table, trade-offs, alternatives with reason, decision-triggers digest) lands at 20 KB minimum. SMB SaaS and venture-scale typically 22-28 KB; micro-products may legitimately land under (use the `# OVERRIDE: compact-product: <class>` shape in the prompt's submit context).
 
-- **The literal pipe-delimited row `| Dimension | Assessment | Concern Level |`** — proves the evaluation table carries the canonical 3-column shape from `anthill-principal-engineer § Step 3`. A system-design that ships evaluation as prose bullets (anti-pattern: "**Simplicity**: medium" line-items) trips Layer 1 — the table is the visual contract and forces the agent to put a concern level on every dimension. The literal row only appears as a real markdown table header.
+- **The literal pipe-delimited row `| Dimension | Assessment | Concern Level |`** — proves the evaluation table carries the canonical 3-column shape (the principal-engineer assessment discipline). A system-design that ships evaluation as prose bullets (anti-pattern: "**Simplicity**: medium" line-items) trips Layer 1 — the table is the visual contract and forces the agent to put a concern level on every dimension. The literal row only appears as a real markdown table header.
 
 - **The literal `| Method | Path |` substring** — proves the APIs section carries a structured endpoint catalog (markdown table with `Method | Path | Contract intent | Source`), not paragraph prose. Without this floor, the section silently degrades into "the app has CRUD endpoints" — useless to engineering. The `Source` column is what cross-references PRD user-story IDs (`US-NN`); a row without a `Source` is a discipline failure caught at the prompt-rigor layer.
 
 - **The literal `| # | Question | Deciding signal |` substring** — proves the Open Decisions sub-section carries the canonical 4-column table shape (`# | Question | Deciding signal | Closes by`) and not loose prose bullets. Open decisions without a `Deciding signal` column are the regression mode this anchor catches — see prompt § 11 for the discipline (every deferred decision names what closes it; rows without a deciding signal are red flags).
 
-- **The H3 anchors `### Trade-off Triggers` and `### Open Decisions`** — prove the digest+table layout for § 11 is honored: the prose Trade-off Triggers digest (4-bullet load-bearing scan) precedes the Open Decisions table (audit-trail receipt). Spec 026 Phase B post-task-18 calibration (2026-05-16) introduced this layout in response to anthill-judge feedback that the MCP's deferral list lacked a scannable digest; the schema enforces presence of both children so the layout doesn't silently regress into "Open table only" (loses the digest) or "Triggers prose only" (loses the audit trail).
+- **The H3 anchors `### Trade-off Triggers` and `### Open Decisions`** — prove the digest+table layout for § 11 is honored: the prose Trade-off Triggers digest (4-bullet load-bearing scan) precedes the Open Decisions table (audit-trail receipt). Calibration (2026-05-16) introduced this layout in response to judge feedback that the deferral list lacked a scannable digest; the schema enforces presence of both children so the layout doesn't silently regress into "Open table only" (loses the digest) or "Triggers prose only" (loses the audit trail).
 
 - **`any_of_contains: ["Low", "Medium", "High"]`** — at least one concern level must appear in the file (cheap presence check for the evaluation table's third column). If the agent ships the table headers without filling the Concern Level cells, this fires.
 
@@ -140,7 +139,7 @@ The schema enforces presence + floor; *depth* is the agent's responsibility, rei
 - **Trade-off Triggers & Open Decisions** — H2 with two H3 children.
   - `### Trade-off Triggers (digest)` — ONE prose paragraph (3-5 bullets max) naming the 3-4 highest-stakes triggers from § Open below. The load-bearing "Recommendation changes if (a)(b)(c)(d)" framing in a form a reader scans in 30 seconds. NOT every row from the Open table — just the load-bearing few.
   - `### Open Decisions (table)` — markdown table `# | Question | Deciding signal | Closes by`. Things this step deferred to implementation OR genuinely unresolved. Rows without a Deciding signal are red flags.
-  - **Locked decisions are intentionally NOT a sub-section** — the bridge-skill's PRD-decision extraction lands NATURALLY in § Stack (auth provider, framework), § Integrations (payment processor), § Deployment (host platform), § Non-Functional (uptime target). Re-tabling them as a separate Locked sub-section duplicates the running commitment; spec 026 Phase B judge-feedback (2026-05-16) confirmed the running-prose pattern carries the audit trail without the meta-table.
+  - **Locked decisions are intentionally NOT a sub-section** — the bridge-skill's PRD-decision extraction lands NATURALLY in § Stack (auth provider, framework), § Integrations (payment processor), § Deployment (host platform), § Non-Functional (uptime target). Re-tabling them as a separate Locked sub-section duplicates the running commitment; judge-feedback (2026-05-16) confirmed the running-prose pattern carries the audit trail without the meta-table.
 
 ### `architecture.json`
 
@@ -150,7 +149,7 @@ JSON object with required keys (Layer-1-enforced):
 - **`summary_prose`** (string, required) — 1-3 sentences in plain language; becomes `<figcaption>` when rendered (WCAG 1.1.1 alignment)
 - **`components`** (array of objects, required) — each has `id` (kebab-case unique), `label` (display name), `type` (enum: `frontend | backend | db | cloud | security | bus | external`), optional `sublabel` (one-line technology hint, "Next.js 15 App Router")
 - **`arrows`** (array of objects, required) — each has `from` (component id), `to` (component id), optional `label` (protocol hint, "REST", "events", "Prisma")
-- **`zones`** (array of objects, optional) — visual grouping for the future renderer; one per logical zone (Frontend / Backend / Data / Infrastructure). Skipped in spec 026 (JSON-only consumers don't need them); kept in the optional surface so a fork can populate ahead of the HTML renderer landing.
+- **`zones`** (array of objects, optional) — visual grouping for the future renderer; one per logical zone (Frontend / Backend / Data / Infrastructure). Skipped at v1 (JSON-only consumers don't need them); kept in the optional surface so a consumer project can populate ahead of the HTML renderer landing.
 - **`summary_cards`** (array of objects, optional, max 4) — short cards summarising the diagram; same deferral as `zones`.
 
 **`arrows[].from` and `.to` MUST reference component IDs that exist in `components[]`.** A mismatch is a discipline failure caught at agent self-review; Layer 1 doesn't structurally validate this (substring check only) because the failure shape is rare enough to not warrant a custom validator.

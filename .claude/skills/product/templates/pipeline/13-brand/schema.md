@@ -12,17 +12,17 @@ Either failure produces `code: "schema-incomplete"` with the precise failure lis
 Each name slugifies by lowercasing + dashing the H2 title — `## Voice & Samples` → `voice-samples`, `## We Are / We Are Not` → `we-are-we-are-not`. Match these slugs precisely.
 
 - product-name
-- language          (NEW per spec 054 — declares `target_language: <bcp47>` so downstream sub-agents have a machine-readable surface)
+- language          (declares `target_language: <bcp47>` so downstream sub-agents have a machine-readable surface)
 - voice
 - voice-samples
 - we-are-we-are-not
-- glossary          (NEW per spec 054 — `### We say` + `### We don't say` sub-sections with table format)
+- glossary          (`### We say` + `### We don't say` sub-sections with table format)
 - visual-direction
 - logo-direction
 - color-story
 - anti-patterns
 
-## Glossary shape (spec 054)
+## Glossary shape
 
 The `## Glossary` H2 carries two sub-sections, each with a 4-column table:
 
@@ -49,7 +49,7 @@ The `## Glossary` H2 carries two sub-sections, each with a 4-column table:
 
 **`applies_to` column:** comma-separated surface scopes (e.g. `marketing`, `auth`, `booking`, `app`, `legal`, `pricing`). Empty cell or `all` = applies everywhere. Lets downstream Step 15 screen-writer disable a Glossary entry when working on a surface where the English is correct (e.g. `API` in `/settings/integrations`).
 
-## Language shape (spec 054)
+## Language shape
 
 The `## Language` H2 declares the target language as a BCP-47 tag mirroring `.state.json.target_language` (resolved at Phase 0.5 — see SKILL.md):
 
@@ -97,7 +97,7 @@ All user-facing copy in this product — page headings, button labels, microcopy
 ```
 
 - `brand-book.md` `min_size: 6144` (6 KB). The deep-port floor — once voice + 3+ pairs + scale-calibrated voice samples + visual-direction paragraph + logo-posture (clear space + min size + 3+ prohibited uses) + 3–5 anti-patterns + color story all land, the artifact lands in 6–12 KB naturally. Under 6 KB almost always means the "we are / we are not" pairs collapsed to a flat adjective list, the logo direction got hand-waved, or voice samples regressed to one bland sentence each.
-- `**Version:**` + `**Date:**` anchors enforce the version-line discipline anthill mandated. A brand book without version + date drifts silently across iterations.
+- `**Version:**` + `**Date:**` anchors enforce the version-line discipline. A brand book without version + date drifts silently across iterations.
 - `**We are**` / `**We are not**` substring anchors enforce the contrast-pair shape (≥ 1 pair). The `## We Are / We Are Not` heading carries the section, the inline anchors prove the pair shape was followed.
 - `### Clear Space`, `### Minimum Size`, `### Prohibited Uses` enforce the logo-posture triple under the `## Logo Direction` H2. A logo section with only "use approved colors" is the regression mode.
 

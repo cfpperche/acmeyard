@@ -6,7 +6,7 @@ delegation_hint: "synthesize the concept brief from a locked direction + discove
 
 # Step 1 — Ideation (Concept Brief)
 
-**Goal:** produce a deeply-validated, source-cited concept brief that names the product, articulates the bet, and stands as the design contract every downstream step (prototype, spec, PRD, system-design) refers back to. The output file is `04-concept-brief.md` — the numeric prefix mirrors anthill's pipeline numbering for the sub-steps it conducts internally (00-direction → 01-opportunity-map → 02-concepts → 03-ranking → 04-concept-brief). This MCP collapses those sub-steps into one user-conducted conversation; the file name is preserved so anyone familiar with the anthill source recognizes the artifact.
+**Goal:** produce a deeply-validated, source-cited concept brief that names the product, articulates the bet, and stands as the design contract every downstream step (prototype, spec, PRD, system-design) refers back to. The output file is `04-concept-brief.md` — the numeric prefix reflects the five conceptual sub-steps the ideation conducts internally (00-direction → 01-opportunity-map → 02-concepts → 03-ranking → 04-concept-brief). This step collapses those sub-steps into one user-conducted conversation; the concept brief is the only artifact that lands on disk.
 
 **Mode:** `interactive`. The agent conducts a 6-axis direction interview with the user, runs market discovery (15-25 web searches across 5 tracks), generates 5-8 candidate concepts (or pinned + 4-7 challengers in critique mode), ranks them on 5 axes, lets the user select, then synthesizes the deep brief. Sub-agent delegation is `partial`: the synthesis half (steps 4-6 below — concept brief drafting from a locked selection) can be delegated; the interview + selection cannot, because they require the user channel.
 
@@ -169,7 +169,7 @@ After submit, call `product_advance` — no human-checkpoint required for step 1
 - Competitor data must be factual — funding rounds, public pricing, named features. Never invent revenue or user counts.
 - Critique mode is adversarial. Pinned does NOT get protected scoring. If a challenger wins, say so.
 
-## Market Sizing (NEW per spec 045 Decision 6 — extends Discovery phase)
+## Market Sizing (NEW — extends Discovery phase)
 
 The concept brief MUST include an `## Market Sizing` H2 section with TAM / SAM / SOM estimates (one paragraph each). At standard tier:
 
@@ -179,17 +179,17 @@ The concept brief MUST include an `## Market Sizing` H2 section with TAM / SAM /
 
 **Discipline:** desk research, NOT primary research. 1-2 cited sources per number. NEVER invent numbers — if no source exists for a number, say "Estimated; based on <basis>" and explain. Worst case (zero sources): write "[Estimated — no public source found; 1-paragraph derivation from cost of building x competitor TAM y]".
 
-This section is the lightweight upstream signal the heavy `mcp-product-pipeline` (spec 032) would dedicate a full step to. Standard tier folds it into ideation as 3 paragraphs.
+This section is the lightweight upstream signal a heavier pipeline would dedicate a full step to (TAM/SAM/SOM market sizing). Standard tier folds it into ideation as 3 paragraphs.
 
 ## What this step does NOT do
 
 - High-fidelity visual prototype. Step 2 (prototype lo-fi) renders 1 mood direction + 3-5 killer-flow HTML screens.
 - Functional spec (edge cases, validation rules). Step 3 (spec).
-- User testing. Step 4 (ux-testing) validates the prototype with real users (tested mode) or articulates intuition (intuition mode).
+- User testing. Step 4 (validation) validates the prototype with real users (tested mode) or articulates intuition (intuition mode).
 - PRD 1-pager / OST / sitemap / system-design / legal / roadmap / cost / GTM. Specification phase, steps 5-12.
-- Brand voice / design system. Steps 13 / 14 in the Identity phase (moved after Specification per spec 045 PRD-first ordering).
+- Brand voice / design system. Steps 13 / 14 in the Identity phase (moved after Specification per PRD-first ordering).
 - Comprehensive screen atlas. Step 15 (screen-atlas) synthesizes the full surface.
 
-## What this step replaces
+## Design notes
 
-Anthill's `anthill-product-ideator` skill (435 LOC SKILL + ~1074 LOC references = 1509 LOC total) ran 6 internal sub-steps with file-per-substep persistence under `docs/sdlc/01-ideation/<slug>/`. Our MCP collapses those sub-steps into the conversation; only the final concept brief lands as an artifact. Resumability is handled by `product_status` + `.state.json`, not by parsing sub-step file presence. The COMPANY.md update + handoff manifest (anthill steps 5-6) are absorbed by `product_advance` → step 2 + later `product_done` → `/sdd new <slug>`.
+The step collapses six conceptual sub-steps (direction → opportunity-map → concepts → ranking → concept-brief → handoff) into one user-conducted conversation; only the final concept brief lands as an artifact. Resumability is handled by `product_status` + `.state.json`. The handoff (company-state update + next-step manifest) is absorbed by `product_advance` → step 2 and later `product_done` → `/sdd new <slug>`.

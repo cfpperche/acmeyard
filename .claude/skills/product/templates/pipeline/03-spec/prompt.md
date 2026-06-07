@@ -83,7 +83,7 @@ Whichever you choose, it must be *derivable from* `architecture.md` — same mod
 
 Call `product_step_submit` with `filename: "functional-spec.md"`, `content: <full functional spec>`, and `extra_files: [{ path: "architecture.md", content: ... }, { path: "architecture.html", content: ... }]` (or `architecture.json`). Layer 1 validates all three atomically — nothing is written unless every file passes. On `schema-incomplete`, the `failures` list names exactly which file failed which check (missing path / undersized / missing substring); fix and resubmit.
 
-After a clean submit, call `product_advance` — step 3 is mid-Discovery, no gate, advances to step 4 (ux-testing). No human checkpoint: the synthesis is auditable in the artifacts themselves.
+After a clean submit, call `product_advance` — step 3 is mid-Discovery, no gate, advances to step 4 (validation). No human checkpoint: the synthesis is auditable in the artifacts themselves.
 
 ---
 
@@ -96,7 +96,7 @@ After a clean submit, call `product_advance` — step 3 is mid-Discovery, no gat
 - **Length budget.** `functional-spec.md` lands ≥ 15 KB for a non-trivial product (the deep-port floor — a thinner spec is almost certainly missing pages, states, or features). If you genuinely can't fill 15 KB, the prototype scope was probably too small for this pipeline — flag back to the parent rather than padding.
 - **Three files, one truth.** `architecture.md` and `architecture.{html,json}` are *derived* — if they disagree with `functional-spec.md` or each other, that's a defect, not a variation.
 
-## Problem-Validation Interviews (NEW per spec 045 Decision 6 — extends Discovery phase)
+## Problem-Validation Interviews (NEW — extends Discovery phase)
 
 The functional-spec MUST include a `## Problem-Validation Interviews` H2 section with 3-5 summaries seeding the OST (Step 06). Per-interview shape:
 
@@ -114,22 +114,22 @@ The functional-spec MUST include a `## Problem-Validation Interviews` H2 section
 
 **Discipline:** at standard tier, SYNTHETIC interviews are acceptable (sub-agent infers from concept-brief persona). Clearly mark provenance — `[synthetic]` vs `[real]` — so post-Step-06 OST knows which opportunities have real signal vs inferred. Real interviews dominate when possible (the founder may have actual customer-development conversations to feed in).
 
-**Why this matters:** Step 06 OST consumes these summaries as opportunity inputs. Without this section, OST opportunities default to "[inferred: persona]" tags everywhere — losing the discovery-implementation gap that distinguishes a "PRD-and-pray" team from a "continuously-discovering" team (Torres-aligned per spec 032 Decision 6 + 12).
+**Why this matters:** Step 06 OST consumes these summaries as opportunity inputs. Without this section, OST opportunities default to "[inferred: persona]" tags everywhere — losing the discovery-implementation gap that distinguishes a "PRD-and-pray" team from a "continuously-discovering" team (Torres-aligned).
 
 ## What this step does NOT do
 
-- **Full system design** — scale assumptions, deployment topology, security/threat-model, stack-specific decisions. That's step 8 (renumbered per spec 045). `architecture.md` here is the *preliminary* skeleton step 8 deepens; the `## Open Architecture Questions` section is the explicit handoff.
-- **Visual / brand decisions** — step 13 (brand), step 14 (design-system) — moved AFTER Specification per spec 045 PRD-first ordering.
+- **Full system design** — scale assumptions, deployment topology, security/threat-model, stack-specific decisions. That's step 8. `architecture.md` here is the *preliminary* skeleton step 8 deepens; the `## Open Architecture Questions` section is the explicit handoff.
+- **Visual / brand decisions** — step 13 (brand), step 14 (design-system) — moved AFTER Specification per PRD-first ordering.
 - **Pricing, business model details** — step 5 (PRD 1-pager) + step 11 (cost-estimate) + step 12 (gtm-launch).
-- **Test execution** — step 4 (ux-testing). But the success criteria and acceptance scenarios written here ARE the inputs to step 4's tests.
+- **Test execution** — step 4 (validation). But the success criteria and acceptance scenarios written here ARE the inputs to step 4's tests.
 - **Sitemap / full screen inventory** — step 7 (sitemap-IA). This step's § Pages & Surfaces is a sketch; Step 7 is the canonical inventory.
 - **Comprehensive screen atlas** — step 15 (screen-atlas).
 
-## What this step replaces
+## Design notes
 
-This template synthesises two archived anthill skills (see `.claude/memory/anthill-archived.md`):
+This template synthesises two disciplines into one three-artifact bundle:
 
-- **`anthill-spec`** — the visual-spec discipline: pages → components → interactions → states → navigation map, plus the `## Decisions Pending` handoff table. Anthill produced a single stakeholder-readable `<slug>-spec.md`; we keep that rigor as `functional-spec.md` and add the feature decomposition.
-- **`anthill-feature-refiner`** — the per-feature depth: problem framing, scope boundaries, the architecture section (module placement, data model, integration points), and Gherkin acceptance scenarios. Anthill ran this as an interactive discovery interview; in this pipeline the discovery already happened in step 1 (ideation), so step 3 is pure synthesis — the interview rounds collapse into reading the concept brief.
+- **Visual-spec discipline** — pages → components → interactions → states → navigation map, plus the `## Decisions Pending` handoff table. The stakeholder-readable rigor lives in `functional-spec.md`, supplemented by the feature decomposition.
+- **Per-feature depth** — problem framing, scope boundaries, the architecture section (module placement, data model, integration points), and Gherkin acceptance scenarios. The discovery interview rounds collapse into reading the concept brief (discovery already happened in step 1 ideation), so step 3 is pure synthesis.
 
-Anthill's runtime scaffolding — `.anthill/` rule references, `anthill-route`/`anthill-halt` protocols, `anthill-markdown-writer` REFORMAT pass, the deliverable-registry hook, the resumability file-scan — does not port. Resumability is `product_status` + `.state.json`; the halt protocol is the `schema-incomplete` validation error; the categorical upgrade is that anthill's single markdown becomes a three-artifact bundle persisted atomically through `extra_files`.
+Resumability is `product_status` + `.state.json`; the halt protocol is the `schema-incomplete` validation error; the three-artifact bundle persists atomically through `extra_files`.

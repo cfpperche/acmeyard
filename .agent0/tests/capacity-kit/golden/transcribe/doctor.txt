@@ -1,0 +1,6 @@
+transcribe — capability check
+  [ ok ] whisper engine: uvx --from whisper.cpp-cli whisper-cpp
+  [ ok ] ffmpeg: ffmpeg
+  [info] default model 'base': cached  (cache: .agent0/.runtime-state/transcribe/models)
+  [info] transcripts dir: assets/transcripts (gitignored)   manifest: assets/generated/.transcribe-manifest.jsonl
+--exit:0

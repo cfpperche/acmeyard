@@ -1,112 +1,205 @@
-# Agent0 — base repository
+# Acme Yard
 
-Starting point for new software projects. Replace the placeholder sections below as the project evolves. Behavior rules for any agent working on this repo live in `./.claude/rules/`.
+Acme Yard is a portfolio of small, focused SaaS tools for professions that do not usually get great software. It is built on a shared Laravel + Filament substrate, governed by the Agent0 harness, and distributed through self-host and managed-cloud tiers.
 
 ## Overview
 
-_Brief description of the project and its purpose._
+Each Acme Yard microSaaS solves one concrete pain for one specific profession. The first product target is fluxo-de-caixa for Brazilian MEIs with Pix integration and AI-categorised expenses; future products share the same auth, billing, tenancy, audit, and AI-provider substrate.
 
 
 ## Stack
 
-_Language, framework, main dependencies._
+- Laravel 11+
+- Filament 3
+- Livewire 3
+- Laravel Cashier with Stripe/Paddle
+- `stancl/tenancy`
+- Prism PHP
+- Brazilian fiscal/payment integrations where relevant: Pix, CPF/CNPJ validation, LGPD audit logs
 
 
 ## Build & test
 
 ```bash
-# build:
-# test:
-# lint:
+composer test
+php artisan test
+npm run build
 ```
 
 
 ## Conventions
 
-_Style, patterns, architectural decisions — what's not obvious from the code._
+- Product work is spec-first under `docs/specs/`.
+- Keep Laravel and Filament conventions intact unless a spec explicitly justifies a deviation.
+- Treat the Agent0 harness as governance/tooling. Product code lives in the Laravel app surface, not in harness directories.
 
 
 ## Gotchas
 
-_Non-obvious behaviors, known pitfalls, context not captured in code._
+- Acme Yard is commercially licensed under BSL 1.1 with Apache 2.0 conversion; preserve the managed-service commercial boundary.
+- The repository is currently scaffolding. Substrate work starts from `docs/specs/001-substrate/`.
+
+<!-- AGENT0:PROJECT:BEGIN -->
+# Acme Yard Project Core
+
+Acme Yard is a portfolio of small, focused SaaS tools for professions that do not usually get great software. The product strategy is "12 ships a year": each microSaaS solves one concrete pain for one specific profession, built on a shared Laravel + Filament substrate and governed by Agent0.
+
+## Stack
+
+- Laravel 11+ application substrate with queues, scheduling, auth, and billing surfaces.
+- Filament 3 and Livewire 3 for operational UI.
+- Laravel Cashier, Stripe/Paddle, and `stancl/tenancy` for commercial SaaS primitives.
+- Prism PHP for multi-provider AI abstraction.
+- Brazilian-context integrations matter: Pix, CPF/CNPJ validation, LGPD auditability, and Portuguese-language product workflows.
+
+## Operating Notes
+
+- Treat Agent0 harness files as governance/tooling, not product code.
+- Product work should land under specs in `docs/specs/` and keep Laravel conventions intact.
+- The repository is currently scaffolding; substrate work begins from `docs/specs/001-substrate/` when product implementation resumes.
+- The license posture is BSL 1.1 with Apache 2.0 conversion; avoid advice or changes that weaken the commercial managed-service boundary.
+<!-- AGENT0:PROJECT:END -->
 
 <!-- AGENT0:BEGIN -->
 
 ## Spec-driven development
 
-Non-trivial work is spec-first: write intent before code under `docs/specs/NNN-<slug>/{spec,plan,tasks,notes}.md`. Specs are dual-consumer design memory — humans read them for review/audit/validation, agents read them to guide execution (acceptance criteria, approach, task order). `.claude/` is reserved for harness configuration (rules, skills, hooks) that the Claude Code runtime consumes to shape its own behavior. The `/sdd` skill scaffolds and progresses these (`/sdd new <slug>`, `/sdd plan`, `/sdd tasks`, `/sdd list`). See `.claude/rules/spec-driven.md` for when to apply and when to skip.
+Non-trivial work is spec-first — intent before code under `docs/specs/NNN-<slug>/{spec,plan,tasks,notes}.md`, scaffolded and progressed by the `/sdd` skill. See `.agent0/context/rules/spec-driven.md`.
+
+## Runtime entrypoints
+
+`CLAUDE.md` is the Claude Code entrypoint; `AGENTS.md` is the Codex entrypoint. This managed block is the shared Agent0 index; runtime support details live in `.agent0/context/rules/runtime-capabilities.md`. `AGENTS.md` is baseline-tracked; Codex consumer project customization belongs in `AGENTS.override.md` or nested `AGENTS.md`.
+
+## Runtime capabilities
+
+`.agent0/context/rules/runtime-capabilities.md` is the canonical provider-neutral matrix for Agent0 capability support across Claude Code, Codex CLI, and future runtimes. Consult it before assuming a `.claude/*` capability is native in a runtime. **Never assert that a built-in command (e.g. a slash command like `/goal`) does not exist just because it is absent from your skills list — the injected inventory is not exhaustive; hedge and verify instead (see the rule's § Before claiming a capability or command does NOT exist).**
+
+## Session handoff
+
+`.agent0/HANDOFF.md` is the canonical runtime-neutral handoff with four sections: Current State, Active Work, Next Actions, Decisions & Gotchas. Claude Code injects/nags through hooks; Codex receives the same handoff through tracked `.codex/hooks.json`, with `AGENTS.md` as the convention fallback. See `.agent0/context/rules/session-handoff.md`.
 
 ## Delegation
 
-Sub-agent dispatches via the `Agent` tool are gated by `.claude/hooks/delegation-gate.sh`: every call must use the 5-field handoff (TASK / CONTEXT / CONSTRAINTS / DELIVERABLE-or-DONE_WHEN) so the delegated agent has scope, constraints, and a verifiable outcome instead of inventing its own framing. Edits made by delegated sub-agents are then re-validated by `.claude/hooks/post-edit-validate.sh`, which runs the project validator (`.claude/validators/run.sh`, auto-detects bun/pnpm/npm/python/go/rust) and blocks the sub-agent into a fix-then-retry loop on failure (capped by `CLAUDE_DELEGATION_LOOP_BUDGET`, default 5). Parent edits are exempt; the audit log lives at `.claude/delegation-audit.jsonl`. Same `# OVERRIDE: <reason ≥10 chars>` escape as the governance gate. See `.claude/rules/delegation.md`.
+`Agent` dispatches are gated: `.agent0/hooks/delegation-gate.sh` enforces a 5-field handoff (TASK / CONTEXT / CONSTRAINTS / DELIVERABLE-or-DONE_WHEN), and `.agent0/hooks/delegation-verify.sh` verifies sub-agent work at close (`SubagentStop`, runtime-neutral). See `.agent0/context/rules/delegation.md`.
 
 ## User prompt framing
 
-Spec 035: the user→main-agent boundary mirrors the delegation gate's discipline, but rule-only by construction — the actor being disciplined (the main agent) cannot externally enforce on itself, so no hook ships in v1. On receipt of a non-trivial prompt, the main agent runs a 3-question mental check (TASK / CONTEXT / DONE clear?) and routes by ambiguity count: 0 → act direct; 1 → act with explicit inference ("assumindo X porque…"); 2+ → clarify via `AskUserQuestion` before acting. Skip categories (path + simple verb, explicit command, factual repo question, short continuation, greeting / meta) bypass the check entirely; opinion-shaped prompts route to the 2-3-sentence-recommendation pattern instead of framing; pronouns resolved by the immediately prior turn count as resolved. Same `# OVERRIDE: <reason ≥10 chars>` escape as the other gates. If the dogfood window surfaces ≥3 missed-clarification sessions, a `UserPromptSubmit` hook becomes the next step (per `.claude/memory/feedback_speculative_observability.md`'s rule-of-three demand-test). See `.claude/rules/user-prompt-framing.md`.
+On a non-trivial prompt the main agent runs a 3-question mental check (TASK / CONTEXT / DONE clear?) and clarifies via `AskUserQuestion` before acting when ≥2 are unclear. Rule-only — no hook. See `.agent0/context/rules/user-prompt-framing.md`.
 
 ## Test-driven development
 
-TDD is a *cultural* discipline reinforced by the validator — not a blocking gate. Production code follows red → green → refactor; tests land in the same diff that introduces the behavior they cover. When a delegated sub-agent edits production files in a project with a detected test stack, the validator appends a non-blocking `warnings` entry that the post-edit hook surfaces to stderr with a `tdd-advisory:` prefix; the agent should add the missing test before declaring done unless the change is genuinely test-exempt (rename, comment, doc, dependency bump). The `# OVERRIDE: tdd-exempt: <reason ≥10 chars>` shape on a brief documents deliberate skips. BDD scenarios from `spec.md` map naturally to test names. See `.claude/rules/tdd.md`.
+Production code follows red → green → refactor with tests in the same diff; the validator emits a non-blocking `tdd-advisory:` when prod files move without a test. Cultural discipline, not a blocking gate. See `.agent0/context/rules/tdd.md`.
 
 ## Secrets scan
 
-Two layers (spec 007): the native `.githooks/pre-commit` runs gitleaks over the staged diff at git's actual commit moment and is the primary block; the Claude Code preflight `.claude/hooks/secrets-scan.sh` (PreToolUse Bash) gates dangerous command shapes (compound `git add && git commit`, `git commit -a`, `--no-verify`), parses the override marker, and bridges it across via `CLAUDE_SECRETS_OVERRIDE_REASON`. Activation per-fork: `git config core.hooksPath .githooks` after `git init` (manual on purpose — Lazarus vector). Same `# OVERRIDE: <reason ≥10 chars>` escape as the other gates (multi-line form: marker on its own line); `CLAUDE_SKIP_SECRETS_SCAN=1` disables both layers for throwaway sessions; `CLAUDE_SECRETS_ADVISE_ON_EDIT=1` opts into the soft `secrets-advisory:` on sub-agent edits. Both layers fail open when gitleaks is absent. See `.claude/rules/secrets-scan.md`.
+Two layers — the native `.githooks/pre-commit` runs gitleaks over the staged diff at commit time; a runtime-neutral `PreToolUse(Bash)` preflight (`.agent0/hooks/secrets-preflight.sh`) gates dangerous commit shapes on Claude Code and Codex CLI. Activate per-consumer with `git config core.hooksPath .githooks`. See `.agent0/context/rules/secrets-scan.md`.
 
-## Supply chain
+## Vuln audit
 
-Two-layer capacity (specs 008+009): a `PreToolUse(Bash)` preflight (`.claude/hooks/supply-chain-scan.sh`) **blocks** dep-mutating commands across 10 managers (npm/pnpm/yarn/bun/pip/uv/poetry/pdm/cargo/go) by default with an exit-2 corrective stderr template, and a `PostToolUse(Edit|Write|MultiEdit)` hook (`.claude/hooks/supply-chain-advise.sh`) flags sub-agent edits to manifest/lockfile basenames (`package.json`, `Cargo.toml`, etc.) as advisory-only (basename match has too high an FP rate to block on). A sibling Bash sub-path emits `advisory-bare-install` when a bare lockfile-resolve verb (`{npm,pnpm,bun}.{install,i}`) runs while `package.json` / `pyproject.toml` / `Cargo.toml` / `go.mod` is uncommitted at hook time — closes the parent-edit + bare-install coverage gap surfaced via shrnk-mono spec 013 dogfood. Each Bash match writes a JSONL row to `.claude/supply-chain-audit.jsonl` with `decision` in `{block, block-override, advisory, advisory-override, advisory-bare-install, advisory-bare-install-override, skip-not-install}`. Same `# OVERRIDE: <reason ≥10 chars>` escape (multi-line form); a valid override records `decision: "block-override"` (or `"advisory-bare-install-override"`) and suppresses the block/advisory stderr. `CLAUDE_SUPPLY_CHAIN_BLOCK=0` falls back to spec-008 advisory-only mode; `CLAUDE_SKIP_SUPPLY_CHAIN_SCAN=1` disables both layers for throwaway sessions. See `.claude/rules/supply-chain.md`.
-
-## Runtime introspect
-
-Spec 011: a `PreToolUse(Bash)` mark (`.claude/hooks/runtime-pre-mark.sh`) stamps the start time per `tool_use_id`, and a `PostToolUse(Bash)` capture (`.claude/hooks/runtime-capture.sh`) tokenises the command, matches a strict verifier allowlist (`bun test` / `bun tsc` / `bun run <keyword-script>`, `npm`/`pnpm`/`yarn` test / build / typecheck / lint / run-script, `pytest`, `python -m pytest`, `python -m unittest`), and writes a single snapshot to `.claude/.runtime-state/last-run.json` containing exit code, duration, and 4 KB head + 4 KB tail of stdout/stderr. The agent reads it back with `bash .claude/tools/probe.sh last-run` — closing the edit→verify loop without human ratification or pure static-code reading. `CLAUDE_RUNTIME_INTROSPECT_EXTRA_DETECT="<space-separated keys>"` adds custom runners (e.g. `make-test`). `CLAUDE_SKIP_RUNTIME_INTROSPECT=1` disables both hooks; `CLAUDE_RUNTIME_INTROSPECT_DEBUG=1` opts into stderr diagnostics. No audit log (deliberate non-feature — `last-run.json` is the latest-snapshot truth). See `.claude/rules/runtime-introspect.md`.
+`.agent0/tools/vuln-audit.sh` (engine osv-scanner) detects known-vulnerable INSTALLED dependencies on demand, stack-aware, runtime-neutral. Codex invokes the tool directly: `bash .agent0/tools/vuln-audit.sh [path] [--json] [--exit-code] [--severity <level>]`. Don't gate install/commit — detect vulnerable locked libs and act; reports + proposes, never auto-fixes. See `.agent0/context/rules/vuln-audit.md`.
 
 ## MCP recipes
 
-Spec 012: opt-in `.mcp.json` recipes for four mature external MCPs (Playwright, Chrome DevTools, DBHub, Next.js DevTools) that complement spec 011's local-process probe on the adopt side of the build-vs-adopt split. A `SessionStart` hook (`.claude/hooks/mcp-recipes-hint.sh`) detects the fork's stack via top-level signals (`next.config.*`, `package.json` deps, `schema.prisma`, `DATABASE_URL` in `.env.example`, …) and emits a single `=== mcp-recipes ===` context block listing applicable recipes when ≥1 matches. Spec 015 extended detection to walk depth-1 into common monorepo workspace dirs (default `apps packages services workspaces`) so a fork with `apps/web/next.config.js` + `apps/api/schema.prisma` surfaces the right hints; workspace-detected signals carry a path prefix. Override the default set via `CLAUDE_MCP_RECIPES_WORKSPACE_DIRS` (space-separated; empty string disables walk, restoring spec 012's pre-015 root-only behaviour). The recipes themselves live in `.claude/rules/mcp-recipes.md` (full per-MCP reference with verified install commands + runtime requirements + security pointers) and `.mcp.json.example` at repo root (copy-paste-ready, all four blocks commented out). Pure recommendation — no auto-installs, no audit log, no blocks. `CLAUDE_SKIP_MCP_RECIPES=1` suppresses the hint. See `.claude/rules/mcp-recipes.md`.
+MCP server blocks for common external MCPs (Playwright, Chrome DevTools, DBHub, Laravel Boost, Next.js DevTools, fal.ai) ship as copy-paste templates only: `.mcp.json.example` for Claude Code, `.codex/config.toml.example` for Codex CLI. Each block is `enabled = false` / commented by default and uses env-var indirection for any secret (`bearer_token_env_var`, `env_vars`). Consult the upstream README of each MCP for activation specifics, runtime requirements, and security stance — Agent0 ships the templates, not curated reference docs.
+
+## Image generation
+
+Opt-in capacity for AI image generation via fal.ai MCP — the `/image` skill produces draft mockups (FLUX schnell, ~$0.003/img, gitignored) and brand assets (gpt-image-2 or Imagen 4 Ultra, $0.04-$0.20/img, tracked) with mandatory `--tier` flag, pre-call cost printing, and a gitignored local JSONL manifest of every call. Activation is a `.mcp.json` edit + `FAL_KEY` env. See `.agent0/context/rules/image-gen.md`.
+
+## Video generation
+
+Opt-in capacity for video, sibling to `/image`. The `/video` skill has two disjoint modes behind a required `--mode` flag: `code` (deterministic — HyperFrames renders an HTML/CSS/JS composition to MP4 locally, zero inference cost, source git-tracked) and `generative` (paid, async — fal.ai video models via the queue REST API, fire-and-forget ledger, hard `--confirm-cost-usd` gate). Activation is per-mode: code needs Node 22+/ffmpeg/headless-Chrome; generative needs `FAL_KEY`. Ships mechanisms, not model IDs — generative tiers resolve from a refreshable `video-tiers.yaml`. See `.agent0/context/rules/video-gen.md`.
+
+## Transcribe
+
+Opt-in local-first speech-to-text — the `/transcribe` skill (+ runtime-neutral `.agent0/tools/transcribe.sh`) turns an audio OR video file into a transcript via whisper.cpp (MIT), **locally**: the audio/video content never leaves the machine, only model weights are fetched once. Deliberately NOT paid media (no cost/tiers/key) — a local utility in the `vuln-audit` class (on-demand, single-engine, result-status decoupled from exit code, reports-never-blocks), with a **provenance** manifest not a cost ledger. Auto-acquires engine + `base` model as invisibly as possible (uvx ladder), degrading to a one-line hint. All native transcript formats are selectable (txt default; thin passthrough contract); diarization is the named paid-STT reopen-trigger. Recognition sibling of the synthesis-side `/audio`; split by output ontology. See `.agent0/context/rules/transcribe.md`. (spec 159)
+
+## Audio
+
+Opt-in text-to-speech synthesis — the `/audio` skill (+ runtime-neutral `.agent0/tools/audio.sh`) turns text into spoken audio, **local-first and free by default**. Synthesis sibling of `/transcribe` (split by output ontology). Two on-device engines (Kokoro default — multilingual incl. pt-BR, best quality, but needs the `espeak-ng` system binary; Piper — self-contained, 900+ EN voices, the more-portable fallback), user-installed + subprocess (GPL-via-aggregation, never bundled). Optional paid upgrade via fal (`--remote`, ElevenLabs-only tiers — the paid lane offers what local can't; cost printed before, no hard gate). Two output classes like `/image` (gitignored draft vs tracked `assets/audio/` voiceover); hybrid manifest (provenance for local + cost for paid); `stayed_local` honest per lane (`FAL_KEY` never printed). NOT music/SFX, NOT voice cloning (deferred). See `.agent0/context/rules/audio.md`. (spec 160)
+
+## Sound
+
+Opt-in **paid-only** creative-audio generation — the `/sound` skill (+ runtime-neutral `.agent0/tools/sound.sh`) generates **music + sound effects** from a text prompt. The creative-asset member of the audio family: it is the **`/image brand` analog**, NOT the local-first `/audio` analog — music/SFX has no light local engine, so `/sound` is openly paid (`stayed_local:false` always; no free lane — `FAL_KEY` absent → honest `unavailable`). Kept a separate skill so `/audio`'s local-first identity stays coherent. `--kind music|sfx` required. Tier→model + body shape + output url path + price resolve from a **data-driven `sound-tiers.yaml` oracle** (because body/url shapes differ per model — CassetteAI `audio_file.url` vs ElevenLabs `audio.url`; a new model is a yaml edit, not code). **Hybrid cost gate** (printed before every call + hard `--confirm-cost-usd` above $0.25 — clips cost 100× a TTS call). **Taste-judged** (one generation → gitignored draft to listen to → human promotes a keeper with `--asset`; no auto-done). Two output classes + hybrid manifest like `/audio`. NOT TTS (`/audio`), NOT transcription (`/transcribe`), NOT editing/mixing, NOT lyrics-to-vocals, NOT voice cloning. See `.agent0/context/rules/sound.md`. (spec 161)
+
+## Diagram
+
+Opt-in **deterministic technical-visual generation** — the `/diagram` skill (+ runtime-neutral `.agent0/tools/diagram.sh`) compiles a **Mermaid** text source (file or inline) into a tracked SVG/PNG/PDF (architecture, flowchart, sequence, ER, class, state). The **deterministic sibling of `/video --mode code`** and the **technical-visual counterpart to `/image`** (organic/photo, paid) — a **`/transcribe`-class LOCAL/FREE utility** (provenance manifest, no cost ledger, no `FAL_KEY`/tiers; `stayed_local:true`). Render via `mmdc` (`@mermaid-js/mermaid-cli`) acquired by **npx** (no global install) reusing **system Chrome** (puppeteer config + `PUPPETEER_SKIP_DOWNLOAD=1`); when Chrome is absent it **degrades to validation-only** (Chrome-less structural check + tracked source kept, `status=unavailable` — never a dead capacity). **Mermaid-only v1** (d2 is a documented reopen-trigger if Chrome-dep pain dominates). Diagrams are **keepers** — `.mmd` source + rendered asset are git-tracked (default `assets/diagrams/`, spec-owned via `--out docs/specs/NNN/diagrams/`); only the manifest is gitignored. NOT organic imagery (`/image`), NOT motion (`/video`), NOT design craft (`/frontend-designer`), NOT a GitHub-README-renderer replacement. **Consumer harness-sync gated on a v1 dogfood** (minority report). See `.agent0/context/rules/diagram.md`. (spec 162)
+
+## Capacity kit
+
+`.agent0/tools/lib/capacity.sh` is the shared **kernel** the capacity tools (`audio`/`sound`/`transcribe`/`diagram`, + future) `source` instead of hand-copying plumbing — `cap_have`/`cap_sha256_*`/`cap_emit_exit` (status→exit) /`cap_manifest_append` (one-line JSONL mechanic) /`cap_fail` (with a `_cap_on_fail` manifest hook) /`cap_resolve_ffmpeg`. A small helper lib, NOT a framework — each tool keeps its own flow, args, `doctor`/`caps`, manifest schema, engine, storage. Convention: the tool sets `CAP_TOOL`/`USE_EXIT_CODE`/`OUT_JSON`; extract only byte-identical-or-cleanly-parameterized plumbing (a tool with a richer/ pretty failure JSON keeps its local `fail`). The **paid-media sub-kit** `.agent0/tools/lib/paid-media.sh` (spec 164) is the companion for the PAID tools — **four PURE helpers** (`pm_yaml_top`/`pm_yaml_tier_field` tiers-oracle reader + leak-safe `pm_has_fal_key`/`pm_fal_key_state`), a separate lib (not folded — paid-domain cohesion), consumed by all four paid tools: `sound` + `audio --remote` (tools-dir, file-top source) and `video` + `image` (**skill-dir, cross-dir lazy-load** — spec 165). `video` takes `pm_yaml_*` + `pm_has_fal_key`; `image` takes `pm_has_fal_key` only (pipe-table tiers stay). **Cross-dir pattern (165):** skill-dir tools source `. "$PROJECT_DIR/.agent0/tools/lib/paid-media.sh"` (the anchor they already use for `fal-rest.sh`), **lazy-loaded inside paid subcommands only** so `--help`/`noargs`/`record` work lib-absent; absent → `exit 70` on the paid path. Honest scope: cost-formula + `--confirm-cost-usd` gate + fal invocation stay LOCAL; `image` pipe-table→YAML out (creates surface, retires nothing). **Local acquisition ladders stay per-tool templates.** Propagates via the `.agent0/tools/lib|*.sh` sync glob (load-bearing). Behavior-preserving by contract, proven by `golden.sh` (FAL_KEY-hermetic) + `paid-golden.sh` + `cross-dir-source.sh` + each tool's suite + sync-propagation + missing-kit-guard. See `.agent0/context/rules/capacity-kit.md`. (specs 163, 164, 165)
 
 ## Harness sync
 
-Spec 016: a one-way sync tool (`.claude/tools/sync-harness.sh <fork-path>`) that brings a fork's harness state up to date with this Agent0 repo. Modes: `--check` (default, read-only — exits 1 if drift), `--apply` (write changes), `--dry-run` (apply-shaped output without writes), `--force` (overwrite fork-customized files with `! overwritten` warning), `--force-except=GLOB[,GLOB...]` (comma-separated globs to preserve under `--force` — e.g. `--force --force-except='.gitignore'`). Source path is explicit — `--agent0-path=PATH` or `AGENT0_HARNESS_PATH` env; refuses to guess. Scope: `.claude/hooks/*.sh`, `.claude/rules/*.md`, `.claude/tools/*.sh`, `.claude/validators/*.sh`, `.claude/skills/`, `.claude/tests/`, `.claude/agents/`, plus `.mcp.json.example`, `.gitleaks.toml`, `.githooks/pre-commit`, `.gitignore`. Structured merge for `.claude/settings.json` (jq dedup by matcher+commands) and `CLAUDE.md` (append missing `^## ` capacity sections before `## Compact Instructions` anchor). Customization detected by `sha256sum` compare; refuses without `--force`. NEVER touches `src/`, fork's `tests/` outside `.claude/tests/`, `docs/`, `package.json`, `Cargo.toml`, `pyproject.toml`, `.mcp.json`, `.env*`. No auto-commit — developer reviews `git diff` and commits manually. See `.claude/rules/harness-sync.md`.
+`.agent0/tools/sync-harness.sh` brings a consumer project's harness up to date with Agent0 via 3-way baseline reconciliation against `.agent0/harness-sync-baseline.json` — stale files auto-update, consumer-customized files refuse without `--force`, never touches product code. See `.agent0/context/rules/harness-sync.md`.
 
 ## Lint validator
 
-Spec 013: the post-edit validator (`.claude/validators/run.sh`) extends to lint enforcement when the fork's manifest declares the linter idiomatic to the detected stack — Biome (`@biomejs/biome` in `package.json` `devDependencies`/`dependencies`) for JS/TS, Ruff (declared in `pyproject.toml` or `requirements*.txt`) for Python. Three states per stack: (a) **declared + installed** → append `<runner> biome check` (`bunx`/`pnpm exec`/`npx`) or `<py_prefix> -m ruff check .` to the composed pipeline; failure flips `ok=false` and blocks like tsc/clippy already do; (b) **declared + missing** → emit `lint-advisory: <linter> declared in <manifest> but not installed — run \`<install-cmd>\`` to validator stderr (`bun install`/`pnpm install`/`npm install`/`uv sync`/`poetry install`/`pdm install`/`pip install ruff`); does NOT block, does NOT increment delegation loop budget; (c) **not declared** → silent skip. Manifest-as-intent is the single signal — `biome.json`/`[tool.ruff]` are customization, not intent (a fork with config but no dep declaration hits silent-skip). Single-stack v1: first `if/elif` match wins; multi-stack monorepo lint inherits automatically when spec 015 (monorepo-stack-detect) lands. `CLAUDE_VALIDATOR_SKIP_LINT=1` short-circuits the entire extension; `peerDependencies` is not scanned (linters in peerDeps is antipattern). `post-edit-validate.sh` updated to capture validator stderr separately from JSON stdout so advisory lines surface to the agent without polluting `jq` parsing. See `.claude/rules/lint-validator.md`.
+The post-edit validator runs the consumer project's idiomatic linter — Biome (JS/TS), Ruff (Python), Pint + PHPStan/Larastan (PHP) — when the manifest declares it; missing-but-declared emits a non-blocking `lint-advisory:`. See `.agent0/context/rules/lint-validator.md`.
 
 ## Typecheck advisory
 
-The validator's JS branches detect typecheck primitive availability per fork before composing the pipeline — a strict `manifest-as-intent` posture mirroring the lint extension. For bun/pnpm: `tsconfig.json` exists → `<runner> tsc --noEmit` (direct invocation); else `package.json .scripts.typecheck` exists → `<runner> [run] typecheck`; else omit typecheck step entirely + emit `typecheck-advisory: no tsconfig.json or 'typecheck' script in package.json — typecheck step skipped (add a tsconfig.json or declare \`<runner> typecheck\` to enable)`. The npm path is conservative (script-only — no `npx tsc` fast-path due to resolution surprises). Replaces a pre-fix hard-failure pattern where `<runner> run typecheck` always landed in the pipeline, breaking validators on early-stage forks. Surfaced via shrnk-mono dogfood 2026-05-12 where every sub-agent edit was hard-failing the validator on a fresh fork without typecheck infrastructure. Same advisory propagation channel as `lint-advisory:` and `tdd-advisory:`. See `.claude/rules/typecheck-advisory.md`.
+The validator runs a typecheck step only when the consumer project declares the primitive (a `tsconfig.json`, or a `typecheck` script in `package.json`); otherwise it emits `typecheck-advisory:` and skips. See `.agent0/context/rules/typecheck-advisory.md`.
 
 ## Memory
 
-Spec 019: factual project knowledge lives under `.claude/memory/<topic>.md` — git-tracked, propagates between Agent0 contributors via PR/clone, but **NOT shipped to forks** (no entry in sync-harness manifest). When starting work that may benefit from prior decisions, gotchas, or platform constraints, read the lazy-read index at `.claude/memory/MEMORY.md` first, then the specific files relevant to the task domain. Memory is **factual reference** (e.g. "Claude Code has 29 hook events", "we chose hash-compare because X"), distinct from `.claude/rules/` (behavioral mandates the agent SHOULD comply with). No SessionStart auto-load — discovery is via this CLAUDE.md instruction plus cross-references from specific rule docs (e.g. `.claude/rules/runtime-introspect.md` points at `.claude/memory/cc-platform-hooks.md`). Routing guidance for new memories lives in `.claude/rules/memory-placement.md` (3-bucket model: CC per-user for preferences, `.claude/memory/` for project knowledge, `.claude/rules/` for behavior).
+Factual project knowledge lives in `.agent0/memory/<topic>.md`; the trigger-read index is `.agent0/memory/MEMORY.md`. Content is git-tracked for this project, but not shipped to consumers.
+Read the index when work touches project architecture, first-party capacities, `.agent0/context/rules/`, `.agent0/hooks/`, `.claude/skills/`, `.agent0/tools/sync-harness.sh`, `.agent0/context/rules/runtime-capabilities.md`, or `.agent0/memory/`.
+Follow only relevant entries; ordinary reads do not mutate memory.
+Claude uses `.claude/settings.json` hooks. Codex uses tracked `.codex/hooks.json` hooks after the project and changed hook definitions are trusted.
+Do not raw-edit `.agent0/memory/MEMORY.md`; edit entries and let projection regenerate it.
+Hook-disabled memory edits must end with `bash .agent0/tools/memory-maintain.sh finalize <entry-path>`.
+Without hooks, stale-memory readout is `bash .agent0/tools/memory-query.sh decay --readout`.
+See `.agent0/context/rules/memory-placement.md` § Multi-runtime usage.
+
+## Context retrieval
+
+`.agent0/tools/context-retrieve.sh search --query "<text>"` performs deterministic local retrieval across Agent0 context rules, project memory projection/metadata, specs, and handoff. `context-inject.sh` uses it as a bounded retrieval lane after deterministic rule selection: existing rule matches form a must-include floor, retrieval fills only remaining prompt budget, and snippets are pointers rather than source of truth. No embeddings/vector DB in v1. See `.agent0/context/rules/context-retrieval.md`.
+
+## Status & doctor
+
+Two on-demand, text-first shell tools over live harness state (the transferable kernel of `opus-domini/sentinel`, ported to a repo harness). `status` (`/status`, or `bash .agent0/tools/status.sh`) is the untruncated mid-session sibling of the SessionStart brief — handoff, reminders, routines, decay, git state, suggested next commands; read-only, always exit 0. `doctor` (`bash .agent0/tools/doctor.sh`) reports harness health (files/hooks/binaries/`core.hooksPath`) with a tri-state per check, exit non-zero only on `broken`; reports, never fixes. Both reuse `.agent0/hooks/_brief-compose.sh`. NOT a browser/daemon/metrics surface — the anti-drift scope is load-bearing. See `.agent0/context/rules/agent0-status.md`.
+
+## Browser primitive
+
+`agent-browser` (vercel-labs native-Rust CLI) is the **primary, runtime-neutral agent browser primitive** — eyes + hands + observe driven through plain shell (no per-runtime MCP wiring). First-party work goes through `.agent0/tools/agent-browser.sh`, which adds the operational envelope: binary/Chrome detection (`caps`), deterministic fail-closed routing (`route` → `primary`, else `unavailable:{no-binary,no-chrome,mcp-removed}` and commands fail closed — no MCP fallback, spec 153), a policy-as-file guard + per-command audit (`run`), a bounded visual-contract verifier (`verify-contract`), and daemon-lifecycle ownership (`reset`). Playwright + Chrome DevTools MCP survive only as opt-in `.mcp.json.example` / `.codex/config.toml.example` templates — **not** a harness fallback (spec 153); when the binary is absent, first-party browser work fails closed. Opt-in install; `doctor.sh` reports availability; profiles/saved state are credential-class. **Attempt-before-handoff:** before asking a human to do browser work ("abra essa URL e confira"), drive it via agent-browser or prove an *observed* unavailability/blocker — delegate only the smallest genuinely human-only sub-step, with evidence; never punt by reflex. See `.agent0/context/rules/browser-primitive.md` § Attempt-before-handoff. (spec 152 + 153)
 
 ## Browser auth
 
-Spec 021: when the agent encounters an auth-gated URL (HTTP 401/402/403 or login redirect) and no `.claude/.browser-state/<host>.json` exists for that host, it emits `BROWSER_AUTH_REQUIRED: <host>` to the chat with a one-line pointer to `.claude/rules/mcp-recipes.md` § Authenticated workflow. The human logs in via a headed Playwright MCP session, saves storage state (cookies + localStorage) to `.claude/.browser-state/<host>.json`, and signals done; the agent then reuses that state for headless reads. **Playwright MCP is the default** for routine authenticated access; Chrome DevTools MCP is debug-only (network observation, perf) and is NOT recommended with `--autoConnect` by default. State files live at `.claude/.browser-state/<host>.json` (gitignored, project-local, never propagated by harness sync). As a low-cost special case, `x.com` / `twitter.com` URLs try `https://unrollnow.com/status/<id>` via `WebFetch` before falling back to the `BROWSER_AUTH_REQUIRED: <host>` signal. See `.claude/rules/mcp-recipes.md`.
+On an auth-gated URL with no saved state the agent emits `BROWSER_LOGIN_REQUIRED: <host>`; the human runs `bash .agent0/tools/browser-login.sh <host>` and logs in, then the agent attaches over CDP via `agent-browser.sh adopt <host>` and saves state to `.agent0/.runtime-state/agent-browser/state/<host>.json` for headless reuse. **agent-browser-native; no MCP path (spec 153).** See `.agent0/context/rules/browser-auth.md`.
 
-## Rule load debug
+## Visual contract acceptance
 
-Opt-in observability for CC's native `InstructionsLoaded` hook event. An `InstructionsLoaded` block runs `.claude/hooks/rule-load-debug.sh`, which self-gates on `CLAUDE_RULE_LOAD_DEBUG=1` and otherwise exits silently. When enabled, each CLAUDE.md / `.claude/rules/*.md` load — at `session_start`, `path_glob_match`, `nested_traversal`, `include`, or `compact` — appends one JSONL row to `.claude/.rule-load-debug.jsonl` (gitignored, `flock`-atomic, append-only) capturing `file`, `memory_type`, `load_reason`, `globs` (when path-scoped), `trigger_file` (the file whose access triggered the load), `session_id`. Pure observability — the harness ignores stdout/stderr for this event by design; the audit log + probe is the only signal path. Read back with `bash .claude/tools/probe.sh rule-loads [--json] [--session <id>] [--reason <r>]`. Canonical use: verify path-scoped rules fire on the correct triggers after a frontmatter edit, debug "rule didn't load when expected" symptoms, audit compaction re-load behavior. `CLAUDE_RULE_LOAD_DEBUG` unset or `0` is the default (zero per-load overhead). See `.claude/rules/rule-load-debug.md`.
+When a spec/task produces UI, "done" is proven by **driving the UI**, not static review. A `**UI impact:** none|render|interaction|flow` declaration triggers a **visual contract** — an interaction-trace acceptance artifact (render → interaction → flow tiers, semantic DOM/a11y/route/state assertions, not pixel-diff) run via the existing `agent-browser.sh verify-contract` and proven in the delegation gate's `DONE_WHEN` (no 6th field). `.agent0/tools/ui-impact-detect.sh` + the validator emit a non-blocking `visual-contract-advisory:` when a UI surface changes without a declaration or when a declared UI change lacks a passing `report.json`; v1 is advisory (tdd/lint/typecheck precedent), `agent-browser` unavailable ≠ pass. Reconciles with `/product`'s design-time contract as its implementation-evidence counterpart. See `.agent0/context/rules/visual-contract.md` (spec 155).
 
 ## Skill compliance
 
-Spec 033: every first-party `.claude/skills/<name>/SKILL.md` must pass the agentskills.io frontmatter spec (Anthropic's open standard, adopted by 40+ runtimes — Hermes Agent, Codex, Cursor, Goose, OpenCode, others — so spec-compliant skills are cross-runtime portable for free). The `/skill` meta-skill handles the lifecycle: `/skill new <slug> [--tier <tier>]` scaffolds a compliant SKILL.md from `.claude/skills/skill/templates/`; `/skill audit [<slug>|--all]` reports per-skill compliance + portability tier; `/skill port <slug>` invokes `scripts/port-frontmatter.sh` to add missing required fields (`name`, `compatibility`, `metadata.agent0-portability-tier`) while preserving body bytes byte-identical; `/skill validate <slug>` runs `scripts/validate.sh` (zero-dep bash; defers to `skills-ref validate` when on PATH per defer-to-canonical pattern). Three portability tiers declared in `metadata.agent0-portability-tier`: `cc-native` (body uses `.claude/`-only paths / CC-specific tools), `agentskills-portable` (universal primitives only — file IO, shell, web), `runtime-agnostic` (also OS-portable). The frozen agentskills.io spec lives at `.claude/skills/skill/references/spec-snapshot.md` (retrieved 2026-05-17); the validator's rule set is in `references/frontmatter-validation-rules.md`; tier definitions and the two locked decisions (the `agent0-` namespace prefix, `argument-hint:` staying top-level) are in `references/portability-tiers.md`. CC-marketplace skills (`init`, `review`, `security-review`, etc.) are surfaced by the CC harness, not by this repo's `.claude/skills/`, and are out of scope for the toolkit.
+Every first-party `.claude/skills/*/SKILL.md` must pass the agentskills.io frontmatter spec; the `/skill` meta-skill scaffolds, audits, ports, and validates them, with three declared portability tiers. See `.claude/skills/skill/`.
 
 ## Product skill
 
-`/product` is the foundation generator + design partner for the product lifecycle (idea → v1 → vN). Spec 048 (current — v0.3.0) renamed from `/prototype` and refactored output layout: artifacts now semantic-named under `<out>/docs/` (no `NN-` prefix), PRD release-scoped at `docs/prd/v1.md` from day 1, design system grouped at `docs/design-system/`. Inherits the 15-step industry-aligned pipeline from spec 045 (`/prototype` v3 — Cagan/SVPG · Teresa Torres OST · GDPR Art 25 shift-left · Stage-Gate · Lenny Rachitsky 1-pager · April Dunford positioning), which itself inherited 17 decisions from spec 032 (parent design spec; MCP `packages/mcp-product-pipeline/` was discontinued 2026-05-19 — skill is the canonical delivery). 4 phases (Discovery / Specification / Identity / Visual-contract) with 3 `AskUserQuestion` gates after steps 4/12/14. Sub-agent models declared per step: Step 01 = `opus`; Steps 02-15 = `sonnet`. Standalone — bundled templates + Next.js / Expo skeletons at `.claude/skills/product/templates/`, no MCP runtime dep. Flags: `<idea>` `--out=<path>` `--stack=<next|expo>` `--from-step=NN` `--skip-prd` `--skip-brand`. State.json v4 (breaking; refuses silent v3 upgrade). Historical lineage: spec 034 (`/prototype` v1, 2026-05-17 — superseded by 036); spec 036 (`/prototype` v2 13-step, 2026-05-18 — superseded by 045); spec 045 (`/prototype` v3 15-step NN-flat, 2026-05-18 — superseded by 048). See `.claude/skills/product/references/{pipeline-coverage,state-machine,delegation-briefs,quality-checklist}.md` for the v0.3.0 design.
+`/product` is the foundation generator + design partner for the product lifecycle (idea → v1 → vN) — a multi-step industry-aligned pipeline producing the planning artifacts + a visual contract that hands off to SDD. See `.claude/skills/product/`.
 
-## PHP / Laravel
+## Frontend designer
 
-Spec 047: when a fork contains `composer.json` at the project root (canonical), or `artisan` at the root (Laravel-specific signal), seven Agent0 capacities activate PHP-aware behavior — validator picks `vendor/bin/pest` or `vendor/bin/phpunit` based on composer.json declarations; supply-chain blocks `composer require <pkg>` with the same `# OVERRIDE: <reason ≥10 chars>` escape as npm/pip/cargo/go; runtime-introspect captures `vendor/bin/phpunit`, `vendor/bin/pest`, `php artisan test`, `composer test`, and `composer lint` snapshots; TDD recognises `tests/`, `*Test.php`, and `*_test.php`; lint extension runs Laravel Pint and PHPStan/Larastan when declared in `composer.json` `require-dev`; MCP recipes hint suggests `laravel-boost-mcp` + `playwright-mcp` when `artisan` or `laravel/framework` is detected, with the `.mcp.json.example` block ready to uncomment. Detection is fail-loud — a PHP fork that lacks declared linters or test infrastructure will see `lint-advisory:` / `tdd-advisory:` lines on the next turn pointing at the missing piece. Multi-stack JS+PHP monorepos route to the first matching elif (currently JS-first, PHP late); proper multi-stack walking is spec 015 territory. See `.claude/rules/php-laravel-support.md` for the umbrella index linking each capacity's canonical doc.
+`/frontend-designer` is the build-time **craft loop** — the "artist" that designs or refines a *real, runnable* frontend with taste, filling the gap between `/product` (planning, no runnable app) and the spec-155 visual-contract gate (acceptance). Three modes: `create` (greenfield UI slice in the project's stack), `refine` (improve existing UI — bounded diff, before/after evidence, preserved behavior), `explore` (research + design-direction only, no code). Always researches references first and writes a git-tracked `reference-research.md` + `design-direction.md` pair. Detects and adapts to the project's stack via a project-derived ladder (no frozen defaults); reuses the existing design system before inventing. Done-proof reuses spec 155 — browser-renderable output proven by a green `agent-browser verify-contract` report; **agent-browser unavailable is a blocker, never a pass**; native-only surfaces use honest, labeled evidence and add no new native visual tooling. The "artist" is context-engineering (no persona), bounded by explicit stop criteria. Deterministic mechanics in `scripts/frontend-designer.sh` (`caps|detect|artifacts-dir|scaffold-docs|verify`). Graduated from a decision-grade `/meeting`; built as spec 158. See `.agent0/context/rules/frontend-designer.md`.
+
+## Meeting
+
+`/meeting` convenes a multi-party, multi-model deliberation — a human (intermittent), Claude Code, and Codex CLI take turns on a free topic or vague idea. Human-orchestrated v1 (one turn at a time, no autonomous looping); peer turns run through the `codex-exec`/`claude-exec` bridges; turn legality lives in a machine-readable header managed by `scripts/meeting.sh`. The collaborative sibling of `/brainstorm` (solo divergence) and `/sdd debate` (two-role spec review). Decision-grade `/meeting` + `/sdd debate` run the spec-149 anti-confirmation-bias protocol (blind commit/reveal opening, claim/evidence convergence gate, minority report) via `meeting.sh`. Git-tracked, project-local transcripts under `.agent0/meetings/` (not propagated to consumers). See `.agent0/context/rules/meeting.md`.
+
+## Squad
+
+`/squad` (spec 150) is the **autonomous, symmetric, ping-pong multi-agent build loop**: two heterogeneous runtimes (Claude Code ↔ Codex CLI) implement one already-`/sdd plan`-ned spec together without a human pumping each turn, until an **externally-verified done-condition** (the `docs/specs/NNN/squad.json` gate: tests/build/validator green) is met — then the human approves and triggers production. **Agent agreement only proposes done; the external gate is the only closer** (spec 149 is the hard predecessor). Bounded (`max_rounds`/`max_repair_attempts` → `aborted_budget`/`aborted_repairs`), turn-locked single-writer (out-of-turn → `aborted_conflict`; forbidden path → `aborted_policy`), human-at-milestone-gates, agents-prepare-prod / human-triggers-prod. State machine `.agent0/skills/squad/scripts/squad.sh`; the runtime drives the pump loop. The autonomous-loop demand spec 138 was gated on, realized as a build loop. See `.agent0/context/rules/squad.md`.
 
 ## Routines
 
-Spec 064: the project-scoped sibling of Claude Code's native `/schedule` skill. `/schedule` stores routines on Anthropic's user-account cloud (the user-memory analog); `.claude/routines/<slug>.md` git-tracks recurring intent at the repo level — propagating via clone, surviving fork via sync-harness, visible in PR diff. v1 ships **enqueue-for-session** execution (no Anthropic API key required): a per-repo opt-in leader machine's cron fires `.claude/tools/run-routine.sh <slug>`, which interpolates `{{LAST_COMPLETED_TS}}` / `{{GIT_HEAD}}` / `{{REPO_ROOT}}` / `{{NOW}}` into the routine's prompt and writes it to `.claude/.routines-state/<slug>/queue/<unix-ts>.md`; the next interactive Claude Code session reads the queue via `routines-readout.sh` (`SessionStart` hook) and surfaces a `=== ROUTINES ===` block; the human/Claude dispatches each pending routine via `/routine run <slug>`. Phase 2 (`autonomous: true` + `claude -p` headless executor) is deferred per `.claude/memory/feedback_speculative_observability.md`'s rule-of-three demand test. 4-layer N-fold defense: per-repo leader flag (`~/.claude/.agent0-routines-leaders.json`), hard-rejected `idempotent: false` at `/routine validate`, FIFO-archived `completed/` for audit, SessionStart readout puts human-in-loop before mutation. Skill subcommands: `/routine new <slug> | list | run <slug> | validate <slug> | dismiss <slug>`. Bootstrap: `bash .claude/tools/install-routines.sh` (designates leader + installs the marker-block crontab entry). `CLAUDE_SKIP_ROUTINES_READOUT=1` suppresses the readout for throwaway sessions. See `.claude/rules/routines.md`.
+`.agent0/routines/<slug>.md` git-tracks recurring project work; an opt-in leader machine's cron enqueues each run for the next interactive session to dispatch via `/routine run <slug>`. See `.agent0/context/rules/routines.md`.
 
-## Artifact budgets
+## Artifact size cap
 
-Spec 065: when a sub-agent dispatch produces an artifact with a declared size budget, the budget is a **scope proxy, not a byte cap**. A two-threshold cascade governs overshoot: `output ≤ target_max × 1.2` ships as DONE (20% tolerance absorbs honest variance); `target_max × 1.2 < output ≤ target_max × 1.8` triggers partial-result with `oversize_reason` and the sub-agent has agency to keep producing if useful; `output > target_max × 1.8` is a hard-abort — STOP and emit partial-result regardless. **Trim-loop and re-emit-at-smaller-scope are forbidden** in every zone above 1.2×; both are "redo to fit budget" antipatterns that hide the scope-mismatch signal. Multipliers (`soft_overshoot_multiplier = 1.2`, `hard_abort_multiplier = 1.8`) are declared per-step in `.claude/skills/product/references/pipeline-coverage.md` § Per-step table (uniform v1 baseline; per-step calibration is spec 056's domain) and inlined into each brief's CONSTRAINTS at dispatch time. `oversize_reason` is free prose naming the bloat dimension (CSS, fixtures, prose verbosity, screen count, etc.) — actionable signal for re-scoping, not "too big". Override marker reuses the project's grammar with `budget-exempt:` prefix convention: `# OVERRIDE: budget-exempt: <reason ≥10 chars>`. Rule-only in v1 (no hook intercepts); promotion to a PostToolUse(Write) detector hook is deferred per `.claude/memory/feedback_speculative_observability.md`'s rule-of-three demand-test. See `.claude/rules/artifact-budgets.md`.
+Artifact size is not a scope/quality signal — scope and quality are judged by the `/product` quality judge. The only size mechanism is a uniform 200 KB catastrophe cap (a dumb token-runaway circuit-breaker) plus the retained per-step `min_size` anti-stub floors; trim-loop and re-emit-at-smaller-scope stay forbidden. See `.agent0/context/rules/artifact-budgets.md`.
 
 ## Compact Instructions
 
@@ -123,5 +216,4 @@ Safe to compress:
 - Resolved sub-tasks where the outcome is already in `git log` or the code
 - Exploratory tangents that didn't influence the final direction
 
-`.claude/COMPACT_NOTES.md` is regenerated by the PreCompact hook with the last 12 turns verbatim — that file is the source of truth for raw signal across the compaction boundary, so the summary itself can stay terse.
 <!-- AGENT0:END -->

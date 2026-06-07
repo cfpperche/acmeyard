@@ -42,7 +42,7 @@ When the system grows past ~14 colors or starts repeating values across tokens, 
 
 ## Naming structure: `--<category>-<role>-<state>`
 
-The convention anthill mandated and the port keeps.
+The canonical semantic-token naming convention.
 
 - **`--<category>-<role>`** — base name. e.g. `--color-primary`, `--color-foreground`, `--color-border`, `--space-md`, `--radius-lg`, `--font-display`, `--text-base`.
 - **`--<category>-<role>-<state>`** — interactive variants. e.g. `--color-primary-hover`, `--color-primary-active`, `--color-primary-disabled`, `--color-foreground-muted`.
@@ -115,7 +115,7 @@ These name shapes are wrong:
 
 ## Catalog vs custom token names
 
-When path is `catalog`, the borrowed system's DESIGN.md may use different naming conventions (e.g. Tailwind's `--color-primary-500` vs anthill's `--color-primary` + `--color-primary-hover`). Pick one for the project and convert on import — don't ship a `tokens.css` that mixes two conventions. Document the conversion in `## Catalog Lineage` ("borrowed Composio's color values; renamed to semantic-only convention because Composio's `-500` scale is not used elsewhere in this product").
+When path is `catalog`, the borrowed system's DESIGN.md may use different naming conventions (e.g. Tailwind's `--color-primary-500` numeric scale vs this template's semantic-only `--color-primary` + `--color-primary-hover`). Pick one for the project and convert on import — don't ship a `tokens.css` that mixes two conventions. Document the conversion in `## Catalog Lineage` ("borrowed Composio's color values; renamed to semantic-only convention because Composio's `-500` scale is not used elsewhere in this product").
 
 ## Token comments — what they should say
 

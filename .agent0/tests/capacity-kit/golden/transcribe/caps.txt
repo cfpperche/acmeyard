@@ -1,0 +1,11 @@
+{
+  "engine": "uvx --from whisper.cpp-cli whisper-cpp",
+  "ffmpeg": "ffmpeg",
+  "model": "base",
+  "model_cache": "cached",
+  "acquisition_channels": [
+    "uvx",
+    "pip"
+  ]
+}
+--exit:0

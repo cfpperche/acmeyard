@@ -83,7 +83,7 @@ Concrete shapes for `tokens.css` + `design-system.md` § Tokens table + `compone
 ```markdown
 ## Tokens
 
-The token layer that step 15 (screen-atlas; absorbed step 7 per spec 045) and step 15 (screen-atlas; renamed per spec 045) read from `tokens.css`. Names are semantic; primitives are inlined (this v1 has no need for the primitive layer — see `references/token-naming.md` § "two-layer model").
+The token layer that step 15 (screen-atlas) reads from `tokens.css`. Names are semantic; primitives are inlined (this v1 has no need for the primitive layer — see `references/token-naming.md` § "two-layer model").
 
 ### Color (14 total)
 

@@ -1,6 +1,6 @@
 # Privacy matrix shape — controller-vs-processor, regulation matrix, sub-processor disclosure, DPIA trigger, 72-hour breach
 
-How to write `## Privacy Posture` in `legal-posture.md`. The load-bearing disciplines from anthill-privacy-dpo + the calibration rules that make the privacy section smart, not rigid.
+How to write `## Privacy Posture` in `legal-posture.md`. The load-bearing privacy-DPO disciplines + the calibration rules that make the privacy section smart, not rigid.
 
 ## Controller vs processor — per-flow declaration
 
@@ -63,7 +63,7 @@ Without a trigger column, the row degrades to "counsel will review eventually" �
 
 ## Data categories table
 
-Per anthill-privacy-dpo § Step 3 template. One row per data category:
+One row per data category:
 
 ```markdown
 | Data Category | Purpose | Legal Basis | Retention Period | Deletion Mechanism |
@@ -87,7 +87,7 @@ Per anthill-privacy-dpo § Step 3 template. One row per data category:
 
 ### Anti-pattern: Consent as default
 
-Anthill-privacy-dpo anti-pattern #1. Consent looks deferential but creates fragility — withdrawal of consent forces feature removal. Use Contract for account/billing flows; Legitimate Interest (with documented LIA) for analytics; Consent only where withdrawal-without-feature-loss is acceptable (marketing email, behavioral ads).
+The dominant privacy anti-pattern. Consent looks deferential but creates fragility — withdrawal of consent forces feature removal. Use Contract for account/billing flows; Legitimate Interest (with documented LIA) for analytics; Consent only where withdrawal-without-feature-loss is acceptable (marketing email, behavioral ads).
 
 ## Sub-processor disclosure table
 
@@ -273,6 +273,6 @@ Schema-required H2 still emits; the H2's contents declare the degeneration so re
 - **"We are the controller" blanket** — covered; per-flow declaration.
 - **Retroactive DPIA** — covered; DPIA fires BEFORE processing.
 - **72-hour breach notification "best effort"** — the SLA is binary; either the 72-hour window is met or it's a regulatory violation.
-- **GDPR + CCPA conflation** — they have distinct rights frameworks. CCPA has no "legitimate interest" basis; GDPR has no "do not sell" concept. Mirror anthill-privacy-dpo anti-pattern.
+- **GDPR + CCPA conflation** — they have distinct rights frameworks. CCPA has no "legitimate interest" basis; GDPR has no "do not sell" concept. Treat each regime on its own terms.
 - **Privacy policy without data-flow map** — covered; the data-categories table IS the map.
 - **Generic retention ("as long as needed")** — covered; specific period per category with business or legal justification.
