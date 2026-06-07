@@ -7,13 +7,15 @@ Canonical runtime-neutral handoff for Acmeyard agent sessions.
 ## Current State
 
 - Agent0 harness bootstrap sync applied and committed on branch `chore/agent0-harness-sync`.
+- Legacy `.claude` harness residues were removed: old hooks/rules/tests/tools/validators/runtime state and the obsolete `prototype` skill are gone.
+- `.claude` now matches the current consumer shape: `settings.json`, `agents/`, and current skills including `skills/product`.
 - Sync baseline created at `.agent0/harness-sync-baseline.json`; final `sync-harness --check --agent0-path=/home/goat/Agent0` is clean.
 - Harness health is green: `doctor.sh` reports 22 ok, 0 advisory, 0 broken.
 - `check-instruction-drift.sh --agent0-path=/home/goat/Agent0` still reports `managed blocks differ`; this is inherited from the current Agent0 source, which has the same CLAUDE/AGENTS managed-block drift at `b90b836`.
 
 ## Active Work
 
-- Nothing in flight.
+- Housekeeping changes are ready to review on branch `chore/agent0-harness-sync`.
 
 ## Next Actions
 
