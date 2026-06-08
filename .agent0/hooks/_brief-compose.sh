@@ -87,6 +87,24 @@ githooks_advisory() {
   fi
 }
 
+bootstrap_advisory() {
+  if [[ -f "$PROJECT_DIR/.agent0/project-core.md.example" && ! -f "$PROJECT_DIR/.agent0/project-core.md" ]]; then
+    printf '=== bootstrap ===\n'
+    printf 'project-core missing; configure .agent0/project-core.md from .agent0/project-core.md.example, then run .agent0/tools/project-core-sync.sh --apply\n'
+    return 0
+  fi
+
+  local example_version source_version
+  if [[ -f "$PROJECT_DIR/.agent0/project-core.md.example" && -f "$PROJECT_DIR/.agent0/project-core.md" ]]; then
+    example_version="$(sed -n 's/^<!-- AGENT0:PROJECT-CORE-TEMPLATE: \(.*\) -->$/\1/p' "$PROJECT_DIR/.agent0/project-core.md.example" | head -1)"
+    source_version="$(sed -n 's/^<!-- AGENT0:PROJECT-CORE-TEMPLATE: \(.*\) -->$/\1/p' "$PROJECT_DIR/.agent0/project-core.md" | head -1)"
+    if [[ -n "$example_version" && "$source_version" != "$example_version" ]]; then
+      printf '=== project-core ===\n'
+      printf 'template review pending; review .agent0/project-core.md.example, update .agent0/project-core.md marker to %s, then run .agent0/tools/project-core-sync.sh --apply\n' "$example_version"
+    fi
+  fi
+}
+
 helper_output() {
   local script="$1"
   [ -x "$_BRIEF_COMPOSE_DIR/$script" ] || return 0

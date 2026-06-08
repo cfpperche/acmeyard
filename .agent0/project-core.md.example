@@ -1,0 +1,19 @@
+# Project Core
+
+<!-- AGENT0:PROJECT-CORE-TEMPLATE: 2026-06-08-1 -->
+
+Replace the placeholders before copying this file to `.agent0/project-core.md`.
+
+## Language & Locale
+
+- Human communication: <preferred language for agent replies, for example pt-BR or en>.
+- Repository artifacts: <language policy for specs, docs, commits, code comments, and technical notes>.
+- Product/user-facing copy: <language and locale policy for UI, marketing, support, and legal text>.
+- Existing files: preserve the surrounding language unless the task is translation/localization.
+- Ambiguous new artifacts: ask before choosing a locale when the artifact is user-facing or externally published.
+
+## Voice & Work Style
+
+- Domain voice: <short guidance on tone, terminology, and words to avoid>.
+- Engineering style: <short guidance on evidence, validation, and implementation defaults>.
+- Local gotchas: <small always-needed rules that should shape every session>.

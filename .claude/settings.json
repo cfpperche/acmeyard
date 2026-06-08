@@ -33,6 +33,15 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.agent0/hooks/session-track-edits.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.agent0/tools/project-core-sync.sh --apply --quiet --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ]
       }
     ],
     "PreToolUse": [

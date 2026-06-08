@@ -156,6 +156,8 @@ main() {
   printf '\n'
   summarize_handoff
   printf '\n'
+  bootstrap_advisory
+  printf '\n'
   git_dirty_block
   printf '\n'
   summarize_reminders

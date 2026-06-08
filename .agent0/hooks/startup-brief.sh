@@ -95,6 +95,7 @@ build_brief() {
   out+=$'budget: 6000 bytes / 80 lines by default\n\n'
   out+="$(summarize_handoff)"$'\n'
   out+="$(githooks_advisory)"$'\n'
+  out+="$(bootstrap_advisory)"$'\n'
   out+="$(summarize_reminders)"$'\n'
   out+="$(summarize_routines)"$'\n'
   out+="$(summarize_memory_decay)"$'\n'

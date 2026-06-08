@@ -71,6 +71,16 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.agent0/tools/project-core-sync.sh\" --apply --quiet --root \"$(git rev-parse --show-toplevel)\"",
+            "statusMessage": "Rendering project core"
+          }
+        ]
+      },
+      {
+        "matcher": "^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
             "command": "bash \"$(git rev-parse --show-toplevel)/.agent0/hooks/memory-frontmatter-validate.sh\"",
             "statusMessage": "Validating project-memory frontmatter"
           },

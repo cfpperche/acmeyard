@@ -117,10 +117,10 @@ if [ -f "$project_core" ]; then
       if [ "$(_region_sha "$(_extract_region "$entry" AGENT0:PROJECT)")" = "$core_sha" ]; then
         ok "$ename: PROJECT region matches .agent0/project-core.md"
       else
-        fail "$ename: PROJECT region drifted from .agent0/project-core.md (run sync-harness --apply)"
+        fail "$ename: PROJECT region drifted from .agent0/project-core.md (run .agent0/tools/project-core-sync.sh --apply)"
       fi
     else
-      fail "$ename: .agent0/project-core.md exists but its PROJECT region is missing/invalid (run sync-harness --apply)"
+      fail "$ename: .agent0/project-core.md exists but its PROJECT region is missing/invalid (run .agent0/tools/project-core-sync.sh --apply)"
     fi
   done
 fi

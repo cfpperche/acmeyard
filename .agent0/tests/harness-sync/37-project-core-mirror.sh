@@ -2,8 +2,8 @@
 # Scenario: spec 131 — consumer-source project-core mirror.
 # Asserts the consumer-owned .agent0/project-core.md is mirrored into an always-on
 # AGENT0:PROJECT region of BOTH CLAUDE.md and AGENTS.md, with create / idempotent /
-# stale / customized-refuse / --force / source-never-written / index-untouched /
-# synthetic-baseline-keys / absent-source-no-op semantics.
+# stale local re-render / source-never-written / index-untouched /
+# absent-source-no-op semantics.
 
 set -euo pipefail
 
@@ -56,12 +56,6 @@ echo "  ok: phase1 sentinel mirrored into BOTH entrypoints"
 [ "$(index_block "$CONSUMER/AGENTS.md")" = "$SRC_INDEX" ] || fail "AGENTS.md index block changed"
 echo "  ok: phase1 AGENT0:BEGIN/END index block untouched"
 
-# synthetic baseline keys recorded
-BL="$CONSUMER/.agent0/harness-sync-baseline.json"
-grep -qF 'CLAUDE.md#PROJECT' "$BL" || fail "baseline missing CLAUDE.md#PROJECT" "$(cat "$BL")"
-grep -qF 'AGENTS.md#PROJECT' "$BL" || fail "baseline missing AGENTS.md#PROJECT" "$(cat "$BL")"
-echo "  ok: phase1 synthetic keys recorded in baseline"
-
 # ========================= Phase 2: idempotent =========================
 out="$(bash "$TOOL" --apply --agent0-path="$SRC" "$CONSUMER" 2>&1)" || fail "apply-2 (idempotent) nonzero exit" "$out"
 printf '%s' "$out" | grep -qE '!! customized.*AGENTS\.md' && fail "AGENTS.md falsely reported customized on re-apply (strip failed)" "$out"
@@ -75,28 +69,22 @@ grep -q "$SENTINEL v2" "$CONSUMER/CLAUDE.md" || fail "stale re-render did not up
 grep -q "$SENTINEL v2" "$CONSUMER/AGENTS.md" || fail "stale re-render did not update AGENTS.md" "$out"
 echo "  ok: phase3 source change re-renders both regions without --force"
 
-# ========================= Phase 4: customized region refused =========================
-# Hand-edit the PROJECT region inside AGENTS.md (diverge from source + baseline).
+# ========================= Phase 4: hand-edited derived region re-renders =========================
+# Hand-edit the PROJECT region inside AGENTS.md. The region is derived output,
+# so sync should restore it from .agent0/project-core.md without --force.
 sed -i 's/'"$SENTINEL"' v2.*/HAND-EDITED-DERIVED-REGION/' "$CONSUMER/AGENTS.md"
-set +e
-out="$(bash "$TOOL" --apply --agent0-path="$SRC" "$CONSUMER" 2>&1)"; rc=$?
-set -e
-[ "$rc" -ne 0 ] || fail "apply with edited derived region should exit nonzero" "$out"
-printf '%s' "$out" | grep -qE 'project-core.*AGENTS\.md.*refused' || fail "edited derived region not refused" "$out"
-grep -q 'HAND-EDITED-DERIVED-REGION' "$CONSUMER/AGENTS.md" || fail "refused region was wrongly modified" "$out"
-echo "  ok: phase4 consumer-edited derived region refused, left untouched"
+out="$(bash "$TOOL" --apply --agent0-path="$SRC" "$CONSUMER" 2>&1)" || fail "apply with edited derived region should self-heal" "$out"
+grep -q 'HAND-EDITED-DERIVED-REGION' "$CONSUMER/AGENTS.md" && fail "derived edit was not re-rendered" "$out"
+grep -q "$SENTINEL v2" "$CONSUMER/AGENTS.md" || fail "derived region was not restored from source" "$out"
+echo "  ok: phase4 hand-edited derived region re-rendered from source"
 
 # source file never written
 [ "$(sha256sum "$CONSUMER/.agent0/project-core.md" | awk '{print $1}')" != "$SRC_CORE_SHA_BEFORE" ] || true  # (it changed in phase3 intentionally)
 SRC_CORE_SHA_NOW="$(sha256sum "$CONSUMER/.agent0/project-core.md" | awk '{print $1}')"
 
-# ========================= Phase 5: --force re-renders =========================
-out="$(bash "$TOOL" --apply --force --agent0-path="$SRC" "$CONSUMER" 2>&1)" || fail "apply --force nonzero exit" "$out"
-grep -q 'HAND-EDITED-DERIVED-REGION' "$CONSUMER/AGENTS.md" && fail "--force did not discard the derived edit" "$out"
-grep -q "$SENTINEL v2" "$CONSUMER/AGENTS.md" || fail "--force did not re-render from source" "$out"
-# source still never written by sync
+# ========================= Phase 5: source still never written by sync =========================
 [ "$(sha256sum "$CONSUMER/.agent0/project-core.md" | awk '{print $1}')" = "$SRC_CORE_SHA_NOW" ] || fail "sync overwrote the consumer-owned source"
-echo "  ok: phase5 --force re-renders from source; source never written"
+echo "  ok: phase5 source never written"
 
 # ========================= Phase 6: absent source = no-op =========================
 CONSUMER2="$TMPDIR/consumer2"

@@ -275,11 +275,15 @@ verify_contract() {
   local chrome; chrome="$(resolve_chrome 2>/dev/null || true)"
   [ -n "$chrome" ] && export AGENT_BROWSER_EXECUTABLE_PATH="$chrome"
   local bin; bin="$(ab_bin)"
+  local settle_ms="${AGENT0_BROWSER_SETTLE_MS:-1200}"
 
   audit_line "verify-contract" "open" "$url" "read-only" "allow" "contract-verify"
+  "$bin" console --clear >/dev/null 2>&1 || true
+  "$bin" errors --clear >/dev/null 2>&1 || true
   "$bin" open "$url" >/dev/null 2>&1
   "$bin" snapshot --json > "$outdir/a11y.json" 2>/dev/null
-  "$bin" screenshot "$outdir/screen.png" >/dev/null 2>&1
+  local screen_path; screen_path="$(cd "$outdir" && pwd)/screen.png"
+  "$bin" screenshot "$screen_path" >/dev/null 2>&1
   "$bin" console --json > "$outdir/console.json" 2>/dev/null || echo '{"data":{"messages":[]}}' > "$outdir/console.json"
   "$bin" vitals --json > "$outdir/vitals.json" 2>/dev/null || echo '{}' > "$outdir/vitals.json"
 
@@ -302,7 +306,11 @@ verify_contract() {
       "$1" 2>/dev/null; }
   _vc_present() { jq -r --arg role "$2" --arg name "$3" \
       '[((.data.refs // {}) | .[]) | select(.role==$role and .name==$name)] | length > 0' "$1" 2>/dev/null || echo false; }
-  _vc_url() { jq -r '.data.url // empty' "$1" 2>/dev/null; }
+  _vc_url() {
+    local cur
+    cur="$(jq -r '.data.url // .data.origin // empty' "$1" 2>/dev/null)"
+    if [ -n "$cur" ]; then printf '%s\n' "$cur"; else "$bin" get url 2>/dev/null || true; fi
+  }
   _vc_snap() { "$bin" snapshot --json > "$outdir/a11y.json" 2>/dev/null || true; }
   # Drive one act verb against the live binary via the resolved ref (best-effort
   # mapping onto the agent-browser CLI; the fake-bin stub records the call).
@@ -362,6 +370,7 @@ verify_contract() {
       j=$((j+1)); continue
     fi
     _vc_act "$act" "$ref" "$tval"
+    "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
     _vc_snap
     if [ -n "$exp_role" ]; then
       ok="$(_vc_present "$outdir/a11y.json" "$exp_role" "$exp_name")"
@@ -392,6 +401,7 @@ verify_contract() {
     if [ -n "$goto" ]; then
       audit_line "verify-contract" "open" "$goto" "read-only" "allow" "contract-flow"
       "$bin" open "$goto" >/dev/null 2>&1
+      "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
       _vc_snap
     elif [ -z "$act" ]; then
       _vc_snap
@@ -402,6 +412,7 @@ verify_contract() {
         ok=false; detail="target $trole/$tname not in a11y tree"
       else
         _vc_act "$act" "$ref" "$tval"
+        "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
         _vc_snap
       fi
     fi

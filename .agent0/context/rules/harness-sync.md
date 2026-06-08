@@ -310,31 +310,50 @@ When a capacity's canonical home moves within Agent0 — the consolidation track
 
 Spec 131. The two runtime entrypoints diverge in what each model sees: Claude Code reads `CLAUDE.md`, Codex (and every AGENTS.md-standard tool) reads `AGENTS.md` and never `CLAUDE.md`. Consumer project narrative authored in one entrypoint is invisible to the other runtime. The **project core** mechanism closes that gap for the small, always-needed core (project identity, voice, key conventions) by mirroring a single consumer-owned source into both entrypoints.
 
-**The source.** `<consumer>/.agent0/project-core.md` — consumer-authored, consumer-owned, and **deliberately outside the sync manifest** (not in any `COPY_CHECK_*` array). Agent0 never ships it and never overwrites it; the manifest's explicit-allowlist design (§ Manifest scope) makes any unlisted path invisible to the sync walk. It is git-tracked in the consumer (project knowledge, like specs), not gitignored.
+**The source.** `<consumer>/.agent0/project-core.md` — consumer-authored, consumer-owned, and **deliberately outside the sync manifest** (not in any `COPY_CHECK_*` array). Agent0 never ships the real source and never overwrites it; the manifest's explicit-allowlist design (§ Manifest scope) makes any unlisted path invisible to the sync walk. It is git-tracked in the consumer (project knowledge, like specs), not gitignored. Agent0 may ship `.agent0/project-core.md.example` as a configurable placeholder; operators copy/customize that file into `.agent0/project-core.md` per consumer.
 
-**The mirror.** On `--apply`, `sync_project_core` renders the source verbatim into an always-on region delimited by `<!-- AGENT0:PROJECT:BEGIN -->` / `<!-- AGENT0:PROJECT:END -->` in **both** `CLAUDE.md` and `AGENTS.md` (created just above the `AGENT0:BEGIN` index block on first sync; EOF-appended if no `AGENT0:BEGIN` anchor exists). When the source is absent the whole pass is a **no-op** — the feature is opt-in and backward-compatible; existing consumers are untouched until they author a `project-core.md`.
+**The local renderer.** `.agent0/tools/project-core-sync.sh` is the consumer-local renderer. It reads `.agent0/project-core.md` and writes the always-on `AGENT0:PROJECT` regions in **both** `CLAUDE.md` and `AGENTS.md` without requiring `--agent0-path` or `AGENT0_HARNESS_PATH`. The command is:
 
-**Consumer-source mirror — a new merge direction.** Unlike every other primitive here (Agent0 → consumer), this mirrors a *consumer's own* source into the *consumer's own* two entrypoints. It reuses the 3-way machinery: the per-region rendered sha is recorded in `harness-sync-baseline.json` under synthetic keys `CLAUDE.md#PROJECT` and `AGENTS.md#PROJECT` (the same `#`-key trick as `CLAUDE.md#managed-block`). Per region:
+```bash
+bash .agent0/tools/project-core-sync.sh --apply
+```
 
-| Region state vs source / baseline | Verdict | Behavior |
+`--check` reports mirror drift without writing. `--apply` creates missing regions and re-renders stale or hand-edited regions from the source. The entrypoint regions are derived output; direct edits to them lose to `.agent0/project-core.md`.
+
+**The mirror.** The rendered region is delimited by `<!-- AGENT0:PROJECT:BEGIN -->` / `<!-- AGENT0:PROJECT:END -->` in **both** entrypoints (created just above the `AGENT0:BEGIN` index block on first render; EOF-appended if no `AGENT0:BEGIN` anchor exists). When the source is absent the whole pass is a **no-op** — the feature is opt-in and backward-compatible; existing consumers are untouched until they author a `project-core.md`.
+
+**Bootstrap advisory.** When `.agent0/project-core.md.example` exists but `.agent0/project-core.md` does not, Agent0 treats the consumer as needing project-core bootstrap and emits `bootstrap-advisory:` from `sync-harness.sh`; `startup-brief.sh`, `status.sh`, and `doctor.sh` also surface the pending state. This is advisory-only and never creates the source. Once the consumer authors `.agent0/project-core.md` and runs `.agent0/tools/project-core-sync.sh --apply`, these alerts must disappear; persistent warnings after configuration are false-positive context and should be treated as a bug.
+
+**Template review advisory.** The example carries a template acknowledgement marker:
+
+```markdown
+<!-- AGENT0:PROJECT-CORE-TEMPLATE: <id> -->
+```
+
+When a configured consumer already has `.agent0/project-core.md`, sync still updates the example as an Agent0-owned template and leaves the real source untouched. If the source's marker is missing or differs from the example's marker, Agent0 emits `project-core-advisory:` from `sync-harness.sh`; `startup-brief.sh`, `status.sh`, and `doctor.sh` also surface the review-pending state. The fix is to review the new example, update the real `.agent0/project-core.md` as needed, set its marker to the current example id, then run `.agent0/tools/project-core-sync.sh --apply`. This is the configured-consumer sibling of bootstrap: it must disappear after explicit review, otherwise it becomes false-positive context.
+
+**Consumer-source mirror — a local derived-output direction.** Unlike every other primitive here (Agent0 → consumer), this mirrors a *consumer's own* source into the *consumer's own* two entrypoints. It deliberately does **not** depend on the harness-sync baseline because the entrypoint regions are not independent consumer customizations; they are derived output from `.agent0/project-core.md`. Per region:
+
+| Region state vs source | Verdict | Behavior |
 | --- | --- | --- |
 | markers absent | **create** | render source into a new region; `~ project-core … (region created)` |
 | region == source | up to date | no-op |
-| region == recorded rendered hash, source changed | **stale** | re-render from source, **no `--force`** |
-| region != source AND != recorded hash | **customized** | refuse (consumer edited a *derived* region); `--force` discards the edit and re-renders |
+| region != source | **stale derived output** | re-render from source; no `--force` required |
 | markers mismatched / nested | refuse | fix manually |
 
-**The source is never written by sync** — only the entrypoint regions are. Editing the core means editing `.agent0/project-core.md`, not the rendered regions.
+**The source is never written by sync** — only the entrypoint regions are. Editing the core means editing `.agent0/project-core.md`, not the rendered regions. Editing the example file only changes the starter template for future/manual consumer configuration; it does not change the active project-core source.
 
-**AGENTS.md is region-aware in `process_file`.** `AGENTS.md` is a plain baseline-tracked manifest file (full-file hash), so an injected PROJECT region would otherwise read as permanent Agent0-divergence (`!! customized`) and `--force` would wipe it. `process_file` therefore strips the `AGENT0:PROJECT` region (via `_strip_project_region`, the exact inverse of the insert) before computing the comparison sha for the entrypoint targets (`_is_project_target`). The write paths are unchanged: `sync_project_core` runs *after* `walk_copy_check` in the same `--apply`, so if a stale/force `cp` lands the region-less upstream `AGENTS.md`, the region is re-injected immediately afterward. `CLAUDE.md` needs no such handling — its managed-block merge only compares the `AGENT0:BEGIN/END` region and preserves everything above it (including the PROJECT region) verbatim.
+**AGENTS.md is region-aware in `process_file`.** `AGENTS.md` is a plain baseline-tracked manifest file (full-file hash), so an injected PROJECT region would otherwise read as permanent Agent0-divergence (`!! customized`) and `--force` would wipe it. `process_file` therefore strips the `AGENT0:PROJECT` region (via `_strip_project_region`, the exact inverse of the insert) before computing the comparison sha for the entrypoint targets (`_is_project_target`) and before copying/updating the plain-tracked file. This prevents Agent0's own PROJECT region from leaking into consumers that have not authored `.agent0/project-core.md`. `sync_project_core` runs *after* `walk_copy_check` in the same `--apply`, and delegates to `.agent0/tools/project-core-sync.sh`; if the consumer does have a project-core source, its own region is injected immediately afterward. `CLAUDE.md` needs no such plain-copy handling — its managed-block merge only compares the `AGENT0:BEGIN/END` region and preserves consumer content above it.
+
+**Post-edit auto-render.** Claude `PostToolUse(Edit|Write|MultiEdit)` and Codex `PostToolUse(^apply_patch$)` run `.agent0/tools/project-core-sync.sh --apply --quiet` after normal agent edits. The hook is intentionally local and quiet on no-op. Bash writes or external-editor writes are not hook-covered; run the local tool manually or use `doctor.sh` / `check-instruction-drift.sh` to detect drift.
 
 **Authority order (Codex).** The neutral `project-core.md` is canonical; the entrypoint PROJECT regions are derived mirrors. Codex loads the mirrored core from root `AGENTS.md`, then `AGENTS.override.md` and nested `AGENTS.md` layer after it and **win on conflict** by Codex's native instruction chain — the mirror guarantees the core is always present, it does not override local Codex customization. This is why root `AGENTS.md` stays plain baseline-tracked rather than gaining a second Agent0-owned managed block.
 
 **Gap A (index drift) is guarded separately.** Agent0's `CLAUDE.md` and `AGENTS.md` `AGENT0:BEGIN…END` index blocks are kept byte-identical by `check-instruction-drift.sh` (it fails on any drift); consumers inherit both blocks from Agent0, so they cannot independently drift. Physical single-sourcing (one file rendered into both) is a non-goal — no build step, no current drift.
 
-**Migration for existing consumers.** Hard-cutover, same posture as the `.claude`→`.agent0` relocations (§ Path relocations): a consumer that already keeps project narrative in `CLAUDE.md` only authors `.agent0/project-core.md` once, runs `--apply`, and the mirror seeds both entrypoints. The old `CLAUDE.md`-only narrative is consumer content sync never touches; the consumer prunes/relocates it manually.
+**Migration for existing consumers.** Hard-cutover, same posture as the `.claude`→`.agent0` relocations (§ Path relocations): a consumer that already keeps project narrative in `CLAUDE.md` only authors `.agent0/project-core.md` once, runs `.agent0/tools/project-core-sync.sh --apply`, and the mirror seeds both entrypoints. The old `CLAUDE.md`-only narrative is consumer content sync never touches; the consumer prunes/relocates it manually.
 
-`check-instruction-drift.sh` enforces the mirror invariant when a `project-core.md` exists: both entrypoints' PROJECT regions must equal the source.
+`check-instruction-drift.sh` enforces the mirror invariant when a `project-core.md` exists: both entrypoints' PROJECT regions must equal the source, and the remediation is `.agent0/tools/project-core-sync.sh --apply`.
 
 ## Self-rebootstrap
 

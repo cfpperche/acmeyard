@@ -1,6 +1,16 @@
 # Acme Yard Project Core
 
+<!-- AGENT0:PROJECT-CORE-TEMPLATE: 2026-06-08-1 -->
+
 Acme Yard is a portfolio of small, focused SaaS tools for professions that do not usually get great software. The product strategy is "12 ships a year": each microSaaS solves one concrete pain for one specific profession, built on a shared Laravel + Filament substrate and governed by Agent0.
+
+## Language & Locale
+
+- Human communication: follow the user's language; use pt-BR when the user writes in Portuguese.
+- Repository artifacts: English for README, architecture notes, specs, commits, code comments, and technical docs unless a task explicitly targets localization.
+- Existing files: preserve the surrounding language unless the task is translation/localization.
+- Brazilian context: Pix, CPF/CNPJ, LGPD, BRL, and Brazilian professional workflows matter when the active product/spec targets Brazil; do not infer a global product-copy language from that alone.
+- Ambiguous new user-facing or externally published text: ask before choosing a locale.
 
 ## Stack
 
