@@ -1,7 +1,7 @@
 {
-  "agent0_commit": "2b9f0ce1b39ea81dfcba3469a09afa99a088223e",
-  "synced_at": "2026-06-08T15:58:27Z",
-  "tool_version": 1,
+  "agent0_commit": "37916ec2a6367f89570b795981cecfc949e907f1",
+  "synced_at": "2026-06-08T16:44:50Z",
+  "tool_version": 2,
   "files": {
     ".agent0/.runtime-state/README.md": "4de5dd5eff54a767e99734fd0f4cb9687c6d9b04fbb632749cf52c806888fffe",
     ".agent0/browser-policy.json.example": "10138453acd01dc0e8ea99b36da901dd084f59dba1599792691b7e0e4710a5ac",
@@ -16,7 +16,7 @@
     ".agent0/context/rules/delegation.md": "c2bc5f236de6c20b6e3a9372ccc77b2955d7a48d2073b4a7df01fb15d2192122",
     ".agent0/context/rules/diagram.md": "a6d5cba9a550c0c984b06841e71887a4784c1d95d87ec6db71511144e9e5290c",
     ".agent0/context/rules/frontend-designer.md": "5ea8e41b327ddcd84ab0940f6d42d1cfc504cbffa173bb080aae2771a86e048b",
-    ".agent0/context/rules/harness-sync.md": "a1d38bd9bc4145f1f81e55703f618a2000c8fd0bc6b65f812c51fe2f54fd973b",
+    ".agent0/context/rules/harness-sync.md": "05e1e898ffc5d3836bc0f112ce41d1528cc8928d541634b25144f69e990845fa",
     ".agent0/context/rules/image-gen.md": "bf796737c132f53440e22c799d0e41a22040224a85c1716f1ed4b83a47ba7684",
     ".agent0/context/rules/language.md": "1c18ed0ecc66c1417b5613edc6f0b9bcf96d6411c68c781752bd5f765f38c0a2",
     ".agent0/context/rules/lint-validator.md": "a1607270e260d0ee244d1dbc2673f4a449a14dd64b3672b2cac2125c676b7d95",
@@ -349,7 +349,7 @@
     ".agent0/tests/harness-sync/26-baseline-removed-orphan.sh": "93ffa10d3d252db5f98d3b0af1d873825c7617f1cc376781690b52de7e0bd475",
     ".agent0/tests/harness-sync/27-baseline-customized-upstream-removed.sh": "a91aa72765023c3857a1d8d40c688b5cac72b40c551bffb48fc2375e5669db7c",
     ".agent0/tests/harness-sync/28-baseline-check-labels-states.sh": "294ccb24ac6f11a7974c4428fbd640d4717aed5469515964e548f9d34b681d61",
-    ".agent0/tests/harness-sync/29-baseline-recorded-on-apply.sh": "f9a865cff31fa7cdc6d442f7c43d8e8f2c64cc952a447835627e738aefcb2d96",
+    ".agent0/tests/harness-sync/29-baseline-recorded-on-apply.sh": "72777230e867cd05068d979c1709fdb71580b50d9a02214791961603b1b6cf10",
     ".agent0/tests/harness-sync/30-baseline-idempotent-apply.sh": "be20dbd81d41cb6d658cecb6c88bce6a13182a2890caf58e3b4e888fdfd1014b",
     ".agent0/tests/harness-sync/31-baseline-bootstrap-no-baseline.sh": "02fef6924cae8ada72863ab92df84cb66b81ad0963ca5229b2e9d99b736d8856",
     ".agent0/tests/harness-sync/32-claude-md-managed-block-no-baseline-refuse.sh": "23ab6eca91b58dbf9fc12181ac6f43c8359944a8a03c190547183159bc260814",
@@ -364,6 +364,9 @@
     ".agent0/tests/harness-sync/41-baseline-write-large-consumer.sh": "de164e182c997ccec70653c841fb1f27814abe29cbbbf38ee03bd4c6af9be8a2",
     ".agent0/tests/harness-sync/42-local-only.sh": "8142c1ed6a98035f3a68fdef03d9e8a7666f70e8e12c03df8c8d97daaae1336d",
     ".agent0/tests/harness-sync/43-seed-od-state.sh": "66293d95679035548c7bd2232c8db220677149171b7f115c9aaf8cca86d96641",
+    ".agent0/tests/harness-sync/44-settings-removes-agent0-hook.sh": "6a307c2c3dce93d58b3fdfd7c81c29c76fb7ec5efbabac061ee6f17a72670a03",
+    ".agent0/tests/harness-sync/45-settings-no-baseline-no-prune.sh": "e9ae3555d8340306ee4f9bf64e9ed1f45fdfeb60cba59ad12a2def5056ca184f",
+    ".agent0/tests/harness-sync/46-settings-missing-source-preserves-baseline.sh": "c7665877c6a45d1655fced24d3303c44b359544cdce9c7807ed9b722fd01e1d5",
     ".agent0/tests/harness-sync/README.md": "01d18c1e765456a05318d57e053022975e5991a8a41cea0a8dd2cde3b9248338",
     ".agent0/tests/harness-sync/run-all.sh": "1d6b30f4da62fc0c06e08e9e1f7237318b258eb02601431b3864c1a0ca7ee0be",
     ".agent0/tests/image-gen/01-draft-tier-workflow.sh": "f5b5b2f59d040db4af022a37bf5cb171ca6f00a032d195440fbe156f8e84932d",
@@ -613,7 +616,7 @@
     ".agent0/tools/run-routine.sh": "45fa167dd8584ed1c19840c138bf10a86744feb0d2ff3bc1b454e2765772e81d",
     ".agent0/tools/sound.sh": "51abeb57b5efc2b997b681ec87d4da6f85226a1a0df3b2d754c45ed4380cd0a8",
     ".agent0/tools/status.sh": "58ff7f55f54a1969e8c3a9ad97b23ec302b069fcb3e799666319e7b7cf35be9a",
-    ".agent0/tools/sync-harness.sh": "a34d02142cbc8c40f9a713d096f0f062ae974e070aa7d936a2352a630884f250",
+    ".agent0/tools/sync-harness.sh": "400271cd92d16e4d0d42480d9615bc6ede318f114ec806310e2210fde141b0d8",
     ".agent0/tools/transcribe.sh": "7fc23efe1c25d8ef71c99fe07b5a551fd071423bb46b9283f44194eb182c4676",
     ".agent0/tools/ui-impact-detect.sh": "e23502e7c01515f6e9ac88ea942d83acc9ed570a5b661f4c26b710c8b28e8a26",
     ".agent0/tools/uninstall-routines.sh": "8b3045d8405e2a1c4686d87a2c1c072e27840f5e2b9041a2b798c207727c3a04",
@@ -1224,5 +1227,18 @@
     "assets/sound/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "assets/video/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "assets/video/compositions/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-  }
+  },
+  "settings_hooks": [
+    "[\"PostToolUse\",\"Edit|Write|MultiEdit\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/memory-events-journal.sh\"]]",
+    "[\"PostToolUse\",\"Edit|Write|MultiEdit\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/memory-frontmatter-validate.sh\"]]",
+    "[\"PostToolUse\",\"Edit|Write|MultiEdit\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/session-track-edits.sh\"]]",
+    "[\"PreToolUse\",\"Agent\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/delegation-gate.sh\"]]",
+    "[\"PreToolUse\",\"Bash\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/governance-gate.sh\"]]",
+    "[\"PreToolUse\",\"Bash\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/secrets-preflight.sh\"]]",
+    "[\"PreToolUse\",\"Edit|Write|MultiEdit\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/memory-index-gate.sh\"]]",
+    "[\"SessionStart\",\"\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/startup-brief.sh\"]]",
+    "[\"Stop\",\"\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/session-stop.sh\"]]",
+    "[\"SubagentStop\",\"\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/delegation-stop.sh\"]]",
+    "[\"SubagentStop\",\"\",[\"bash \\\"$CLAUDE_PROJECT_DIR\\\"/.agent0/hooks/delegation-verify.sh\"]]"
+  ]
 }

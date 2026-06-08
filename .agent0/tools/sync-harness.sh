@@ -140,10 +140,12 @@ fi
 # Spec 130 relocated it from .claude/ to .agent0/ (the harness-home for runtime-neutral
 # artifacts); LEGACY_BASELINE_FILE is the pre-130 path, read as a fallback and removed
 # on the migrating --apply.
-BASELINE_TOOL_VERSION=1
+BASELINE_TOOL_VERSION=2
 BASELINE_FILE="$CONSUMER_ROOT/.agent0/harness-sync-baseline.json"
 LEGACY_BASELINE_FILE="$CONSUMER_ROOT/.claude/harness-sync-baseline.json"
 BASELINE_PRESENT=0
+BASELINE_SOURCE_FILE=""
+SETTINGS_BASELINE_PRESERVE=0
 # spec 131 — consumer-owned project core, mirrored into both entrypoints.
 # Deliberately NOT in any COPY_CHECK_* array: the source is consumer-owned and
 # outside the sync manifest, so Agent0 never ships or overwrites it.
@@ -398,15 +400,18 @@ load_baseline() {
   fi
   if [ ! -f "$src" ]; then
     BASELINE_PRESENT=0
+    BASELINE_SOURCE_FILE=""
     return
   fi
   BASELINE_TSV="$(mktemp -t sync-baseline-XXXXXX)"
   if jq -r '.files // {} | to_entries[] | "\(.key)\t\(.value)"' "$src" 2>/dev/null \
        | sort > "$BASELINE_TSV"; then
     BASELINE_PRESENT=1
+    BASELINE_SOURCE_FILE="$src"
   else
     printf '!! harness-sync-baseline.json unreadable/malformed — treating as no baseline\n' >&2
     BASELINE_PRESENT=0
+    BASELINE_SOURCE_FILE=""
   fi
 }
 
@@ -419,6 +424,44 @@ baseline_sha_for() {
     return
   fi
   awk -F'\t' -v k="$rel" '$1 == k { print $2; exit }' "$BASELINE_TSV"
+}
+
+# Emit a JSON array of Agent0-owned .claude/settings.json hook identities from a
+# settings file. Each identity is a canonical JSON string for:
+# [event, matcher, ordered inner commands].
+settings_hook_ids_json_from_file() {
+  local file="$1"
+  if [ ! -f "$file" ]; then
+    return 1
+  fi
+
+  jq -c '
+    def inner_commands:
+      ((.hooks // []) | map(.command // ""));
+    def hook_id($event):
+      [$event, (.matcher // ""), inner_commands] | tojson;
+    def is_excluded:
+      any(.hooks[]?; (.command // "") | contains("propagation-advise.sh"));
+
+    [
+      (.hooks // {})
+      | to_entries[]
+      | .key as $event
+      | (.value // [])[]?
+      | select(is_excluded | not)
+      | hook_id($event)
+    ] | unique
+  ' "$file"
+}
+
+baseline_settings_hook_ids_json() {
+  if [ "$BASELINE_PRESENT" -ne 1 ] || [ -z "$BASELINE_SOURCE_FILE" ] || [ ! -f "$BASELINE_SOURCE_FILE" ]; then
+    printf '[]'
+    return
+  fi
+
+  jq -c '(.settings_hooks // []) | if type == "array" then map(tostring) | unique else [] end' \
+    "$BASELINE_SOURCE_FILE" 2>/dev/null || printf '[]'
 }
 
 # ---------------------------------------------------------------------------
@@ -929,21 +972,31 @@ write_baseline() {
   files_obj="$(jq -R -s -c '
     split("\n") | map(select(length > 0) | split("\t") | {(.[0]): .[1]}) | add // {}
   ' "$MANIFEST_TSV" 2>/dev/null || echo '{}')"
+  local settings_hooks_obj
+  if [ "$SETTINGS_BASELINE_PRESERVE" -eq 1 ]; then
+    settings_hooks_obj="$(baseline_settings_hook_ids_json)"
+  elif ! settings_hooks_obj="$(settings_hook_ids_json_from_file "$AGENT0_ROOT/.claude/settings.json" 2>/dev/null)"; then
+    settings_hooks_obj="$(baseline_settings_hook_ids_json)"
+  fi
 
   # Idempotency: if the existing baseline already records this exact files-map,
-  # leave the file untouched (a rewrite would only bump synced_at).
+  # and settings hook ownership set, leave the file untouched (a rewrite would
+  # only bump synced_at).
   if [ -f "$BASELINE_FILE" ]; then
-    local old_files new_files
+    local old_files new_files old_settings_hooks new_settings_hooks
     old_files="$(jq -S -c '.files // {}' "$BASELINE_FILE" 2>/dev/null || echo '')"
     new_files="$(printf '%s' "$files_obj" | jq -S -c '.' 2>/dev/null || echo '')"
-    if [ -n "$old_files" ] && [ "$old_files" = "$new_files" ]; then
+    old_settings_hooks="$(jq -S -c '(.settings_hooks // []) | if type == "array" then map(tostring) else [] end' "$BASELINE_FILE" 2>/dev/null || echo '')"
+    new_settings_hooks="$(printf '%s' "$settings_hooks_obj" | jq -S -c '.' 2>/dev/null || echo '')"
+    if [ -n "$old_files" ] && [ "$old_files" = "$new_files" ] \
+       && [ -n "$old_settings_hooks" ] && [ "$old_settings_hooks" = "$new_settings_hooks" ]; then
       printf '= baseline up-to-date .agent0/harness-sync-baseline.json\n' >&2
       _remove_legacy_baseline
       return
     fi
   fi
 
-  local agent0_commit synced_at tmp files_tmp
+  local agent0_commit synced_at tmp files_tmp settings_hooks_tmp
   agent0_commit="$(cd "$AGENT0_ROOT" 2>/dev/null && git rev-parse HEAD 2>/dev/null || true)"
   synced_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   tmp="$(mktemp -t sync-baseline-write-XXXXXX)"
@@ -953,10 +1006,13 @@ write_baseline() {
   # E2BIG ("Argument list too long"). --slurpfile reads from a file (no argv
   # limit). See harness-sync test 41. ($files is a 1-element array → $files[0].)
   files_tmp="$(mktemp -t sync-baseline-files-XXXXXX)"
+  settings_hooks_tmp="$(mktemp -t sync-baseline-settings-hooks-XXXXXX)"
   printf '%s' "$files_obj" > "$files_tmp"
+  printf '%s' "$settings_hooks_obj" > "$settings_hooks_tmp"
 
   if jq -n \
        --slurpfile files "$files_tmp" \
+       --slurpfile settings_hooks "$settings_hooks_tmp" \
        --arg commit "$agent0_commit" \
        --arg synced "$synced_at" \
        --argjson ver "$BASELINE_TOOL_VERSION" \
@@ -964,7 +1020,8 @@ write_baseline() {
           agent0_commit: (if $commit == "" then null else $commit end),
           synced_at: $synced,
           tool_version: $ver,
-          files: ($files[0] // {})
+          files: ($files[0] // {}),
+          settings_hooks: ($settings_hooks[0] // [])
         }' > "$tmp" 2>/dev/null; then
     mkdir -p "$(dirname "$BASELINE_FILE")"
     mv "$tmp" "$BASELINE_FILE"
@@ -974,7 +1031,7 @@ write_baseline() {
     rm -f "$tmp"
     printf '!! failed to write .agent0/harness-sync-baseline.json (jq error)\n' >&2
   fi
-  rm -f "$files_tmp"
+  rm -f "$files_tmp" "$settings_hooks_tmp"
 }
 
 # ---------------------------------------------------------------------------
@@ -987,9 +1044,11 @@ merge_settings_json() {
   local dst="$CONSUMER_ROOT/$rel"
 
   if [ ! -f "$src" ]; then
+    SETTINGS_BASELINE_PRESERVE=1
     return
   fi
   if _skip_tracked_local_only "$rel"; then
+    SETTINGS_BASELINE_PRESERVE=1
     return
   fi
 
@@ -1016,45 +1075,72 @@ merge_settings_json() {
   # Consumer project (consumer_base) is the BASE — preserves permissions/env/model/statusLine/consumer-only top-level keys.
   # Agent0-owned top-level keys ($schema) overwrite when Agent0 has them.
   # hooks: union per-event, dedup by (matcher, ordered list of inner commands).
+  # Hook removals: if a consumer hook identity was recorded as Agent0-owned in
+  # the previous baseline and is absent from current Agent0 settings, prune it.
+  # Without previous ownership metadata, prune nothing.
   # Excluded hook commands (matched as substring on any inner .command) are dropped
   # from BOTH sides — companion to COPY_CHECK_EXCLUDE, makes propagation-advise.sh
   # registration invisible to consumer projects even if a prior sync leaked it. Substring match
   # is anchored only by hook-file basename, so command shape (`bash $CLAUDE_PROJECT_DIR/...`)
   # variants all match.
-  local tmp merged
+  local tmp previous_hooks current_hooks
   tmp="$(mktemp -t sync-settings-XXXXXX)"
-  if ! jq -s '
+  previous_hooks="$(mktemp -t sync-settings-previous-hooks-XXXXXX)"
+  current_hooks="$(mktemp -t sync-settings-current-hooks-XXXXXX)"
+  baseline_settings_hook_ids_json > "$previous_hooks"
+  if ! settings_hook_ids_json_from_file "$src" > "$current_hooks" 2>/dev/null; then
+    baseline_settings_hook_ids_json > "$current_hooks"
+    SETTINGS_BASELINE_PRESERVE=1
+  fi
+  if ! jq -s \
+    --slurpfile previous_hooks "$previous_hooks" \
+    --slurpfile current_hooks "$current_hooks" \
+    '
+    def inner_commands:
+      ((.hooks // []) | map(.command // ""));
     def dedup_key:
-      (.matcher // "") + "|" + ((.hooks // []) | map(.command // "") | join("##"));
+      (.matcher // "") + "|" + (inner_commands | join("##"));
+    def hook_id($event):
+      [$event, (.matcher // ""), inner_commands] | tojson;
 
     def is_excluded:
       any(.hooks[]?; (.command // "") | contains("propagation-advise.sh"));
 
     def strip_excluded:
       map(select(is_excluded | not));
+    def is_removed_agent0_hook($event; $previous_agent0_hooks; $current_agent0_hooks):
+      hook_id($event) as $id |
+      (($previous_agent0_hooks | index($id)) != null)
+      and (($current_agent0_hooks | index($id)) == null);
 
     . as $arr |
     ($arr[0] // {}) as $consumer |
     ($arr[1] // {}) as $agent0 |
+    ($previous_hooks[0] // []) as $previous_agent0_hooks |
+    ($current_hooks[0] // []) as $current_agent0_hooks |
     $consumer
     | (if ($agent0 | has("$schema"))    then .["$schema"]  = $agent0["$schema"]  else . end)
     | .hooks = (
         ((($consumer.hooks // {}) | keys) + (($agent0.hooks // {}) | keys))
         | unique
         | map(. as $k | {
-            ($k): (((($consumer.hooks[$k]) // []) | strip_excluded)
+            ($k): (((($consumer.hooks[$k]) // [])
+                 | strip_excluded
+                 | map(select(is_removed_agent0_hook($k; $previous_agent0_hooks; $current_agent0_hooks) | not)))
                  + ((($agent0.hooks[$k]) // []) | strip_excluded)
                  | unique_by(dedup_key))
           })
+        | map(select((to_entries[0].value | length) > 0))
         | add // {}
       )
   ' "$consumer_base" "$src" > "$tmp" 2>/dev/null; then
     printf '!! settings.json merge failed (jq error)\n' >&2
-    rm -f "$tmp" "$consumer_base"
+    rm -f "$tmp" "$consumer_base" "$previous_hooks" "$current_hooks"
+    SETTINGS_BASELINE_PRESERVE=1
     DRIFT=1
     return
   fi
-  rm -f "$consumer_base"
+  rm -f "$consumer_base" "$previous_hooks" "$current_hooks"
 
   # Up-to-date test: merged result vs current consumer content. dst_sha is empty
   # when the consumer has no settings.json (first sync) — never equals merged.

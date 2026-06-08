@@ -16,7 +16,13 @@ CONSUMER="$TMPDIR/consumer"
 mkdir -p "$SRC/.claude/hooks" "$CONSUMER/.claude"
 
 printf '#!/usr/bin/env bash\necho hookA\n' > "$SRC/.claude/hooks/hookA.sh"
-printf '{"hooks":{}}\n' > "$SRC/.claude/settings.json"
+jq -cn '{
+  hooks: {
+    SessionStart: [
+      {hooks:[{type:"command", command:"bash $CLAUDE_PROJECT_DIR/.agent0/hooks/startup-brief.sh"}]}
+    ]
+  }
+}' > "$SRC/.claude/settings.json"
 printf '# CLAUDE\n\n## Compact Instructions\n' > "$SRC/CLAUDE.md"
 chmod +x "$SRC/.claude/hooks/hookA.sh"
 printf '{"hooks":{}}\n' > "$CONSUMER/.claude/settings.json"
@@ -48,11 +54,23 @@ if [ "$recorded" != "$expected" ]; then
   exit 1
 fi
 
-for key in agent0_commit synced_at tool_version files; do
+for key in agent0_commit synced_at tool_version files settings_hooks; do
   if ! jq -e "has(\"$key\")" "$BASELINE" >/dev/null 2>&1; then
     printf 'FAIL: baseline missing top-level key: %s\n' "$key"
     exit 1
   fi
 done
+
+if ! jq -e '.tool_version == 2' "$BASELINE" >/dev/null 2>&1; then
+  printf 'FAIL: baseline tool_version should be 2 after settings_hooks metadata landed\n'
+  jq . "$BASELINE"
+  exit 1
+fi
+
+if ! jq -e '.settings_hooks[]? | select(test("startup-brief"))' "$BASELINE" >/dev/null 2>&1; then
+  printf 'FAIL: baseline settings_hooks did not record Agent0 settings hook identity\n'
+  jq . "$BASELINE"
+  exit 1
+fi
 
 echo "PASS: 29-baseline-recorded-on-apply"
