@@ -110,16 +110,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.agent0/hooks/context-inject.sh"
-          }
-        ]
-      }
     ]
   }
 }

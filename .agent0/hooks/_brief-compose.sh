@@ -181,6 +181,6 @@ summarize_memory_decay() {
 
 context_pointer() {
   printf '=== context ===\n'
-  printf 'Rules live in .agent0/context/rules/. Prompt turns receive bounded capsules from context-inject.sh.\n'
+  printf 'Rules live in .agent0/context/rules/. Prompt-time context injection is paused while spec 171 redesigns routing.\n'
   printf 'For full inventory: AGENT0_CONTEXT_DIAGNOSTIC=1 bash .agent0/hooks/context-inject.sh <payload.json\n'
 }

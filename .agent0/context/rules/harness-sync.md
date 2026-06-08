@@ -254,10 +254,11 @@ A fourth disposition, distinct from copy/merge/exclude: `COPY_CHECK_SEED` (spec 
 
 Behavioral context ships from `.agent0/context/rules/`, not from Claude Code's native `.claude/rules/`
 directory. The shared startup aggregator (`.agent0/hooks/startup-brief.sh`) is registered for
-`SessionStart`, and the prompt hydrator (`.agent0/hooks/context-inject.sh`) is registered for
-`UserPromptSubmit` in `.claude/settings.json` for Claude Code and tracked `.codex/hooks.json` for Codex CLI.
-sync-harness therefore propagates the neutral source directory plus the shared hook registrations, while
-`.claude/rules/*.md` is not in the manifest.
+`SessionStart` in `.claude/settings.json` for Claude Code and tracked `.codex/hooks.json` for Codex CLI.
+The prompt hydrator (`.agent0/hooks/context-inject.sh`) remains shipped as a helper/diagnostic tool but is
+not registered as a recurring `UserPromptSubmit` hook while spec 171 redesigns prompt and mid-session
+context routing. sync-harness therefore propagates the neutral source directory plus the current shared hook
+registrations, while `.claude/rules/*.md` is not in the manifest.
 
 On an existing consumer project, stale `.claude/rules/*.md` files are upstream-removed orphans once the
 baseline knows about them. The normal deletion pass removes them when unchanged and refuses them when

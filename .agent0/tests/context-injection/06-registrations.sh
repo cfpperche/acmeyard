@@ -14,8 +14,8 @@ if jq -e '.hooks.SessionStart[]?.hooks[]? | select((.command // "") | contains("
   exit 1
 fi
 
-if ! jq -e '.hooks.UserPromptSubmit[]?.hooks[]? | select((.command // "") | contains("context-inject.sh"))' "$ROOT/.claude/settings.json" >/dev/null; then
-  printf 'FAIL: Claude UserPromptSubmit missing context-inject registration\n'
+if jq -e '.hooks.UserPromptSubmit[]?.hooks[]? | select((.command // "") | contains("context-inject.sh"))' "$ROOT/.claude/settings.json" >/dev/null; then
+  printf 'FAIL: Claude UserPromptSubmit still registers context-inject prompt hook\n'
   exit 1
 fi
 
@@ -29,8 +29,8 @@ if jq -e '.hooks.SessionStart[]?.hooks[]? | select((.command // "") | contains("
   exit 1
 fi
 
-if ! jq -e '.hooks.UserPromptSubmit[]?.hooks[]? | select((.command // "") | contains("context-inject.sh"))' "$ROOT/.codex/hooks.json" >/dev/null; then
-  printf 'FAIL: Codex hooks.json missing context-inject UserPromptSubmit registration\n'
+if jq -e '.hooks.UserPromptSubmit[]?.hooks[]? | select((.command // "") | contains("context-inject.sh"))' "$ROOT/.codex/hooks.json" >/dev/null; then
+  printf 'FAIL: Codex hooks.json still registers context-inject UserPromptSubmit hook\n'
   exit 1
 fi
 
