@@ -203,6 +203,10 @@ Product foundation ready at <out>/.
 
   Next: work the foundation child (/sdd plan -> /sdd tasks -> implement),
   then materialize each umbrella child-matrix row via /sdd new <phase-slug>.
+
+  Optional after first release: use .agent0/context/rules/post-launch-maintenance-loop.md
+  to wire production signals into reviewable maintenance work. It is standalone
+  Agent0 guidance, not a /product phase or installed runtime integration.
 ```
 
 ## Worked example — parallel dispatch in a single message

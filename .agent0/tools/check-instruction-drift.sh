@@ -134,14 +134,14 @@ else
   else
     sync_exit=0
     sync_out="$(bash "$sync_tool" --check --agent0-path="$AGENT0_PATH" "$ROOT" 2>&1)" || sync_exit=$?
-    if ! printf '%s\n' "$sync_out" | grep -q 'AGENTS.md'; then
+    if ! grep -q 'AGENTS.md' <<<"$sync_out"; then
       fail "sync-harness --check did not inspect AGENTS.md"
-    elif printf '%s\n' "$sync_out" | grep -qE '(^!!|^~|would copy|would remove).*AGENTS\.md|AGENTS\.md.*(customized|stale)'; then
+    elif grep -qE '(^!!|^~|would copy|would remove).*AGENTS\.md|AGENTS\.md.*(customized|stale)' <<<"$sync_out"; then
       fail "sync-harness reports AGENTS.md drift"
     else
       ok "sync-harness checks AGENTS.md on the baseline-tracked path"
     fi
-    if [ "$sync_exit" -ne 0 ] && ! printf '%s\n' "$sync_out" | grep -q 'AGENTS.md'; then
+    if [ "$sync_exit" -ne 0 ] && ! grep -q 'AGENTS.md' <<<"$sync_out"; then
       fail "sync-harness --check exited $sync_exit before AGENTS.md could be verified"
     fi
   fi

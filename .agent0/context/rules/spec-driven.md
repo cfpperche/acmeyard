@@ -90,6 +90,7 @@ Skills with ≥4 step headers carry an analogous discipline at the SKILL.md body
 ## Relationship to other rules
 
 - **`research-before-proposing.md`** — research happens *during* spec phase, before `plan.md` is locked. Cite sources in the spec or plan.
+- **`agent0-governance-doctrine.md` / `scope-admission-governance.md`** — when a spec adds or expands a first-party Agent0 capacity, governance lane, hook, tool, skill, sync surface, or hard gate, classify the proposal before planning: layer, ownership boundary, evidence, v1 posture, blast radius, validation, and non-goals.
 - **`session-handoff.md`** — if a spec is mid-flight at end of session, mention the active spec dir in `.agent0/HANDOFF.md` so the next session resumes from `tasks.md`.
 
 ## Escalation path

@@ -22,6 +22,8 @@ Industry-aligned methodology — Cagan/SVPG · Teresa Torres OST · GDPR Art 25 
 
 Phase 5 has no step number — it is the terminal phase. `/product` scaffolds, under `<out>/docs/specs/`, the **umbrella spec** (`001-<slug>/`, `**Type:** umbrella`, child-spec matrix sliced by `roadmap.md` phases, standing constraints) plus the **foundation child** (`002-foundation/`, skeleton + tooling + route-group dirs + thin layout shells). Children #2..N are matrix rows, not pre-scaffolded. The full contract is `references/sdd-handoff.md`. This is the deliberate fix for the v2/v3 36-route fan-out whose output quality collapsed: `/product` hands a *contract* to SDD, which is built for deliberate harness-disciplined implementation.
 
+Post-launch maintenance remains sibling infrastructure, not Phase 6. After a consumer ships, `.agent0/context/rules/post-launch-maintenance-loop.md` and `.agent0/context/templates/post-launch-maintenance-loop/` can help that project wire production signals into human-reviewed agent maintenance work. `/product` may point to that rule in its terminal handoff, but it does not install, operate, or require the loop; existing Agent0 consumers that never ran `/product` can use the same guidance.
+
 ## Per-step output + size floors (standard tier)
 
 **The per-step `min_size` anti-stub floor lives in each step's `templates/pipeline/<NN-step>/schema.md`** — the `## Size floor` section + the Layer 1 `required_files` block. The `Size floor` column below is a **derived view**: when a floor changes, update the schema, not this table.

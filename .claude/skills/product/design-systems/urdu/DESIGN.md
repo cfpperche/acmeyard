@@ -50,27 +50,27 @@ All colors are tested for WCAG AA contrast compliance (minimum 4.5:1 for body te
   --color-primary: #0F595E;
   --color-primary-dark: #0D3F45;
   --color-primary-light: #2B7A82;
-  
+
   /* Accent */
   --color-accent: #C05621;
   --color-accent-dark: #A03F1C;
   --color-accent-light: #E8754A;
-  
+
   /* Backgrounds */
   --color-bg-primary: #F4F1EA;
   --color-bg-secondary: #FAFAF8;
-  
+
   /* Text */
   --color-text-primary: #1A202C;
   --color-text-secondary: #4A5568;
   --color-text-tertiary: #718096;
-  
+
   /* Status Colors */
   --color-success: #2D5B4A; /* Deep green */
   --color-warning: #C05621; /* Terracotta (doubles as warning) */
   --color-error: #8B3A3A;   /* Deep burgundy */
   --color-info: #2B7A82;    /* Light teal */
-  
+
   /* Borders & Dividers */
   --color-border: #E2E8F0;
   --color-border-dark: #CBD5E0;
@@ -132,7 +132,7 @@ font-family: "Inter", "Segoe UI", "Helvetica Neue", sans-serif;
 
 **Minimum line-height: 1.8**
 
-Nastaliq has high vertical ascenders and deep descenders. Standard web line-heights (1.5) cause nuqtas (diacritical marks) to clip or overlap. 
+Nastaliq has high vertical ascenders and deep descenders. Standard web line-heights (1.5) cause nuqtas (diacritical marks) to clip or overlap.
 
 **Enforcement:**
 ```css
@@ -210,7 +210,7 @@ In RTL context, directionality is reversed:
   /* ✅ GOOD: Auto-flips in RTL */
   margin-inline: 16px;
   padding-inline-start: 24px;
-  
+
   /* ❌ BAD: Hard-coded LTR; breaks in RTL */
   margin-left: 16px;
   padding-right: 24px;
@@ -367,10 +367,10 @@ In RTL, icons should be placed on the **right (logical-right)** of the text:
 ```html
 <div class="form-group">
   <label lang="ur" for="username">صارف کا نام</label>
-  <input 
-    id="username" 
-    type="text" 
-    class="input" 
+  <input
+    id="username"
+    type="text"
+    class="input"
     placeholder="اپنا صارف کا نام درج کریں"
     lang="ur"
     dir="rtl"
@@ -436,8 +436,8 @@ In RTL, icons should be placed on the **right (logical-right)** of the text:
 
 <!-- ✅ EXCELLENT: Label + aria-label for screen readers -->
 <label for="username" lang="ur">صارف کا نام</label>
-<input 
-  id="username" 
+<input
+  id="username"
   aria-label="صارف کا نام درج کریں"
   placeholder="احمد علی"
 />
@@ -716,7 +716,7 @@ Always use Pakistani Rupee (₨), not generic rupee (₹):
   ```css
   /* ❌ BAD */
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  
+
   /* ✅ GOOD: Shadows only on containers */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   ```
@@ -728,7 +728,7 @@ Always use Pakistani Rupee (₨), not generic rupee (₹):
   <p style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
     یہ بہت لمبا متن ہے...
   </p>
-  
+
   <!-- ✅ GOOD: Full text or expand-button -->
   <details>
     <summary lang="ur">مزید دیکھیں</summary>
@@ -767,10 +767,10 @@ Here's a complete, production-ready example:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Urdu Modern - Quick Start</title>
-  
+
   <!-- Google Fonts: Noto Nastaliq Urdu -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       /* Colors */
@@ -780,11 +780,11 @@ Here's a complete, production-ready example:
       --color-bg: #F4F1EA;
       --color-text: #1A202C;
       --color-border: #E2E8F0;
-      
+
       /* Typography */
       --font-urdu: "Noto Nastaliq Urdu", serif;
       --font-latin: "Inter", "Segoe UI", sans-serif;
-      
+
       /* Spacing */
       --space-xs: 4px;
       --space-sm: 8px;
@@ -792,13 +792,13 @@ Here's a complete, production-ready example:
       --space-lg: 24px;
       --space-xl: 32px;
     }
-    
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: var(--font-urdu);
       background: var(--color-bg);
@@ -807,13 +807,13 @@ Here's a complete, production-ready example:
       direction: rtl;
       -webkit-font-smoothing: antialiased;
     }
-    
+
     .container {
       max-width: 600px;
       margin: 0 auto;
       padding: var(--space-lg);
     }
-    
+
     h1 {
       font-size: 32px;
       font-weight: 700;
@@ -821,21 +821,21 @@ Here's a complete, production-ready example:
       color: var(--color-primary);
       line-height: 1.4;
     }
-    
+
     p {
       font-size: 16px;
       line-height: 1.8;
       margin-block-end: var(--space-md);
       color: var(--color-text);
     }
-    
+
     .button-group {
       display: flex;
       gap: var(--space-md);
       margin-block-start: var(--space-lg);
       flex-direction: row-reverse; /* Reverses button order for RTL visual hierarchy */
     }
-    
+
     .button {
       padding: 12px 24px;
       border: none;
@@ -847,31 +847,31 @@ Here's a complete, production-ready example:
       transition: background 0.2s ease;
       flex: 1;
     }
-    
+
     .button-primary {
       background: var(--color-primary);
       color: white;
     }
-    
+
     .button-primary:hover {
       background: var(--color-primary-dark);
     }
-    
+
     .button-secondary {
       background: transparent;
       color: var(--color-primary);
       border: 2px solid var(--color-primary);
     }
-    
+
     .button-secondary:hover {
       background: rgba(15, 89, 94, 0.1);
     }
-    
+
     .button:focus {
       outline: 2px solid var(--color-accent);
       outline-offset: 2px;
     }
-    
+
     .code-block {
       background: #f5f5f5;
       padding: var(--space-md);
@@ -887,25 +887,25 @@ Here's a complete, production-ready example:
 <body>
   <div class="container">
     <h1>خیر مقدم — Urdu Modern Quick Start</h1>
-    
+
     <p>
       یہ ایک مکمل مثال ہے جو دکھاتی ہے کہ کیسے Urdu Modern ڈیزائن سسٹم استعمال کریں۔
     </p>
-    
+
     <p>
       یہاں کچھ اہم خصوصیات ہیں:
     </p>
-    
+
     <ul style="margin-block-start: var(--space-md); margin-inline-start: var(--space-lg);">
       <li>نسطعلیق فونٹ خودکار طور پر RTL کے لیے بہتر بنایا گیا ہے</li>
       <li>رنگ نقطے <code>#0F595E</code> معلومات تنبیہی کے ساتھ منظم ہیں</li>
       <li>تمام اردو ٹیکسٹ <code>lang="ur"</code> کے ساتھ نشان زد ہے</li>
     </ul>
-    
+
     <div class="code-block">
       &lt;button class="button-primary"&gt;موافقہ&lt;/button&gt;
     </div>
-    
+
     <div class="button-group">
       <button class="button button-primary">موافقہ</button>
       <button class="button button-secondary">منسوخ</button>
@@ -999,5 +999,5 @@ target_audience: Pakistani startups, news, education, government, global Urdu co
 |---------|------|---------|
 | 1.0 | 2025-05-07 | Initial release; complete Nastaliq + RTL + bilingual support |
 
-**Last Updated:** 2025-05-07  
+**Last Updated:** 2025-05-07
 **Status:** Production-Ready ✅

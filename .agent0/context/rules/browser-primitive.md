@@ -68,7 +68,7 @@ The bar for granting an agent "hands" is not *can it click* but **can a later hu
 
 - **Read-only** (`snapshot/screenshot/console/vitals/get/...`) → allowed + audited.
 - **Same-origin interactive** (`click/fill/type/...` against an allowlisted host; `localhost`/`127.0.0.1`/`file://` are local) → allowed + audited.
-- **External / sensitive** (cross-origin navigation; `upload/download/eval/cookies/storage/network/pdf`) → blocked unless the host is allowlisted or `--confirm` is passed (raw `eval` always needs `--confirm`). 
+- **External / sensitive** (cross-origin navigation; `upload/download/eval/cookies/storage/network/pdf`) → blocked unless the host is allowlisted or `--confirm` is passed (raw `eval` always needs `--confirm`).
 
 Every `run` appends a JSONL audit line (`ts/cmd/action/target/class/decision/guard`) under `.agent0/.runtime-state/agent-browser/` (gitignored). Profiles / saved `state` JSON under `.agent0/.runtime-state/agent-browser/{profiles,state}/` are **credential-class** (gitignored — see `secrets-scan.md`).
 

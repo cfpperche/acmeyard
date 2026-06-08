@@ -94,7 +94,7 @@ The sub-agent writes `legal-posture.md` against this 8-required spine (full shap
    - **IP Assignment posture.** Two artifacts the founder MUST execute (and v1 typically defers documentation of):
      - **Founder IP Assignment Agreement** — at entity formation, assigning all founder work-product (pre-incorporation code, designs, brand assets) to the company. Required for Series A IP-chain-of-title diligence; investors reject any unassigned-founder exposure.
      - **PIIA (Proprietary Information and Inventions Assignment Agreement) for contractors and employees** — executed BEFORE first commit / first day, assigning work-product to the company and covering perpetual license + confidentiality. The roadmap's part-time designer / first-engineer-hire is the standard trigger. Retroactive PIIA is unenforceable in many jurisdictions.
-     
+
      Both surface as explicit § Open Decisions rows with concrete deciding signals (Founder IPAA: "at entity formation, before any Company code is committed"; PIIA: "before the designer's first commit / first employee's first day") and `[counsel-review] [founder]` concern tags — NOT buried under § Regulated Aspects § Trade-secret as a sub-paragraph.
 
 6. **Regulated Aspects** — the regulation triggers + posture per trigger. Conditional rows fire only when the trigger applies. Format:
