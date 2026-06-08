@@ -23,6 +23,37 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# --- spec-verify advisory (spec 177) ---------------------------------
+# Opt-in, non-blocking: a SHIPPED spec that DECLARES a `**Verify:**` command in
+# its tasks.md but whose notes.md has no PASSING latest record gets exactly one
+# advisory line. Specs that declare no verify command are never nagged (opt-in,
+# anti-ceremony). Emitted to stderr (the post-edit hook routes it per runtime),
+# never touches the validator's `ok`/exit. Placed BEFORE stack detection so it
+# fires on stackless harness repos too (Agent0 itself emits no-stack and would
+# otherwise skip every advisory below). Opt-out: CLAUDE_VALIDATOR_SKIP_SPEC_VERIFY=1.
+if [ "${CLAUDE_VALIDATOR_SKIP_SPEC_VERIFY:-0}" != "1" ] && [ -d "$ROOT/docs/specs" ]; then
+  for _sv_spec_md in "$ROOT"/docs/specs/*/spec.md; do
+    [ -f "$_sv_spec_md" ] || continue
+    grep -qiE '^\*\*Status:\*\*[[:space:]]*shipped' "$_sv_spec_md" || continue
+    _sv_dir="$(dirname "$_sv_spec_md")"
+    _sv_tasks="$_sv_dir/tasks.md"
+    # opt-in: a verify command must be declared (tasks.md canonical, spec.md fallback)
+    grep -qE '^\*\*Verify:\*\*[[:space:]]*`' "$_sv_tasks" 2>/dev/null \
+      || grep -qE '^\*\*Verify:\*\*[[:space:]]*`' "$_sv_spec_md" 2>/dev/null || continue
+    # latest record: the last tool-shaped verification header in notes.md
+    _sv_notes="$_sv_dir/notes.md"
+    _sv_last=""
+    [ -f "$_sv_notes" ] && _sv_last="$(grep -E '^### [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z — (pass|fail) \([0-9]+/[0-9]+\) — source: (tasks|spec)\.md$' "$_sv_notes" 2>/dev/null | tail -n 1)"
+    case "$_sv_last" in
+      *" — pass "*) : ;;  # latest record passed → silent
+      *)
+        _sv_rel="docs/specs/$(basename "$_sv_dir")"
+        printf 'spec-verify-advisory: %s declares a verify command with no passing record — run bash .agent0/tools/spec-verify.sh %s\n' "$_sv_rel" "$_sv_rel" >&2
+        ;;
+    esac
+  done
+fi
+
 command_str=""
 stack=""
 stack_subtype=""

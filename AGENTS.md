@@ -136,6 +136,10 @@ The post-edit validator runs the project's idiomatic linter — Biome (JS/TS), R
 
 The validator runs a typecheck step only when the project declares the primitive (a `tsconfig.json`, or a `typecheck` script in `package.json`); otherwise it emits `typecheck-advisory:` and skips. See `.agent0/context/rules/typecheck-advisory.md`.
 
+## Spec verify advisory
+
+`/sdd` specs opt in to mechanical re-verification by declaring a `**Verify:** \`<cmd>\`` line in `tasks.md`; `.agent0/tools/spec-verify.sh <spec-dir>` runs it from the repo root and records pass/fail to `notes.md`; the validator emits a non-blocking `spec-verify-advisory:` when a **shipped** spec that declares a verify command has no passing record. Opt-in, markdown+shell only. See `.agent0/context/rules/spec-verify.md`.
+
 ## Context retrieval
 
 `.agent0/tools/context-retrieve.sh search --query "<text>"` — deterministic local retrieval across context rules, memory projection/metadata, specs, and handoff; `context-inject.sh` uses it as a bounded lane after deterministic rule selection (snippets are pointers, no embeddings/vector DB in v1). See `.agent0/context/rules/context-retrieval.md`.
