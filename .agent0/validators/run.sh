@@ -54,6 +54,41 @@ if [ "${CLAUDE_VALIDATOR_SKIP_SPEC_VERIFY:-0}" != "1" ] && [ -d "$ROOT/docs/spec
   done
 fi
 
+# --- sdd-close advisory (spec 179) -----------------------------------
+# Non-blocking + OPT-IN (mirrors spec-verify): only a spec that has FORMALLY
+# CLOSED — i.e. declares a `**Closure:**` line, asserting "done with this
+# evidence" — is checked for closure consistency. For such a spec, if its own
+# artifacts contradict that assertion (unchecked tasks/acceptance boxes, or
+# surviving {{placeholders}}), emit one aggregated advisory line. Specs WITHOUT
+# a `**Closure:**` line are never nagged (the line is the opt-in, exactly like
+# `**Verify:**` for spec-verify), so the legacy corpus stays silent and Agent0's
+# high spec-cadence never floods. (`missing-closure` itself is a finding of the
+# on-demand .agent0/tools/sdd-close.sh full audit, NOT an advisory finding.)
+# Emitted to stderr, never touches `ok`/exit. Placed BEFORE stack detection
+# (stackless harness repos too). Opt-out: CLAUDE_VALIDATOR_SKIP_SDD_CLOSE=1.
+if [ "${CLAUDE_VALIDATOR_SKIP_SDD_CLOSE:-0}" != "1" ] && [ -d "$ROOT/docs/specs" ]; then
+  for _sc_spec_md in "$ROOT"/docs/specs/*/spec.md; do
+    [ -f "$_sc_spec_md" ] || continue
+    grep -qiE '^\*\*Status:\*\*[[:space:]]*shipped(-partial)?\b' "$_sc_spec_md" || continue
+    # opt-in: only specs that declare **Closure:** are held to consistency.
+    grep -qE '^\*\*Closure:\*\*' "$_sc_spec_md" 2>/dev/null || continue
+    _sc_dir="$(dirname "$_sc_spec_md")"
+    _sc_rel="docs/specs/$(basename "$_sc_dir")"
+    _sc_tasks="$_sc_dir/tasks.md"
+    _sc_msgs=""
+    _sc_tu="$(grep -cE '^[[:space:]]*-[[:space:]]\[ \]' "$_sc_tasks" 2>/dev/null)"; _sc_tu="${_sc_tu:-0}"
+    [ "$_sc_tu" -gt 0 ] && _sc_msgs="${_sc_msgs:+$_sc_msgs, }$_sc_tu unchecked task(s)"
+    _sc_au="$(awk '/^##[[:space:]]+Acceptance criteria/{i=1;next} /^##[[:space:]]/{if(i)i=0} i&&/^[[:space:]]*-[[:space:]]\[ \]/{n++} END{printf "%d",n+0}' "$_sc_spec_md")"
+    [ "${_sc_au:-0}" -gt 0 ] && _sc_msgs="${_sc_msgs:+$_sc_msgs, }$_sc_au unchecked acceptance box(es)"
+    if sed 's/`[^`]*`//g' "$_sc_spec_md" 2>/dev/null | grep -qE '\{\{' \
+       || { [ -f "$_sc_tasks" ] && sed 's/`[^`]*`//g' "$_sc_tasks" 2>/dev/null | grep -qE '\{\{'; }; then
+      _sc_msgs="${_sc_msgs:+$_sc_msgs, }surviving placeholders"
+    fi
+    [ -n "$_sc_msgs" ] || continue
+    printf 'sdd-close-advisory: %s declares **Closure:** but %s — run bash .agent0/tools/sdd-close.sh %s\n' "$_sc_rel" "$_sc_msgs" "$_sc_rel" >&2
+  done
+fi
+
 command_str=""
 stack=""
 stack_subtype=""

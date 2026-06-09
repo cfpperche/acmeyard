@@ -140,6 +140,10 @@ The validator runs a typecheck step only when the project declares the primitive
 
 `/sdd` specs opt in to mechanical re-verification by declaring a `**Verify:** \`<cmd>\`` line in `tasks.md`; `.agent0/tools/spec-verify.sh <spec-dir>` runs it from the repo root and records pass/fail to `notes.md`; the validator emits a non-blocking `spec-verify-advisory:` when a **shipped** spec that declares a verify command has no passing record. Opt-in, markdown+shell only. See `.agent0/context/rules/spec-verify.md`.
 
+## Spec close advisory
+
+`.agent0/tools/sdd-close.sh [<spec-dir>]` is a read-only auditor that checks a **shipped** spec's artifacts against its declared status — unchecked tasks/acceptance boxes, surviving `{{placeholders}}`, missing `**Closure:**`. The validator emits a non-blocking `sdd-close-advisory:` **opt-in via the `**Closure:**` line** (a spec that formally closed but whose boxes/placeholders contradict it); specs without a closure line are never nagged, so the legacy corpus stays silent. Complements spec-verify (artifacts vs command); never auto-fixes. See `.agent0/context/rules/sdd-close.md`.
+
 ## Context retrieval
 
 `.agent0/tools/context-retrieve.sh search --query "<text>"` — deterministic local retrieval across context rules, memory projection/metadata, specs, and handoff; `context-inject.sh` uses it as a bounded lane after deterministic rule selection (snippets are pointers, no embeddings/vector DB in v1). See `.agent0/context/rules/context-retrieval.md`.
