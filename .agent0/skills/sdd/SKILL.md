@@ -156,18 +156,18 @@ Copy `.agent0/skills/sdd/templates/debate.md.tmpl` to `docs/specs/NNN-<slug>/deb
 - `{{reviewing agent name}}` → leave as the literal placeholder string `{{reviewing agent name}}` (the reviewing runtime fills it on its first write)
 - `{{runtime or session label}}` → a short label naming your runtime + session date, e.g. `Claude Code session YYYY-MM-DD` or `Codex CLI session YYYY-MM-DD` (use today's date)
 
-### Step 4: Pre-populate Round 1 — 🔓 Medium freedom
+### Step 4: Round 1 — blind opening (REQUIRED) — 🔓 Medium freedom
 
-Only runs when this runtime is the initiating agent (no pre-existing file or freshly archived). Replace the `{{round 1 position — initiating agent fills at scaffold time from spec.md}}` placeholder with a structured summary of `spec.md`:
+Only runs when this runtime is the initiating agent (no pre-existing file or freshly archived). A `/sdd debate` is **always decision-grade** (SDD policy — `.agent0/context/rules/spec-driven.md` § debate.md), so Round 1 **MUST** use the **blind commit/reveal** flow — not the legacy position-first scaffold, which anchors the reviewer. **Do not pre-fill the `{{round 1 position …}}` placeholder.** Instead:
 
-- **Intent** — one paragraph (verbatim or condensed from `spec.md` § Intent)
-- **Top 3 acceptance scenarios** — pick the 3 most load-bearing scenarios from `## Acceptance criteria` (skip plain-bullet static facts; favor Given/When/Then behaviors)
-- **Top 3 open questions** — verbatim from `spec.md` § Open questions; if fewer than 3 exist, include all
-- **Where the initiating agent wants pushback** — 2-3 lines naming the parts of the spec the local agent is least confident about (don't fabricate; if confident throughout, say "I'm confident in scope and acceptance; pushback most useful on Non-goals — is anything missing?")
+1. Write your *independent* opening (formed from `spec.md` only) to a temp file. Structure it: **Intent** (one paragraph, condensed from `spec.md` § Intent) → **top 3 load-bearing acceptance scenarios** (favor Given/When/Then over static-fact bullets) → **top 3 open questions** (verbatim from § Open questions) → **where you want pushback** (2-3 lines; don't fabricate).
+2. Commit its hash: `meeting.sh commit <debate.md> --speaker <id> --text-file <tmp>`. The peer runtime independently commits its own opening; build the peer's blind-opening prompt from `spec.md` only — **never** include your un-revealed opening.
+3. `meeting.sh reveal <debate.md>` publishes both openings only after both have committed (it refuses otherwise and verifies hashes). This de-anchors Round 1.
+4. Gate convergence with the claim/evidence ledger (`meeting.sh ledger-add` / `ledger-check` — a point with only `assertion-only` claims is **unresolved**) and record a **minority report** at synthesis (residual objections preserved verbatim, never smoothed). Mechanics: `.agent0/context/rules/meeting.md` § De-biased deliberation + `.agent0/skills/meeting/SKILL.md` § De-biased decision-grade flow.
 
 Leave all other placeholders (`{{round 1 critique}}`, `{{round 2 counter}}`, …) intact for the reviewing agent and later rounds to fill.
 
-**Anti-confirmation-bias (spec 149) — prefer the blind Round 1.** The position-first Round 1 above anchors the reviewer. For decision-grade debates, instead run the **blind commit/reveal** flow via `meeting.sh` (debate is always decision-grade): each agent commits the `sha256` of its *independent* opening (`meeting.sh commit <debate.md> --speaker <id> --text-file <tmp>`), and `meeting.sh reveal <debate.md>` publishes both only after both committed (it refuses otherwise; it verifies hashes). Build a peer's blind-opening prompt from `spec.md` only — never include the peer's un-revealed opening. Then gate convergence with the claim/evidence ledger (`meeting.sh ledger-add` / `ledger-check` — `assertion-only` ⇒ unresolved) and record a **minority report** at synthesis. Full flow: `.agent0/context/rules/meeting.md` § De-biased deliberation + `.agent0/skills/meeting/SKILL.md` § De-biased decision-grade flow. The legacy position-first Round 1 stays the fallback when the blind flow isn't run.
+**Degraded fallback — legacy position-first Round 1 (NOT a tier you may choose).** The position-first scaffold is permitted **only when an attempted `meeting.sh` command actually fails** — the binary is missing, no `sha256` tool is present, or its state is corrupted. "I chose not to run the blind flow" is never sufficient. When you fall back: (a) emit a `debate-degraded: <reason>` line to stderr and into the debate transcript; (b) pre-fill the `{{round 1 position …}}` placeholder with the same Intent → top-3-scenarios → top-3-OQs → where-you-want-pushback structure; (c) at synthesis, mark `**Resolution:**` as degraded (e.g. `… (degraded — not full-confidence decision-grade)`). A degraded debate **cannot be cited as the decision-grade convergence gate** that `/squad` relies on (per `spec-driven.md` § debate.md).
 
 ### Step 5: Emit handoff instruction — 🔒 Low freedom
 
