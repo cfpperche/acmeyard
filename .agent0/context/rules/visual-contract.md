@@ -1,6 +1,6 @@
 # Visual contract acceptance
 
-When a spec or a delegated task produces UI, "done" must be provable by **driving the UI**, not by static code review — an agent can otherwise claim a screen works without ever loading it. A **visual contract** makes that proof a first-class acceptance artifact in both SDD and the delegation gate. It is the spec-152 follow-up #2, built on the fail-closed `agent-browser` primitive (spec 152/153) and reusing the existing 5-field delegation gate (spec 119/delegation.md). (Spec 155.)
+When **any change** produces UI — whether or not it carries a spec or a delegated task — "done" must be provable by **driving the UI**, not by static code review — an agent can otherwise claim a screen works without ever loading it. The obligation is independent of SDD: a UI tweak that correctly *skips* a spec (see `spec-driven.md` § When to skip) still owes this contract, with its evidence recorded outside a spec — in the PR body, a `report.json` path, or the session handoff. A **visual contract** makes that proof a first-class acceptance artifact in both SDD and the delegation gate. It is the spec-152 follow-up #2, built on the fail-closed `agent-browser` primitive (spec 152/153) and reusing the existing 5-field delegation gate (spec 119/delegation.md). (Spec 155.)
 
 The contract is an **interaction trace**, not a screenshot/pixel diff. It asserts *semantic* conditions — DOM roles/names, a11y, console budget, route/URL, post-action state. Screenshots are review artifacts, never the bar.
 

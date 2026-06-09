@@ -4,31 +4,38 @@ Non-trivial work in this repo is **spec-driven**: write the intent before the co
 
 ## When SDD applies
 
-Apply for any change that meets at least one of:
+SDD is owed when, **before editing**, any one of these questions lacks a short answer already determined by existing convention:
 
-- Touches 3+ files, or introduces a new module/package/service
-- Changes a public API, schema, or contract another component depends on
-- Has user-visible behavior change worth describing in a PR body
-- Has reversibility cost (migrations, infra, destructive ops)
-- Was prompted by a vague request ("add auth", "make it faster") that needs decomposition
+1. **What observable behavior or contract changes?** _(nothing visible outside this file → trivial)_
+2. **Who outside this local file/module depends on it?** _(callers, another service, a consumer, a public route, persisted data)_
+3. **How will it be proven?**
+4. **If it is wrong, how is it reverted or migrated?** _(migrations, auth, billing, permissions, persisted data, feature flags rarely have a trivial answer here)_
+5. **Which approach was chosen among plausible alternatives?** _(no real choice → trivial)_
+
+If every answer is trivial, already-determined, or not-applicable → **skip SDD**, go straight to the edit. If even one needs explanatory writing → **write a spec** before the code.
+
+**Breadth (file count) is not a trigger.** It is evidence only when it crosses independent boundaries — `API + client + persistence` crosses; `component + hook + test + stylesheet` does not. A wide-but-trivial change (a mechanical rename across many files, an obvious-cause bugfix touching tests and docs) skips SDD; a change crossing a contract or ownership boundary earns it even when the diff is small.
 
 ## When to skip
 
-Mechanical or local-only work — go straight to the edit:
+Go straight to the edit when the change is mechanically clear, locally bounded, and has an obvious proof path — **even if several files change**:
 
-- Typos, renames, formatting, lint fixes
-- One-file bug fixes with obvious cause
-- Dependency bumps without behavior change
-- Editing existing specs / docs / configs
+- Typos, formatting, lint fixes, dead-code cleanup, dependency bumps without behavior or contract change
+- Mechanical renames or field propagation where the source of truth is known and no compatibility/rollout decision is involved — file count is irrelevant
+- Obvious-cause bug fixes with a localized behavioral expectation, even when tests, fixtures, or docs also change
+- Small UI layout / copy / style / component tweaks that change no flow, state semantics, permission, persisted data, or public contract
+- Editing existing specs / docs / configs / tests to reflect already-decided behavior
 - Throwaway exploration in a scratch branch
 
-When in doubt, write a spec — 5 minutes of markdown is cheap insurance.
+**Skipping SDD never waives proof.** If UI surfaces changed, the visual-contract obligation still holds (see `.agent0/context/rules/visual-contract.md`) — declare or record the effective `UI impact` and keep the browser-driving evidence somewhere durable: the PR body, a `report.json` path, or the handoff. Use whichever fits the project; do not skip the proof just because there is no spec.
+
+When in doubt, don't ask "how many files?" — ask **which of the five questions a spec would answer**. If the answer is none, skip.
 
 ## The artifacts
 
 Specs live under `docs/specs/NNN-<slug>/` where `NNN` is zero-padded sequential (001, 002, …). Each spec has up to five files — the first three are the canonical contract, `notes.md` is in-flight memory, `debate.md` is an opt-in cross-model review:
 
-- **`spec.md`** — the *what* and *why*. Intent, acceptance criteria as scenarios or a checklist (see § *Acceptance scenarios* below), non-goals, open questions. This is the contract — hand it to a stakeholder or paste it into the PR body. The `**Status:**` line near the top declares lifecycle: `draft` (not started), `in-progress` (work begun), `shipped` (acceptance criteria satisfied), `superseded` (replaced by a later spec, slug named inline — e.g. `superseded by 0NN-<slug>`). An optional `**Type:**` line adjacent to `**Status:**` declares the spec's role — omitted (default) for feature/refinement specs that ship code; `umbrella` for aggregators that track closure of multiple child specs without shipping code themselves (acceptance is the closure of every row in a gap matrix, not a code delta). An optional `**UI impact:** none|render|interaction|flow` line declares whether the spec produces UI and at what depth a visual contract is owed (default `none`); it drives the visual-contract acceptance gate — see `.agent0/context/rules/visual-contract.md`. Expansion to other values (`bugfix` / `refactor` / `research`) is deferred until 3+ specs demand the distinction (rule-of-three demand-test).
+- **`spec.md`** — the *what* and *why*. Intent, acceptance criteria as scenarios or a checklist (see § *Acceptance scenarios* below), non-goals, open questions. This is the contract — hand it to a stakeholder or paste it into the PR body. The `**Status:**` line near the top declares lifecycle as a **single bare enum value**: `draft` (not started), `in-progress` (work begun), `shipped` (acceptance criteria satisfied), `shipped-partial` (delivered with documented residual scope — name it in `**Closure:**`), `superseded` (replaced by a later spec, slug named inline — e.g. `superseded by 0NN-<slug>`), `abandoned` (killed without replacement; record why in `**Closure:**`), `deferred` (parked indefinitely). Keep `**Status:**` mechanically parseable — do **not** append dates, commit hashes, test counts, or rationale to it; that closure evidence belongs on an optional adjacent `**Closure:**` line (e.g. `**Closure:** 2026-06-08 — shipped at <commit>; tests 8/8; residual: none`). A spec is a **historical decision record**, not a living contract: after ship it does not re-verify against the code unless it opts into a `**Verify:**` command (see `.agent0/context/rules/spec-verify.md`). An optional `**Type:**` line adjacent to `**Status:**` declares the spec's role — omitted (default) for feature/refinement specs that ship code; `umbrella` for aggregators that track closure of multiple child specs without shipping code themselves (acceptance is the closure of every row in a gap matrix, not a code delta). An optional `**UI impact:** none|render|interaction|flow` line declares whether the spec produces UI and at what depth a visual contract is owed (default `none`); it drives the visual-contract acceptance gate — see `.agent0/context/rules/visual-contract.md`. Expansion to other values (`bugfix` / `refactor` / `research`) is deferred until 3+ specs demand the distinction (rule-of-three demand-test).
 - **`plan.md`** — the *how*. Approach, files to touch, alternatives considered and rejected (with reasoning), risks and unknowns. This is the engineering judgment.
 - **`tasks.md`** — the *do*. Numbered checklist of concrete execution steps. This is what Claude (or you) works through one at a time, checking off as it goes.
 - **`notes.md`** — the *in-flight design memory* (optional in v1). Decisions, deviations, tradeoffs, and open questions surfaced **while building** that weren't pre-empted by `spec.md` or `plan.md`. Append-only by convention. Four canonical sections (`Design decisions` / `Deviations` / `Tradeoffs` / `Open questions`) function as a routing rubric; sections may stay empty. Entry shape: `### YYYY-MM-DD — <author> — <one-line title>` followed by free-prose body, where `<author>` is `parent` or the `subagent_type` of the delegated worker. Distinct from `spec.md` § *Open questions* (pre-flight, set before implementation) and from `.agent0/HANDOFF.md` (cross-session WIP, overwritten each handoff). Append entries when a non-trivial decision wasn't pre-empted by spec/plan; do not log every micro-step. Sub-agent integration via `DELIVERABLE` — see `.agent0/context/rules/delegation.md` § *The 5-field handoff*.
