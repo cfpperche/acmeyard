@@ -25,6 +25,9 @@ Options:
   --disallowedTools <list>  Space/comma-separated tools to deny.
   --model <model>           Claude model alias or full name.
   --reasoning-effort <lvl>  low|medium|high|xhigh|max (maps to claude --effort). Alias: --effort.
+  --timeout <seconds>       Wall-clock limit for the Claude subprocess (default: 600).
+  --progress-interval <sec> Emit waiting heartbeat to stderr every N seconds; 0 disables (default: 30).
+  --max-budget-usd <amount> Forwarded to claude --max-budget-usd as a native budget guard.
   --add-dir <dir>           Extra dir Claude may access; must resolve under the repo root.
   --bare                    Opt-in: skip hooks/CLAUDE.md/auto-memory (cheap isolated probe).
                             Note: forces auth to ANTHROPIC_API_KEY (breaks OAuth/subscription).
@@ -68,6 +71,37 @@ abs_dir() {
   (cd "$dir" && pwd -P)
 }
 
+is_non_negative_int() {
+  case "$1" in
+    ""|*[!0-9]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+is_positive_int() {
+  is_non_negative_int "$1" || return 1
+  [ "$1" -gt 0 ]
+}
+
+is_positive_decimal() {
+  local value=$1
+  [[ "$value" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]] || return 1
+  local nonzero=${value//[0.]/}
+  [ -n "$nonzero" ]
+}
+
+file_size_bytes() {
+  local file=$1
+  local bytes
+  if [ ! -f "$file" ]; then
+    printf '0'
+    return
+  fi
+  bytes=$(wc -c < "$file" 2>/dev/null || printf '0')
+  bytes=${bytes//[[:space:]]/}
+  printf '%s' "${bytes:-0}"
+}
+
 derive_slug() {
   local raw slug
   raw=$1
@@ -98,6 +132,9 @@ allowed_tools=""
 disallowed_tools=""
 model=""
 reasoning_effort=""
+timeout_seconds="${CLAUDE_EXEC_TIMEOUT_SECONDS:-600}"
+progress_interval_seconds="${CLAUDE_EXEC_PROGRESS_INTERVAL_SECONDS:-30}"
+max_budget_usd=""
 add_dir=""
 bare=0
 allow_writes=0
@@ -141,6 +178,18 @@ while [ "$#" -gt 0 ]; do
       shift; require_value "--reasoning-effort" "${1-}"; reasoning_effort=$1 ;;
     --reasoning-effort=*|--effort=*)
       reasoning_effort=${1#*=}; require_value "--reasoning-effort" "$reasoning_effort" ;;
+    --timeout)
+      shift; require_value "--timeout" "${1-}"; timeout_seconds=$1 ;;
+    --timeout=*)
+      timeout_seconds=${1#--timeout=}; require_value "--timeout" "$timeout_seconds" ;;
+    --progress-interval)
+      shift; require_value "--progress-interval" "${1-}"; progress_interval_seconds=$1 ;;
+    --progress-interval=*)
+      progress_interval_seconds=${1#--progress-interval=}; require_value "--progress-interval" "$progress_interval_seconds" ;;
+    --max-budget-usd)
+      shift; require_value "--max-budget-usd" "${1-}"; max_budget_usd=$1 ;;
+    --max-budget-usd=*)
+      max_budget_usd=${1#--max-budget-usd=}; require_value "--max-budget-usd" "$max_budget_usd" ;;
     --add-dir)
       shift; require_value "--add-dir" "${1-}"; add_dir=$1 ;;
     --add-dir=*)
@@ -201,6 +250,16 @@ case "$reasoning_effort" in
   *) die "invalid --reasoning-effort '$reasoning_effort' (expected low, medium, high, xhigh, or max)" ;;
 esac
 
+if ! is_positive_int "$timeout_seconds"; then
+  die "invalid --timeout '$timeout_seconds' (expected positive integer seconds)"
+fi
+if ! is_non_negative_int "$progress_interval_seconds"; then
+  die "invalid --progress-interval '$progress_interval_seconds' (expected non-negative integer seconds)"
+fi
+if [ -n "$max_budget_usd" ] && ! is_positive_decimal "$max_budget_usd"; then
+  die "invalid --max-budget-usd '$max_budget_usd' (expected a positive number)"
+fi
+
 # Resolve the prompt from exactly one source.
 if [ -n "$task_file" ]; then
   [ -f "$task_file" ] || die "task file does not exist: $task_file"
@@ -221,6 +280,7 @@ fi
 # Dependency checks — fail before creating a success-looking output dir.
 command -v claude >/dev/null 2>&1 || die "claude CLI is not on PATH"
 command -v jq >/dev/null 2>&1 || die "jq is required to extract Claude's final message but is not on PATH"
+command -v timeout >/dev/null 2>&1 || die "timeout is required to bound the Claude subprocess but is not on PATH"
 
 ROOT_REAL="$(abs_dir "$ROOT")"
 case "$STATE_ROOT" in
@@ -307,6 +367,9 @@ fi
 if [ -n "$reasoning_effort" ]; then
   cmd+=(--effort "$reasoning_effort")
 fi
+if [ -n "$max_budget_usd" ]; then
+  cmd+=(--max-budget-usd "$max_budget_usd")
+fi
 if [ -n "$allowed_tools" ]; then
   cmd+=(--allowedTools "$allowed_tools")
 fi
@@ -332,10 +395,46 @@ printf '\n' >> "$command_file"
 # .agent0/HANDOFF.md. (spec 154)
 export CLAUDE_SKIP_SESSION_HOOKS=1
 
+start_epoch="$(date +%s)"
+last_progress_epoch="$start_epoch"
+exit_status_file="$run_dir/.exit-code"
+timed_out=false
+elapsed_seconds=0
+
 set +e
-"${cmd[@]}" < "$prompt_file" > "$stdout_file" 2> "$stderr_file"
-exit_code=$?
+(
+  timeout "${timeout_seconds}s" "${cmd[@]}" < "$prompt_file" > "$stdout_file" 2> "$stderr_file"
+  printf '%s\n' "$?" > "$exit_status_file"
+) &
+runner_pid=$!
+
+while [ ! -f "$exit_status_file" ]; do
+  now_epoch="$(date +%s)"
+  elapsed_seconds=$((now_epoch - start_epoch))
+  if [ "$progress_interval_seconds" -gt 0 ] && [ $((now_epoch - last_progress_epoch)) -ge "$progress_interval_seconds" ]; then
+    printf 'claude-exec: still running elapsed=%ss stdout_bytes=%s stderr_bytes=%s\n' \
+      "$elapsed_seconds" \
+      "$(file_size_bytes "$stdout_file")" \
+      "$(file_size_bytes "$stderr_file")" >&2
+    last_progress_epoch="$now_epoch"
+  fi
+  sleep 1
+done
+
+wait "$runner_pid"
+runner_status=$?
+exit_code="$(cat "$exit_status_file" 2>/dev/null)"
+rm -f "$exit_status_file"
 set -e
+if [ -z "$exit_code" ]; then
+  exit_code=$runner_status
+fi
+end_epoch="$(date +%s)"
+elapsed_seconds=$((end_epoch - start_epoch))
+if [ "$exit_code" -eq 124 ]; then
+  timed_out=true
+  printf 'claude-exec: timed out after %ss\n' "$timeout_seconds" >&2
+fi
 
 # Extract the final message + session id from Claude's JSON output. Both the
 # single-object (json) and JSONL (stream-json) forms carry a type=="result"
@@ -358,6 +457,11 @@ fi
   printf '  "disallowed_tools": %s,\n' "$(json_string "$disallowed_tools")"
   printf '  "model": %s,\n' "$(json_string "$model")"
   printf '  "reasoning_effort": %s,\n' "$(json_string "$reasoning_effort")"
+  printf '  "timeout_seconds": %s,\n' "$timeout_seconds"
+  printf '  "progress_interval_seconds": %s,\n' "$progress_interval_seconds"
+  printf '  "max_budget_usd": %s,\n' "$(json_string "$max_budget_usd")"
+  printf '  "timed_out": %s,\n' "$timed_out"
+  printf '  "elapsed_seconds": %s,\n' "$elapsed_seconds"
   printf '  "add_dir": %s,\n' "$(json_string "$add_dir_real")"
   printf '  "bare": %s,\n' "$([ "$bare" -eq 1 ] && printf true || printf false)"
   printf '  "allow_writes": %s,\n' "$([ "$allow_writes" -eq 1 ] && printf true || printf false)"
@@ -379,6 +483,11 @@ fi
   printf '"permission_mode":%s,' "$(json_string "$permission_mode")"
   printf '"model":%s,' "$(json_string "$model")"
   printf '"reasoning_effort":%s,' "$(json_string "$reasoning_effort")"
+  printf '"timeout_seconds":%s,' "$timeout_seconds"
+  printf '"progress_interval_seconds":%s,' "$progress_interval_seconds"
+  printf '"max_budget_usd":%s,' "$(json_string "$max_budget_usd")"
+  printf '"timed_out":%s,' "$timed_out"
+  printf '"elapsed_seconds":%s,' "$elapsed_seconds"
   printf '"bare":%s,' "$([ "$bare" -eq 1 ] && printf true || printf false)"
   printf '"json":%s,' "$([ "$json" -eq 1 ] && printf true || printf false)"
   printf '"resume_id":%s,' "$(json_string "$resume_id")"

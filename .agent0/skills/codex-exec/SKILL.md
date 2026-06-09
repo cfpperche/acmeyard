@@ -1,12 +1,12 @@
 ---
 name: codex-exec
-description: Launch the local Codex CLI as a bounded non-interactive subprocess and capture its output. Use when Claude Code or another agent needs a second-model probe, review, or continuation through `codex exec` with explicit parameters such as model, profile, sandbox, cwd, resume id, JSON capture, or output path. Defaults to read-only sandbox; pass a non-read-only sandbox only when file edits are intended. Not for proving interactive Codex TUI hook behavior or native subagent semantics.
-argument-hint: "[--model <model>] [--profile <profile>] [--sandbox read-only|workspace-write|danger-full-access] [--cwd <repo-relative-dir>] [--resume <session-id>] [--json] [--output <path>] (--task <prompt> | --task-file <path> | prompt via stdin)"
+description: Launch the local Codex CLI as a bounded non-interactive subprocess and capture its output. Use when Claude Code or another agent needs a second-model probe, review, or continuation through `codex exec` with explicit parameters such as model, profile, sandbox, cwd, timeout, progress interval, resume id, JSON capture, or output path. Defaults to read-only sandbox and a 600-second timeout; pass a non-read-only sandbox only when file edits are intended. Not for proving interactive Codex TUI hook behavior or native subagent semantics.
+argument-hint: "[--model <model>] [--profile <profile>] [--sandbox read-only|workspace-write|danger-full-access] [--timeout <seconds>] [--progress-interval <seconds>] [--cwd <repo-relative-dir>] [--resume <session-id>] [--json] [--output <path>] (--task <prompt> | --task-file <path> | prompt via stdin)"
 license: MIT
 compatibility: Compatible with agentskills.io-compatible runtimes that can run bash and have Codex CLI installed/authenticated. The helper invokes the repo-local `.agent0/tools/codex-local-env.sh` launcher and writes artifacts under `.agent0/.runtime-state/codex-exec/` by default.
 metadata:
   agent0-portability-tier: agentskills-portable
-  version: "0.1"
+  version: "0.2"
 ---
 
 # /codex-exec — Codex CLI bridge
@@ -41,6 +41,8 @@ Supported parameters:
 - `--model <model>` — maps to Codex `--model`.
 - `--profile <profile>` — maps to Codex `--profile`.
 - `--reasoning-effort <minimal|low|medium|high|xhigh>` — maps to Codex `-c model_reasoning_effort=<level>`. Validated against the allowed set; recorded in `metadata.json` / `runs.jsonl`.
+- `--timeout <seconds>` — wall-clock limit for the Codex subprocess; default is `600`. Must be a positive integer. A timeout exits `124`, preserves partial artifacts, and records `timed_out: true`.
+- `--progress-interval <seconds>` — helper stderr heartbeat interval while Codex is still running; default is `30`. Must be a non-negative integer; `0` disables heartbeats.
 - `--sandbox read-only|workspace-write|danger-full-access` — default is `read-only`.
 - `--cwd <dir>` — working root for Codex; must resolve under the repo root.
 - `--resume <session-id>` — calls `codex exec resume <session-id> -`.
@@ -50,12 +52,14 @@ Supported parameters:
 
 Pass `--sandbox workspace-write` only when Codex is expected to edit files. The helper never grants write access by default.
 
+Current local Codex CLI help does not expose a native spend or budget guard equivalent to Claude's `--max-budget-usd`. Use scoped prompts, read-only sandboxing, `--json` capture, and an explicit `--timeout`; do not describe the timeout as a cost ceiling.
+
 ## Flow — 🔒 Low freedom
 
 1. Build a concise task prompt with scope, constraints, and the expected deliverable.
 2. Run `scripts/codex-exec.sh` with the needed parameters.
 3. Relay the helper summary: `exit_code`, `run_dir`, `last_message`, and `metadata`.
-4. If `exit_code` is non-zero, surface stderr and treat the result as failed or partial.
+4. If `exit_code` is non-zero, surface stderr and treat the result as failed or partial. `124` means the helper's wall-clock timeout elapsed.
 5. If the run succeeded, read `last-message.md` when the user needs the Codex answer inline; otherwise provide the artifact path.
 
 ## Examples — 🔓 Medium freedom
@@ -67,8 +71,15 @@ bash .agent0/skills/codex-exec/scripts/codex-exec.sh \
 
 # Capture JSONL events and use an explicit model.
 bash .agent0/skills/codex-exec/scripts/codex-exec.sh \
-  --model gpt-5-codex --json \
+  --model gpt-5-codex --json --timeout 600 --progress-interval 30 \
   --task "Inspect .agent0/skills/codex-exec/SKILL.md and report compliance risks only."
+
+# Broad read-only review with explicit run bounds.
+bash .agent0/skills/codex-exec/scripts/codex-exec.sh \
+  --json \
+  --timeout 900 \
+  --progress-interval 30 \
+  --task "Review only docs/specs/184-codex-exec-run-bounds/spec.md and .agent0/skills/codex-exec/scripts/codex-exec.sh. Report concrete risks and cite files."
 
 # Continue a prior Codex session.
 bash .agent0/skills/codex-exec/scripts/codex-exec.sh \
@@ -99,8 +110,17 @@ bash .agent0/skills/codex-exec/scripts/codex-exec.sh \
 
 **Failure indicators:** The helper starts a fresh session instead of resume, puts the prompt before the session id, streams JSONL inline instead of writing an artifact, or masks a non-zero Codex exit.
 
+### Eval 3: Timeout and heartbeat
+
+**Input:** The parent agent invokes `codex-exec` with `--timeout 1 --progress-interval 0 --task "Timeout test"` against a slow child process, and separately invokes a slow successful child with `--timeout 5 --progress-interval 1`.
+
+**Expected:** The timed-out run exits `124`, preserves partial stdout/stderr, records `timeout_seconds`, `progress_interval_seconds`, `timed_out`, and `elapsed_seconds` in metadata and `runs.jsonl`, and leaves no child process running in deterministic tests. The slow successful run emits at least one `codex-exec: still running ... stdout_bytes=... stderr_bytes=...` heartbeat to helper stderr.
+
+**Failure indicators:** The helper waits forever, reports timeout as success, drops partial artifacts, writes heartbeat lines into Codex stdout artifacts, or accepts malformed timeout/progress values.
+
 ## Notes
 
 - The helper calls `.agent0/tools/codex-local-env.sh`, which loads `.codex/.env.local` and starts from the repo root.
 - Runtime artifacts are gitignored by the existing `.agent0/.runtime-state/*` rule. Set `CODEX_EXEC_STATE_DIR` only in tests or local experiments that need a temporary artifact directory.
+- `CODEX_EXEC_TIMEOUT_SECONDS` and `CODEX_EXEC_PROGRESS_INTERVAL_SECONDS` can override defaults for tests or local experiments; CLI flags take precedence.
 - The aggregate run log is `runs.jsonl`; each run also gets `metadata.json`.

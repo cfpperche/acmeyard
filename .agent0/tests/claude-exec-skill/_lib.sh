@@ -36,6 +36,19 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local file=$1
+  local needle=$2
+  local label=$3
+  if [ -f "$file" ] && grep -Fq -- "$needle" "$file"; then
+    no "$label"
+    echo "      unexpected: $needle"
+    sed -n '1,120p' "$file"
+  else
+    ok "$label"
+  fi
+}
+
 assert_arg_order() {
   local file=$1
   local left=$2
@@ -72,6 +85,10 @@ for arg in "$@"; do
 done
 cat > "$FAKE_CLAUDE_STDIN"
 
+if [ -n "${FAKE_CLAUDE_PID_FILE:-}" ]; then
+  printf '%s\n' "$$" > "$FAKE_CLAUDE_PID_FILE"
+fi
+
 fmt="text"
 prev=""
 for arg in "$@"; do
@@ -83,6 +100,16 @@ done
 
 sid="${FAKE_CLAUDE_SESSION:-fake-session-0001}"
 result_line=$(printf '{"type":"result","subtype":"success","is_error":false,"result":"fake claude review","session_id":"%s"}' "$sid")
+
+if [ -n "${FAKE_CLAUDE_PARTIAL_STDOUT:-}" ]; then
+  printf '%s\n' "$FAKE_CLAUDE_PARTIAL_STDOUT"
+fi
+if [ -n "${FAKE_CLAUDE_PARTIAL_STDERR:-}" ]; then
+  printf '%s\n' "$FAKE_CLAUDE_PARTIAL_STDERR" >&2
+fi
+if [ -n "${FAKE_CLAUDE_SLEEP:-}" ]; then
+  sleep "$FAKE_CLAUDE_SLEEP"
+fi
 
 if [ "$fmt" = "stream-json" ]; then
   printf '{"type":"system","subtype":"init","session_id":"%s"}\n' "$sid"

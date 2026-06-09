@@ -1,12 +1,12 @@
 ---
 name: claude-exec
-description: Launch the local Claude Code CLI as a bounded non-interactive subprocess and capture its output. Use when Codex CLI or another non-Claude runtime needs a second-model probe, review, or continuation through `claude -p` with explicit parameters such as permission mode, model, tool allowlists, add-dir, resume id, JSON capture, or output path. The permission mode is required with no default; the helper refuses to run without it. Not for proving interactive Claude TUI hook behavior.
-argument-hint: "--permission-mode <default|plan|acceptEdits|bypassPermissions|dontAsk|auto> [--allow-writes] [--model <model>] [--reasoning-effort <low|medium|high|xhigh|max>] [--allowedTools <list>] [--disallowedTools <list>] [--add-dir <repo-relative-dir>] [--bare] [--resume <session-id>] [--json] [--output <path>] [--slug <slug>] (--task <prompt> | --task-file <path> | prompt via stdin)"
+description: Launch the local Claude Code CLI as a bounded non-interactive subprocess and capture its output. Use when Codex CLI or another non-Claude runtime needs a second-model probe, review, or continuation through `claude -p` with explicit parameters such as permission mode, model, timeout, budget guard, tool allowlists, add-dir, resume id, JSON capture, or output path. The permission mode is required with no default; the helper refuses to run without it. Not for proving interactive Claude TUI hook behavior.
+argument-hint: "--permission-mode <default|plan|acceptEdits|bypassPermissions|dontAsk|auto> [--allow-writes] [--model <model>] [--reasoning-effort <low|medium|high|xhigh|max>] [--timeout <seconds>] [--progress-interval <seconds>] [--max-budget-usd <amount>] [--allowedTools <list>] [--disallowedTools <list>] [--add-dir <repo-relative-dir>] [--bare] [--resume <session-id>] [--json] [--output <path>] [--slug <slug>] (--task <prompt> | --task-file <path> | prompt via stdin)"
 license: MIT
-compatibility: Compatible with agentskills.io-compatible runtimes that can run bash and have the Claude Code CLI (`claude`) plus `jq` installed and authenticated. The helper invokes `claude` directly and writes artifacts under `.agent0/.runtime-state/claude-exec/` by default.
+compatibility: Compatible with agentskills.io-compatible runtimes that can run bash and have the Claude Code CLI (`claude`), `jq`, and `timeout` installed, with Claude authenticated. The helper invokes `claude` directly and writes artifacts under `.agent0/.runtime-state/claude-exec/` by default.
 metadata:
   agent0-portability-tier: agentskills-portable
-  version: "0.1"
+  version: "0.2"
 ---
 
 # /claude-exec — Claude Code CLI bridge
@@ -44,6 +44,9 @@ Supported parameters:
 - `--allowedTools <list>` / `--disallowedTools <list>` — space/comma-separated tool names. Compose read-only review with `--permission-mode default --allowedTools "Read Grep Glob"`.
 - `--model <model>` — maps to Claude `--model`.
 - `--reasoning-effort <low|medium|high|xhigh|max>` — maps to Claude `--effort` (alias: `--effort`). Validated against the allowed set; recorded in `metadata.json` / `runs.jsonl`.
+- `--timeout <seconds>` — wall-clock limit for the Claude subprocess. Defaults to `600`; must be a positive integer. Timeout exits `124`, records `timed_out: true`, and preserves any partial artifacts.
+- `--progress-interval <seconds>` — emit a concise waiting heartbeat to stderr every N seconds while Claude is still running. Defaults to `30`; `0` disables the heartbeat, not the timeout.
+- `--max-budget-usd <amount>` — maps to Claude `--max-budget-usd`, validates obvious malformed/non-positive values, and records the configured guard in metadata. This is a native Claude budget guard, not a hard billing ceiling; Claude remains the authority for actual spend and budget-exceeded semantics.
 - `--add-dir <dir>` — extra directory Claude may access; must resolve under the repo root.
 - `--bare` — opt-in: skip hooks/CLAUDE.md/auto-memory for a cheap isolated probe. Note: forces auth to strictly `ANTHROPIC_API_KEY` (breaks OAuth/subscription); off by default so reviews keep project context.
 - `--resume <session-id>` — continue an existing Claude session via `claude -p --resume <id>`.
@@ -64,7 +67,7 @@ bash .agent0/skills/claude-exec/scripts/claude-exec.sh --permission-mode acceptE
 1. Build a concise task prompt with scope, constraints, and the expected deliverable.
 2. Run `scripts/claude-exec.sh` with `--permission-mode` plus the needed parameters.
 3. Relay the helper summary: `exit_code`, `run_dir`, `last_message`, `session_id`, and `metadata`.
-4. If `exit_code` is non-zero, surface stderr and treat the result as failed or partial.
+4. If `exit_code` is non-zero, surface stderr and treat the result as failed or partial. `124` means the helper-owned timeout fired; budget-exceeded responses are Claude non-zero results and must not be treated as successful review.
 5. If the run succeeded, read `last-message.md` when the user needs the Claude answer inline; otherwise provide the artifact path. Use the captured `session_id` to `--resume` later.
 
 ## Examples — 🔓 Medium freedom
@@ -74,6 +77,17 @@ bash .agent0/skills/claude-exec/scripts/claude-exec.sh --permission-mode acceptE
 bash .agent0/skills/claude-exec/scripts/claude-exec.sh \
   --permission-mode default --allowedTools "Read Grep Glob" \
   --task "Review docs/specs/129-claude-exec/plan.md for implementation risks."
+
+# Broad read-only repo review: keep scope, time, budget guard, and progress explicit.
+bash .agent0/skills/claude-exec/scripts/claude-exec.sh \
+  --permission-mode default \
+  --allowedTools "Read Grep Glob" \
+  --reasoning-effort low \
+  --timeout 180 \
+  --progress-interval 15 \
+  --max-budget-usd 0.25 \
+  --json \
+  --task "Inspect only package.json, README.md, LICENSE, and src/entrypoints; report the top 5 risks with file refs."
 
 # Capture JSONL events and pin a model.
 bash .agent0/skills/claude-exec/scripts/claude-exec.sh \
@@ -119,11 +133,20 @@ bash .agent0/skills/claude-exec/scripts/claude-exec.sh \
 
 **Failure indicators:** The helper starts a fresh session, streams JSONL inline instead of writing an artifact, or masks a non-zero Claude exit.
 
+### Eval 4: Timeout and budget-guarded review
+
+**Input:** The parent invokes `claude-exec` with `--permission-mode default --allowedTools "Read Grep Glob" --timeout 1 --progress-interval 1 --max-budget-usd 0.05 --task "Slow review."`
+
+**Expected:** The helper forwards `--max-budget-usd 0.05` to Claude, emits waiting heartbeats while the child is still running, exits `124` if the timeout fires, records timeout/budget/progress fields in `metadata.json` and `runs.jsonl`, and preserves partial stdout/stderr artifacts.
+
+**Failure indicators:** The helper runs indefinitely, reports success after timeout, drops partial artifacts, omits timeout/budget fields from metadata, or accepts malformed timeout/budget values.
+
 ## Notes
 
 - The helper invokes `claude` directly; no launcher. `claude` self-discovers config (`~/.claude`, `.claude/settings.json`) and anchors on cwd.
 - `jq` is a hard dependency — Claude has no `--output-last-message`, so the final message is extracted from the JSON output (`select(.type=="result")|.result`).
 - The prompt is always passed via stdin so variadic flags (`--allowedTools`, `--add-dir`) never swallow it.
+- The subprocess is bounded by default (`--timeout 600`), and the helper emits waiting heartbeats every 30 seconds unless `--progress-interval 0` is passed. Set `CLAUDE_EXEC_TIMEOUT_SECONDS` or `CLAUDE_EXEC_PROGRESS_INTERVAL_SECONDS` only for local/test overrides.
 - Runtime artifacts are gitignored by the existing `.agent0/.runtime-state/*` rule. Set `CLAUDE_EXEC_STATE_DIR` only in tests or local experiments that need a temporary artifact directory.
 - The aggregate run log is `runs.jsonl`; each run also gets `metadata.json` carrying `session_id` for later `--resume`.
 - This bridge is symmetric to `codex-exec` but deliberately not a clone — see `docs/specs/129-claude-exec/`.

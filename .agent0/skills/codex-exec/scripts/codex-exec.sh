@@ -11,6 +11,8 @@ Options:
   --model <model>           Codex model override.
   --profile <profile>       Codex config profile.
   --reasoning-effort <lvl>  minimal|low|medium|high|xhigh (maps to -c model_reasoning_effort).
+  --timeout <seconds>       Wall-clock limit for the Codex subprocess (default: 600).
+  --progress-interval <sec> Emit waiting heartbeat to stderr every N seconds; 0 disables (default: 30).
   --sandbox <mode>          read-only | workspace-write | danger-full-access (default: read-only).
   --cwd <dir>               Codex working root; must resolve under the repo root.
   --resume <session-id>     Run codex exec resume <session-id> -.
@@ -53,6 +55,30 @@ abs_dir() {
   (cd "$dir" && pwd -P)
 }
 
+is_non_negative_int() {
+  case "$1" in
+    ""|*[!0-9]*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
+is_positive_int() {
+  is_non_negative_int "$1" || return 1
+  [ "$1" -gt 0 ]
+}
+
+file_size_bytes() {
+  local file=$1
+  local bytes
+  if [ ! -f "$file" ]; then
+    printf '0'
+    return
+  fi
+  bytes=$(wc -c < "$file" 2>/dev/null || printf '0')
+  bytes=${bytes//[[:space:]]/}
+  printf '%s' "${bytes:-0}"
+}
+
 derive_slug() {
   local raw slug
   raw=$1
@@ -82,6 +108,8 @@ task_file=""
 model=""
 profile=""
 reasoning_effort=""
+timeout_seconds="${CODEX_EXEC_TIMEOUT_SECONDS:-600}"
+progress_interval_seconds="${CODEX_EXEC_PROGRESS_INTERVAL_SECONDS:-30}"
 sandbox="read-only"
 cwd="$ROOT"
 resume_id=""
@@ -140,6 +168,24 @@ while [ "$#" -gt 0 ]; do
     --reasoning-effort=*)
       reasoning_effort=${1#--reasoning-effort=}
       require_value "--reasoning-effort" "$reasoning_effort"
+      ;;
+    --timeout)
+      shift
+      require_value "--timeout" "${1-}"
+      timeout_seconds=$1
+      ;;
+    --timeout=*)
+      timeout_seconds=${1#--timeout=}
+      require_value "--timeout" "$timeout_seconds"
+      ;;
+    --progress-interval)
+      shift
+      require_value "--progress-interval" "${1-}"
+      progress_interval_seconds=$1
+      ;;
+    --progress-interval=*)
+      progress_interval_seconds=${1#--progress-interval=}
+      require_value "--progress-interval" "$progress_interval_seconds"
       ;;
     --sandbox|-s)
       shift
@@ -217,6 +263,13 @@ case "$reasoning_effort" in
   *) die "invalid --reasoning-effort '$reasoning_effort' (expected minimal, low, medium, high, or xhigh)" ;;
 esac
 
+if ! is_positive_int "$timeout_seconds"; then
+  die "invalid --timeout '$timeout_seconds' (expected positive integer seconds)"
+fi
+if ! is_non_negative_int "$progress_interval_seconds"; then
+  die "invalid --progress-interval '$progress_interval_seconds' (expected non-negative integer seconds)"
+fi
+
 if [ -n "$task_file" ]; then
   [ -f "$task_file" ] || die "task file does not exist: $task_file"
   if [ -n "$task" ] || [ "${#positional[@]}" -gt 0 ]; then
@@ -235,6 +288,7 @@ fi
 
 [ -f "$LAUNCHER" ] || die "missing launcher: $LAUNCHER"
 command -v codex >/dev/null 2>&1 || die "codex CLI is not on PATH"
+command -v timeout >/dev/null 2>&1 || die "timeout is required to bound the Codex subprocess but is not on PATH"
 
 ROOT_REAL="$(abs_dir "$ROOT")"
 case "$STATE_ROOT" in
@@ -337,9 +391,45 @@ printf '\n' >> "$command_file"
 export CLAUDE_SKIP_SESSION_HOOKS=1
 
 set +e
-"${cmd[@]}" < "$prompt_file" > "$stdout_file" 2> "$stderr_file"
-exit_code=$?
+start_epoch="$(date +%s)"
+last_progress_epoch="$start_epoch"
+exit_status_file="$run_dir/.exit-code"
+timed_out=false
+elapsed_seconds=0
+
+(
+  timeout "${timeout_seconds}s" "${cmd[@]}" < "$prompt_file" > "$stdout_file" 2> "$stderr_file"
+  printf '%s\n' "$?" > "$exit_status_file"
+) &
+runner_pid=$!
+
+while [ ! -f "$exit_status_file" ]; do
+  now_epoch="$(date +%s)"
+  elapsed_seconds=$((now_epoch - start_epoch))
+  if [ "$progress_interval_seconds" -gt 0 ] && [ $((now_epoch - last_progress_epoch)) -ge "$progress_interval_seconds" ]; then
+    printf 'codex-exec: still running elapsed=%ss stdout_bytes=%s stderr_bytes=%s\n' \
+      "$elapsed_seconds" \
+      "$(file_size_bytes "$stdout_file")" \
+      "$(file_size_bytes "$stderr_file")" >&2
+    last_progress_epoch="$now_epoch"
+  fi
+  sleep 1
+done
+
+wait "$runner_pid"
+runner_status=$?
+exit_code="$(cat "$exit_status_file" 2>/dev/null)"
+rm -f "$exit_status_file"
 set -e
+if [ -z "$exit_code" ]; then
+  exit_code=$runner_status
+fi
+end_epoch="$(date +%s)"
+elapsed_seconds=$((end_epoch - start_epoch))
+if [ "$exit_code" -eq 124 ]; then
+  timed_out=true
+  printf 'codex-exec: timed out after %ss\n' "$timeout_seconds" >&2
+fi
 
 if [ ! -f "$last_message" ]; then
   : > "$last_message"
@@ -353,6 +443,10 @@ fi
   printf '  "model": %s,\n' "$(json_string "$model")"
   printf '  "profile": %s,\n' "$(json_string "$profile")"
   printf '  "reasoning_effort": %s,\n' "$(json_string "$reasoning_effort")"
+  printf '  "timeout_seconds": %s,\n' "$timeout_seconds"
+  printf '  "progress_interval_seconds": %s,\n' "$progress_interval_seconds"
+  printf '  "timed_out": %s,\n' "$timed_out"
+  printf '  "elapsed_seconds": %s,\n' "$elapsed_seconds"
   printf '  "cwd": %s,\n' "$(json_string "$CWD_REAL")"
   printf '  "resume_id": %s,\n' "$(json_string "$resume_id")"
   printf '  "json": %s,\n' "$([ "$json" -eq 1 ] && printf true || printf false)"
@@ -372,6 +466,10 @@ fi
   printf '"model":%s,' "$(json_string "$model")"
   printf '"profile":%s,' "$(json_string "$profile")"
   printf '"reasoning_effort":%s,' "$(json_string "$reasoning_effort")"
+  printf '"timeout_seconds":%s,' "$timeout_seconds"
+  printf '"progress_interval_seconds":%s,' "$progress_interval_seconds"
+  printf '"timed_out":%s,' "$timed_out"
+  printf '"elapsed_seconds":%s,' "$elapsed_seconds"
   printf '"cwd":%s,' "$(json_string "$CWD_REAL")"
   printf '"resume_id":%s,' "$(json_string "$resume_id")"
   printf '"json":%s,' "$([ "$json" -eq 1 ] && printf true || printf false)"

@@ -36,6 +36,19 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local file=$1
+  local needle=$2
+  local label=$3
+  if [ -f "$file" ] && grep -Fq -- "$needle" "$file"; then
+    no "$label"
+    echo "      unexpected: $needle"
+    sed -n '1,120p' "$file"
+  else
+    ok "$label"
+  fi
+}
+
 assert_arg_order() {
   local file=$1
   local left=$2
@@ -80,6 +93,19 @@ for arg in "$@"; do
   fi
   prev=$arg
 done
+
+if [ -n "${FAKE_CODEX_PID_FILE:-}" ]; then
+  printf '%s\n' "$$" > "$FAKE_CODEX_PID_FILE"
+fi
+if [ -n "${FAKE_CODEX_PARTIAL_STDOUT:-}" ]; then
+  printf '%s\n' "$FAKE_CODEX_PARTIAL_STDOUT"
+fi
+if [ -n "${FAKE_CODEX_PARTIAL_STDERR:-}" ]; then
+  printf '%s\n' "$FAKE_CODEX_PARTIAL_STDERR" >&2
+fi
+if [ -n "${FAKE_CODEX_SLEEP:-}" ]; then
+  sleep "$FAKE_CODEX_SLEEP"
+fi
 
 if [ -n "$out" ]; then
   mkdir -p "$(dirname "$out")"
