@@ -148,6 +148,49 @@ else
   check advisory "core.hooksPath" ".githooks/ absent — no native git hooks to wire"
 fi
 
+# --- shipped integrity (consumer-side; baseline-backed, advisory-only) -------
+# Verifies the executable shipped surface (hooks/tools/validators/githooks)
+# against the sha256 set recorded by the last sync in
+# .agent0/harness-sync-baseline.json. A mismatch is advisory, never broken:
+# it means "customized or tampered — reconcile via sync-harness --check".
+# Source repo / pre-first-sync (no baseline) is n/a, not a failure.
+printf '\n=== shipped integrity ===\n'
+BASELINE_JSON="$PROJECT_DIR/.agent0/harness-sync-baseline.json"
+if [ ! -f "$BASELINE_JSON" ]; then
+  check ok "shipped integrity" "no sync baseline (source repo or pre-first-sync) — n/a"
+elif ! command -v jq >/dev/null 2>&1 || ! command -v sha256sum >/dev/null 2>&1; then
+  check advisory "shipped integrity" "jq/sha256sum missing — cannot verify baseline hashes"
+else
+  si_verified=0; si_flagged=0
+  while IFS="$(printf '\t')" read -r si_rel si_sha; do
+    [ -n "$si_rel" ] || continue
+    case "$si_rel" in
+      .agent0/hooks/*.sh|.agent0/tools/*|.agent0/validators/*|.claude/hooks/*.sh|.githooks/*) ;;
+      *) continue ;;
+    esac
+    si_abs="$PROJECT_DIR/$si_rel"
+    if [ ! -f "$si_abs" ]; then
+      si_flagged=$((si_flagged + 1))
+      check advisory "$si_rel" "in sync baseline but missing on disk"
+      continue
+    fi
+    si_cur="$(sha256sum "$si_abs" | awk '{print $1}')"
+    if [ "$si_cur" = "$si_sha" ]; then
+      si_verified=$((si_verified + 1))
+    else
+      si_flagged=$((si_flagged + 1))
+      check advisory "$si_rel" "differs from last-sync baseline — customized or tampered; run sync-harness --check"
+    fi
+  done <<EOF_SI
+$(jq -r '(.files // {}) | to_entries[] | "\(.key)\t\(.value)"' "$BASELINE_JSON" 2>/dev/null)
+EOF_SI
+  if [ "$si_flagged" -eq 0 ]; then
+    check ok "shipped executables" "$si_verified verified against sync baseline"
+  else
+    check advisory "shipped executables" "$si_verified verified, $si_flagged diverged/missing (see lines above)"
+  fi
+fi
+
 # --- binaries (required → broken; optional → advisory) -----------------------
 printf '\n=== binaries ===\n'
 bin_check() {

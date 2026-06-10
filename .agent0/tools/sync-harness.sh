@@ -244,7 +244,6 @@ COPY_CHECK_FILES=(
 # hook command from the settings merge so the registration is invisible too.
 COPY_CHECK_EXCLUDE=(
   ".agent0/hooks/propagation-advise.sh"
-  ".agent0/context/rules/propagation-advisory.md"
   ".agent0/tests/propagation-advisory/*"
   # Ephemeral OD-engine tarball-extraction cache (gitignored via
   # .../runtime/od-sync/.gitignore → extracted-*/). The git-aware walk already

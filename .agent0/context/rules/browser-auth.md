@@ -7,7 +7,7 @@ paths:
 
 # Browser auth
 
-> **agent-browser-native (spec 153).** Authenticated-content reads run **exclusively** through the `agent-browser` primitive — the human-in-the-loop `browser-login.sh` → `adopt` flow below. There is **no Playwright/Chrome DevTools MCP path**: those survive only as opt-in `.mcp.json.example` / `.codex/config.toml.example` templates a consumer may wire up for their own use, never a harness fallback. See `.agent0/context/rules/browser-primitive.md`.
+> **agent-browser-native.** Authenticated-content reads run **exclusively** through the `agent-browser` primitive — the human-in-the-loop `browser-login.sh` → `adopt` flow below. There is **no Playwright/Chrome DevTools MCP path**: those survive only as opt-in `.mcp.json.example` / `.codex/config.toml.example` templates a consumer may wire up for their own use, never a harness fallback. See `.agent0/context/rules/browser-primitive.md`.
 
 Authenticated reads use a **headed-login → save state → headless-reuse** pattern, where the **human owns the browser and the agent attaches over CDP** (the environment can't reliably keep an agent-spawned headed window alive — see browser-primitive.md § Human-in-the-loop auth). This rule documents the signaling convention (`BROWSER_LOGIN_REQUIRED: <host>`), the per-host state directory (`.agent0/.runtime-state/agent-browser/state/<host>.json`), and the X/Twitter shortcut that avoids the full flow for a common case.
 
@@ -39,7 +39,7 @@ Next step: run  bash .agent0/tools/browser-login.sh x  — log in at x.com in th
 See .agent0/context/rules/browser-auth.md.
 ```
 
-The phrase is all-caps with a colon-space separator — agents and humans alike can grep for it (and `context-inject.sh` auto-selects this rule on `*login*`/`*browser*`/`*auth*` prompts). The agent does NOT retry the same host until the human signals login is done (by replying, or by the agent's `adopt --detect-only` confirming, or by the state file existing on disk). _(Renamed from the legacy `BROWSER_AUTH_REQUIRED` in spec 153 — the remedy is now `browser-login.sh` → `adopt`, not an MCP session.)_
+The phrase is all-caps with a colon-space separator — agents and humans alike can grep for it (and `context-inject.sh` auto-selects this rule on `*login*`/`*browser*`/`*auth*` prompts). The agent does NOT retry the same host until the human signals login is done (by replying, or by the agent's `adopt --detect-only` confirming, or by the state file existing on disk). _(Renamed from the legacy `BROWSER_AUTH_REQUIRED` — the remedy is now `browser-login.sh` → `adopt`, not an MCP session.)_
 
 ## The flow — `browser-login.sh` → `adopt` → reuse
 

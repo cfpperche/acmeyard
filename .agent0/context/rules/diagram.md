@@ -7,7 +7,7 @@ paths:
 
 # Diagram
 
-`/diagram` (engine `.agent0/tools/diagram.sh`) is **deterministic technical-visual generation** — architecture, flowchart, sequence, ER, class, state diagrams from a **Mermaid text source**, rendered **locally, zero-cost, git-trackable**. It is the **deterministic sibling of `/video --mode code`** and the **technical-visual counterpart to `/image`** (organic/photo/raster, paid). Following the structured-capacity contract, it is a **`/transcribe`-class LOCAL/FREE utility**: a provenance manifest (not a cost ledger), no `FAL_KEY`/tiers/`--confirm-cost-usd`, `status` decoupled from exit, `doctor`/`caps`, rule as propagation vehicle, honest degradation. Graduated from the decision-grade meeting `.agent0/meetings/diagram-capacity-technical-visuals-2026-06-06T22-34-59Z/` (blind openings converged independently; ledger 7 claims / 0 assertion-only; `synthesis: accepted`). Spec: `docs/specs/162-diagram/`.
+`/diagram` (engine `.agent0/tools/diagram.sh`) is **deterministic technical-visual generation** — architecture, flowchart, sequence, ER, class, state diagrams from a **Mermaid text source**, rendered **locally, zero-cost, git-trackable**. It is the **deterministic sibling of `/video --mode code`** and the **technical-visual counterpart to `/image`** (organic/photo/raster, paid). Following the structured-capacity contract, it is a **`/transcribe`-class LOCAL/FREE utility**: a provenance manifest (not a cost ledger), no `FAL_KEY`/tiers/`--confirm-cost-usd`, `status` decoupled from exit, `doctor`/`caps`, rule as propagation vehicle, honest degradation. Graduated from a decision-grade meeting (blind openings converged independently; ledger 7 claims / 0 assertion-only; `synthesis: accepted`).
 
 ## Why it exists (the demand)
 

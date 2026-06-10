@@ -10,7 +10,7 @@ paths:
 
 # Capacity kit
 
-`.agent0/tools/lib/capacity.sh` is the shared **kernel** for Agent0's capacity tools — the plumbing the 6 capacity tools (`image`/`video`/`audio`/`sound`/`transcribe`/`diagram`) used to hand-copy, extracted once + tested once so the **7th tool is config, not a clone**. A small, flat helper lib (NOT a framework): each tool still owns its own main control flow, arg parsing, `doctor`/`caps` domain fields, manifest *schema*, engine invocation, and storage policy. Precedent: `lib/managed-block.sh`. Spec: `docs/specs/163-capacity-kit/` (graduated from the decision-grade meeting `.agent0/meetings/capacity-tool-kit-consolidation-2026-06-07T00-28-12Z/`).
+`.agent0/tools/lib/capacity.sh` is the shared **kernel** for Agent0's capacity tools — the plumbing the 6 capacity tools (`image`/`video`/`audio`/`sound`/`transcribe`/`diagram`) used to hand-copy, extracted once + tested once so the **7th tool is config, not a clone**. A small, flat helper lib (NOT a framework): each tool still owns its own main control flow, arg parsing, `doctor`/`caps` domain fields, manifest *schema*, engine invocation, and storage policy. Precedent: `lib/managed-block.sh`.
 
 ## What the kernel provides
 
@@ -37,18 +37,18 @@ The discipline that keeps the kit honest (and behavior-preserving):
 - The tool's `append_manifest` keeps its own **fields** (schema differs per tool) and routes the append through `cap_manifest_append`.
 - Tool-specific acquisition ladders stay in the tool (see below).
 
-## Paid-media sub-kit (`lib/paid-media.sh`) — shipped (spec 164)
+## Paid-media sub-kit (`lib/paid-media.sh`)
 
 The paid-domain plumbing that was duplicated across the paid tools, extracted into a sibling sourced lib `.agent0/tools/lib/paid-media.sh` — a **separate** file (not folded into `capacity.sh`) on cohesion grounds: `capacity.sh`'s identity is local/free; `FAL_KEY` + a `*-tiers.yaml` oracle are paid-domain. Contents are **four PURE helpers** (never emit, never exit — the calling tool keeps its own failure contract, which is what lets one lib serve `sound`'s compact `cap_fail` and `audio`'s pretty local `fail`):
 
 - `pm_yaml_top <file> <key>` / `pm_yaml_tier_field <file> <tier> <field>` — the fixed 2-/4-space `*-tiers.yaml` block-scan scalar oracle (quote + inline-comment stripping), the former `yget`/`ytop`.
 - `pm_has_fal_key` (predicate → 0/1) / `pm_fal_key_state` (→ `set|unset`) — leak-safe FAL_KEY state; never echoes the value.
 
-Consumers (4): `sound` + `audio --remote` (tools-dir, source at file-top — spec 164); `video` + `image` (**skill-dir**, **cross-dir lazy-load** — spec 165). `video` consumes `pm_yaml_*` (reader, byte-identical) + `pm_has_fal_key`; `image` consumes `pm_has_fal_key` only (its tiers are a pipe-table, not YAML — left intact).
+Consumers (4): `sound` + `audio --remote` (tools-dir, source at file-top); `video` + `image` (**skill-dir**, **cross-dir lazy-load**). `video` consumes `pm_yaml_*` (reader, byte-identical) + `pm_has_fal_key`; `image` consumes `pm_has_fal_key` only (its tiers are a pipe-table, not YAML — left intact).
 
-**Cross-dir sourcing (spec 165).** Skill-dir tools source `. "$PROJECT_DIR/.agent0/tools/lib/paid-media.sh"` — the `$PROJECT_DIR` anchor they already use for `fal-rest.sh` (robust in repo + synced consumer, where `$PROJECT_DIR` = consumer root). It is **lazy-loaded** via a `load_paid_media` guard called INSIDE paid subcommands only (video `prepare`/`submit`/`poll`; image `prepare`/`exec`), NOT at file-top — so the non-paid lanes (`--help`/`noargs`/`record`) keep working when the lib is absent. Absent → `exit 70` + `missing kit library lib/paid-media.sh` on the paid path. Pinned by `.agent0/tests/capacity-kit/cross-dir-source.sh` (repo-root + consumer-root via an observable sentinel + absent-lib-exit-70-while-help-works).
+**Cross-dir sourcing.** Skill-dir tools source `. "$PROJECT_DIR/.agent0/tools/lib/paid-media.sh"` — the `$PROJECT_DIR` anchor they already use for `fal-rest.sh` (robust in repo + synced consumer, where `$PROJECT_DIR` = consumer root). It is **lazy-loaded** via a `load_paid_media` guard called INSIDE paid subcommands only (video `prepare`/`submit`/`poll`; image `prepare`/`exec`), NOT at file-top — so the non-paid lanes (`--help`/`noargs`/`record`) keep working when the lib is absent. Absent → `exit 70` + `missing kit library lib/paid-media.sh` on the paid path. Pinned by `.agent0/tests/capacity-kit/cross-dir-source.sh` (repo-root + consumer-root via an observable sentinel + absent-lib-exit-70-while-help-works).
 
-**Honest scope (kill-gate measurement, decision-grade `/meeting`):** the cost FORMULA, the `--confirm-cost-usd` GATE (`sound` hybrid-threshold vs `video` hard-confirm vs none — conflicting *policy*), and fal invocation (sync `run` vs async `submit`; per-model body — already at `fal-rest.sh`) are **genuine per-tool variants and stay LOCAL**. A FAL_KEY *require* helper was rejected (would fail internally, violating the pure contract). **`image` pipe-table → YAML is out** (it would CREATE a new oracle/doc/test surface, not RETIRE duplication this pass introduces — its own spec if ever wanted). The spec-164 `video`/`image` reopen-trigger is now **CLOSED** by spec 165.
+**Honest scope (kill-gate measurement, decision-grade `/meeting`):** the cost FORMULA, the `--confirm-cost-usd` GATE (`sound` hybrid-threshold vs `video` hard-confirm vs none — conflicting *policy*), and fal invocation (sync `run` vs async `submit`; per-model body — already at `fal-rest.sh`) are **genuine per-tool variants and stay LOCAL**. A FAL_KEY *require* helper was rejected (would fail internally, violating the pure contract). **`image` pipe-table → YAML is out** (it would CREATE a new oracle/doc/test surface, not RETIRE duplication this pass introduces — its own spec if ever wanted). The `video`/`image` cross-dir reopen-trigger is now **CLOSED**.
 
 ## Local acquisition stays a TEMPLATE, not a library
 
@@ -64,8 +64,8 @@ The local acquire ladders are **policy-heavy and not byte-identical** — `uvx -
 
 ## Sync propagation (load-bearing)
 
-`.agent0/tools|*.sh` is a maxdepth-1 glob — it does NOT recurse into `lib/`. The kit propagates via a dedicated **`.agent0/tools/lib|*.sh`** glob in `sync-harness.sh`'s `COPY_CHECK_GLOBS` (spec 163; the `managed-block.sh` literal was retired in favor of it). Without this, a consumer's tools would `source` a lib that never shipped and break. Guarded by `.agent0/tests/capacity-kit/sync-propagation.sh`.
+`.agent0/tools|*.sh` is a maxdepth-1 glob — it does NOT recurse into `lib/`. The kit propagates via a dedicated **`.agent0/tools/lib|*.sh`** glob in `sync-harness.sh`'s `COPY_CHECK_GLOBS` (the `managed-block.sh` literal was retired in favor of it). Without this, a consumer's tools would `source` a lib that never shipped and break. Guarded by `.agent0/tests/capacity-kit/sync-propagation.sh`.
 
 ## Behavior-preservation gate
 
-This was a **pure, test-protected refactor** — zero behavior change. The gate: every tool's offline suite green **+** `.agent0/tests/capacity-kit/golden.sh verify` clean (captures each tool's `caps`/`doctor`/`--help`/usage/bad-flag stdout+stderr+exit, before vs after; `FAL_KEY` pinned UNSET so it is hermetic) **+** `paid-golden.sh verify` (spec 164 — pins `sound`/`audio` caps/doctor under FAL_KEY **set AND unset** + a key-value leak guard) **+** the sync-propagation test (covers `paid-media.sh`) **+** `missing-kit-guard.sh` (capacity + paid-media absence both exit 70) **+** `bash -n` **+** `doctor`. Run `golden.sh capture` BEFORE any future kit change, `verify` after.
+This was a **pure, test-protected refactor** — zero behavior change. The gate: every tool's offline suite green **+** `.agent0/tests/capacity-kit/golden.sh verify` clean (captures each tool's `caps`/`doctor`/`--help`/usage/bad-flag stdout+stderr+exit, before vs after; `FAL_KEY` pinned UNSET so it is hermetic) **+** `paid-golden.sh verify` (pins `sound`/`audio` caps/doctor under FAL_KEY **set AND unset** + a key-value leak guard) **+** the sync-propagation test (covers `paid-media.sh`) **+** `missing-kit-guard.sh` (capacity + paid-media absence both exit 70) **+** `bash -n` **+** `doctor`. Run `golden.sh capture` BEFORE any future kit change, `verify` after.

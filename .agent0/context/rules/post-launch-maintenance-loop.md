@@ -2,7 +2,6 @@
 paths:
   - ".agent0/context/rules/post-launch-maintenance-loop.md"
   - ".agent0/context/templates/post-launch-maintenance-loop/**"
-  - "docs/specs/169-post-launch-maintenance-loop/"
 ---
 
 # Post-launch maintenance loop
@@ -70,7 +69,4 @@ Maintenance signals may feed `/product` vN only when the human explicitly decide
 
 ## Cross-references
 
-- `.agent0/context/rules/agent0-governance-doctrine.md` - instrument vs own boundary.
-- `.agent0/context/rules/scope-admission-governance.md` - admission outcome and evidence ladder.
 - `.agent0/context/rules/secrets-scan.md` - credential-class handling.
-- `docs/specs/169-post-launch-maintenance-loop/` - design record.

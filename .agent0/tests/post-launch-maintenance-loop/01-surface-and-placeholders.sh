@@ -16,7 +16,7 @@ require_file() {
 require_text() {
   local file="$1"
   local text="$2"
-  rg -q --fixed-strings "$text" "$file" || fail "missing '$text' in $file"
+  grep -qF -- "$text" "$file" || fail "missing '$text' in $file"
 }
 
 rule=".agent0/context/rules/post-launch-maintenance-loop.md"
@@ -26,7 +26,7 @@ checklist=".agent0/context/templates/post-launch-maintenance-loop/review-checkli
 example=".agent0/context/templates/post-launch-maintenance-loop/examples/sentry-linear-codex.md"
 product_skill=".claude/skills/product/SKILL.md"
 pipeline=".claude/skills/product/references/pipeline-coverage.md"
-governance=".agent0/context/rules/agent0-governance-doctrine.md"
+governance=".agent0/memory/agent0-governance-doctrine.md"
 
 for file in "$rule" "$provider_map" "$issue_template" "$checklist" "$example" "$product_skill" "$pipeline" "$governance"; do
   require_file "$file"
@@ -79,7 +79,7 @@ targets=(
   "$pipeline"
 )
 
-if rg -n "SENTRY_DSN=|auth_token|lin_[A-Za-z0-9]|ghp_|sk-[A-Za-z0-9]|xox[baprs]-|team_[A-Za-z0-9]|Linear team ID|github.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" "${targets[@]}"; then
+if grep -nE "SENTRY_DSN=|auth_token|lin_[A-Za-z0-9]|ghp_|sk-[A-Za-z0-9]|xox[baprs]-|team_[A-Za-z0-9]|Linear team ID|github.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+" "${targets[@]}"; then
   fail "configured credential or concrete consumer id pattern found"
 fi
 

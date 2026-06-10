@@ -7,7 +7,7 @@ paths:
 
 # Sound
 
-`/sound` (engine `.agent0/tools/sound.sh`) is **creative-audio generation — music + sound effects**, **paid-only and taste-judged**. It is the creative-asset member of Agent0's audio family, alongside the recognition-side `/transcribe` (spec 159, STT) and the synthesis-side `/audio` (spec 160, TTS). The deliberate distinction: `/audio` is **local-first/free** because light on-device TTS engines exist (Kokoro/Piper); music/SFX has **no light local engine** (MusicGen is heavy/GPU), so `/sound` is openly the **`/image brand` analog** — paid, taste-judged, human-in-loop — NOT a `/audio` analog. Kept a **separate skill** (not folded into `/audio` as `--kind`) precisely so `/audio`'s local-first identity stays coherent. Graduated from the audio-family meeting's deferred music/SFX reopen-trigger (`.agent0/meetings/audio-transcribe-media-family-skills-2026-06-06T17-01-43Z/`). Spec: `docs/specs/161-sound/`.
+`/sound` (engine `.agent0/tools/sound.sh`) is **creative-audio generation — music + sound effects**, **paid-only and taste-judged**. It is the creative-asset member of Agent0's audio family, alongside the recognition-side `/transcribe` (STT) and the synthesis-side `/audio` (TTS). The deliberate distinction: `/audio` is **local-first/free** because light on-device TTS engines exist (Kokoro/Piper); music/SFX has **no light local engine** (MusicGen is heavy/GPU), so `/sound` is openly the **`/image brand` analog** — paid, taste-judged, human-in-loop — NOT a `/audio` analog. Kept a **separate skill** (not folded into `/audio` as `--kind`) precisely so `/audio`'s local-first identity stays coherent.
 
 ## Paid-only by nature — no free lane
 

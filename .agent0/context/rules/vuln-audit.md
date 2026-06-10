@@ -1,18 +1,17 @@
 # Vuln audit
 
-`/vuln-audit` (and its engine `.agent0/tools/vuln-audit.sh`) detects **known-vulnerable installed dependencies** in a project, on demand, and surfaces them with enough context to act. It is the positive replacement for the supply-chain block/advise capacity removed in spec 112: that capacity gated `npm install` at the wrong moment, and the founder's decision was explicit — **don't limit lib usage at install time; detect vulnerable installed libs and act.** This capacity answers one narrow, high-signal question from the project's lockfiles — "does a dependency I already lock have a published advisory with a fixed version?" — across whatever ecosystems the project actually has (stack-aware), identically under Claude Code and Codex CLI (runtime-neutral). It reports and proposes; it never auto-upgrades and never blocks a commit or an install.
+`/vuln-audit` (and its engine `.agent0/tools/vuln-audit.sh`) detects **known-vulnerable installed dependencies** in a project, on demand, and surfaces them with enough context to act. It is the positive replacement for a supply-chain block/advise capacity that was removed because it gated `npm install` at the wrong moment — the decision was explicit: **don't limit lib usage at install time; detect vulnerable installed libs and act.** This capacity answers one narrow, high-signal question from the project's lockfiles — "does a dependency I already lock have a published advisory with a fixed version?" — across whatever ecosystems the project actually has (stack-aware), identically under Claude Code and Codex CLI (runtime-neutral). It reports and proposes; it never auto-upgrades and never blocks a commit or an install.
 
-See `docs/specs/120-vuln-audit/` for the full spec, the cross-model debate that shaped it, and the plan.
 
 ## Trigger surface — on-demand only
 
-The audit runs **only when invoked** — via `/vuln-audit` in Claude Code, or `bash .agent0/tools/vuln-audit.sh` directly (Codex CLI / any runtime / CI). It is deliberately **not** on the `PreToolUse(Bash)` install path, **not** on the `.githooks/pre-commit` path, and **not** scheduled. Gating install was the wrong shape (spec 112); a commit gate is the same anti-pattern one step later.
+The audit runs **only when invoked** — via `/vuln-audit` in Claude Code, or `bash .agent0/tools/vuln-audit.sh` directly (Codex CLI / any runtime / CI). It is deliberately **not** on the `PreToolUse(Bash)` install path, **not** on the `.githooks/pre-commit` path, and **not** scheduled. Gating install is the wrong shape; a commit gate is the same anti-pattern one step later.
 
 **Staleness limitation (honest by design):** a vulnerability published *after* your last run is invisible until you next run it. A recurring cadence is the documented deferred path via the generic `/routine` capacity — point a routine at `bash .agent0/tools/vuln-audit.sh` if you want periodic scans. No v1 code ships for this; see `.agent0/context/rules/routines.md`.
 
 ## Engine — osv-scanner-only (v1)
 
-The engine is **osv-scanner** (Google): one static binary, 19+ lockfile ecosystems in a single pass, the OSV database (free/transparent), call-graph FP reduction. It is `osv-scanner`-only in v1 by deliberate decision (recorded in `docs/specs/120-vuln-audit/debate.md`):
+The engine is **osv-scanner** (Google): one static binary, 19+ lockfile ecosystems in a single pass, the OSV database (free/transparent), call-graph FP reduction. It is `osv-scanner`-only in v1 by deliberate decision:
 
 - **Trivy was rejected** — its release infrastructure was supply-chain compromised in March 2026 with vulnerability-DB updates suspended; disqualifying for a security tool.
 - **No second-source fallback matrix** (`npm audit` / `pip-audit` / `bun audit`) — it reintroduces divergent severity models, package-identity normalization, duplicate findings, and per-ecosystem remediation semantics. Deferred behind observed demand (rule-of-three).
@@ -72,8 +71,6 @@ Unlike the project's gates (delegation, secrets-scan, governance, routines), vul
 
 ## Cross-references
 
-- `docs/specs/120-vuln-audit/` — spec, plan, tasks, debate (Claude Code ↔ Codex CLI, converged in 2 rounds).
-- `docs/specs/112-prune-supply-chain-and-secrets-advise/` — the removal this capacity positively replaces.
 - `.agent0/context/rules/secrets-scan.md` — sibling security capacity (the gate-shaped one this deliberately is *not*).
 - `.agent0/context/rules/tdd.md` § Reading the validator advisory — the `<kind>-advisory:` non-blocking family this mirrors.
 - `.agent0/context/rules/routines.md` — the deferred recurring-cadence path.

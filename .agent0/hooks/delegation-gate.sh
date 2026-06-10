@@ -51,14 +51,12 @@ AUDIT_LOG="$PROJECT_DIR/.agent0/delegation-audit.jsonl"
 
 # --- Phase 1: Override marker ---
 override_reason=""
-override_present=0
 override_too_short=0
 
 # Start-of-line anchor (with optional leading whitespace) so prose that
 # *documents* the marker mid-paragraph is not treated as a bypass.
 override_line="$(printf '%s' "$PROMPT" | grep -E '^[[:space:]]*# OVERRIDE: ' | head -1 | sed -e 's/^[[:space:]]*//' || true)"
 if [ -n "$override_line" ]; then
-  override_present=1
   reason="${override_line#'# OVERRIDE: '}"
   reason="$(printf '%s' "$reason" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
   if [ ${#reason} -ge 10 ]; then

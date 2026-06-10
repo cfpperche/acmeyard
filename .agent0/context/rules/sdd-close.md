@@ -8,13 +8,13 @@ paths:
 
 # Spec close advisory
 
-A spec that declares `**Status:** shipped` is asserting it is done. **sdd-close** checks that the spec's own artifacts back that assertion. `.agent0/tools/sdd-close.sh` is a read-only auditor that reports, per shipped (or `shipped-partial`) spec, where the artifacts disagree with the declared status; the post-edit validator (`.agent0/validators/run.sh`) emits a non-blocking `sdd-close-advisory:` for specs that have **formally closed** (declare a `**Closure:**` line) but whose artifacts still contradict that closure. It is the static-consistency complement of [spec-verify](spec-verify.md) (spec 177): verify proves the spec's *command* still passes; close proves the spec's *artifacts* agree with its status. It never runs or duplicates `**Verify:**`. Spec 179.
+A spec that declares `**Status:** shipped` is asserting it is done. **sdd-close** checks that the spec's own artifacts back that assertion. `.agent0/tools/sdd-close.sh` is a read-only auditor that reports, per shipped (or `shipped-partial`) spec, where the artifacts disagree with the declared status; the post-edit validator (`.agent0/validators/run.sh`) emits a non-blocking `sdd-close-advisory:` for specs that have **formally closed** (declare a `**Closure:**` line) but whose artifacts still contradict that closure. It is the static-consistency complement of [spec-verify](spec-verify.md): verify proves the spec's *command* still passes; close proves the spec's *artifacts* agree with its status. It never runs or duplicates `**Verify:**`.
 
 ## The four findings
 
 For a shipped / `shipped-partial` spec, sdd-close reports any of:
 
-- **`tasks-unchecked`** — `tasks.md` still has `- [ ]` boxes (the canonical defect: spec 177 shipped with every task box unchecked).
+- **`tasks-unchecked`** — `tasks.md` still has `- [ ]` boxes (the canonical defect: a shipped spec with every task box still unchecked).
 - **`acceptance-unchecked`** — `spec.md`'s `## Acceptance criteria` section still has `- [ ]` boxes (counted only within that section — Open-questions boxes do not count).
 - **`placeholders`** — surviving `{{...}}` scaffold placeholders in `spec.md` or `tasks.md`. Inline `` `code` `` spans are stripped first, so a spec that merely *discusses* template syntax (e.g. `` `{{SLUG}}` ``) is not a false positive.
 - **`missing-closure`** — no uncommented `**Closure:**` line (see [spec-driven.md](spec-driven.md) § The artifacts for the closure convention).

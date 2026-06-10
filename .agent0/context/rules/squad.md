@@ -1,10 +1,10 @@
 # Squad
 
-`/squad` (spec 150) is Agent0's **autonomous, symmetric, ping-pong multi-agent build loop**: two heterogeneous runtimes (Claude Code ↔ Codex CLI today; the name is N-ready) implement one already-`/sdd plan`-ned spec together, taking turns *without a human pumping each turn*, until an **externally-verified done-condition** is met — then the human approves and triggers production. It is Etapa 2 of the roadmap whose Etapa 1 (`149-deliberation-confirmation-bias`) makes "the agents agree" trustworthy.
+`/squad` is Agent0's **autonomous, symmetric, ping-pong multi-agent build loop**: two heterogeneous runtimes (Claude Code ↔ Codex CLI today; the name is N-ready) implement one already-`/sdd plan`-ned spec together, taking turns *without a human pumping each turn*, until an **externally-verified done-condition** is met — then the human approves and triggers production. It is the autonomous build loop whose prerequisite is the de-biased deliberation capacity that makes "the agents agree" trustworthy.
 
 ## The load-bearing invariant
 
-**Done is defined by reality external to the agents, never by their agreement.** Agent agreement only sets `propose-done`; the external `gate` (the `squad.json` commands — tests/build/validator green) is the only thing that reaches `ready_for_human_prod`. This is enforced mechanically in `squad.sh` and is *why* spec 149 is a hard predecessor: two models converging is a social signal, not evidence the product works.
+**Done is defined by reality external to the agents, never by their agreement.** Agent agreement only sets `propose-done`; the external `gate` (the `squad.json` commands — tests/build/validator green) is the only thing that reaches `ready_for_human_prod`. This is enforced mechanically in `squad.sh` and is *why* the de-biased deliberation capacity is a hard predecessor: two models converging is a social signal, not evidence the product works.
 
 ## Shape
 
@@ -12,7 +12,7 @@
 - **Gate contract:** `docs/specs/<NNN-slug>/squad.json` (see the skill's `references/squad-contract.md`).
 - **Symmetric initiation:** whoever runs `/squad` owns the loop and drives the peer via `codex-exec` / `claude-exec` (workspace-write). No runtime is privileged.
 - **Target must contain the harness:** the exec bridges anchor `ROOT` to the harness root and refuse a `--cwd` outside it, so `/squad`'s peer-driving only works inside a repo that has the Agent0 harness (Agent0 itself, or a consumer with it synced) — never an external/`/tmp` repo. (Surfaced by the 150.1 live dogfood; `init` warns when the bridge scripts are absent.)
-- **Peer-turn hygiene (spec 154):** a bridge sub-invocation (`codex-exec`/`claude-exec`) is a bounded subprocess, not a handoff-owning session — both bridges set `CLAUDE_SKIP_SESSION_HOOKS=1` so the session-handoff Stop-hook nag does NOT fire mid-turn (otherwise the peer gets blocked into rewriting the orchestrator-owned, `forbidden_paths` `HANDOFF.md`). Recover from a false-positive/reconciled abort with **`squad.sh resume`** (non-destructive re-baseline; refuses a genuine forbidden touch without `--force`) rather than `rollback` (which discards uncommitted work). Author `forbidden_paths` with anchored patterns — a bare substring like `secrets` false-matches `secrets-scan.md`.
+- **Peer-turn hygiene:** a bridge sub-invocation (`codex-exec`/`claude-exec`) is a bounded subprocess, not a handoff-owning session — both bridges set `CLAUDE_SKIP_SESSION_HOOKS=1` so the session-handoff Stop-hook nag does NOT fire mid-turn (otherwise the peer gets blocked into rewriting the orchestrator-owned, `forbidden_paths` `HANDOFF.md`). Recover from a false-positive/reconciled abort with **`squad.sh resume`** (non-destructive re-baseline; refuses a genuine forbidden touch without `--force`) rather than `rollback` (which discards uncommitted work). Author `forbidden_paths` with anchored patterns — a bare substring like `secrets` false-matches `secrets-scan.md`.
 
 ## The three flaws the design rejects (the bounded/gate-driven posture)
 
@@ -25,8 +25,8 @@ The maximalist "infinite, 100% AI, human only at the very end, convergence = the
 
 ## Relationship to other capacities
 
-- **149 (de-biased deliberation)** — hard predecessor; `/squad` reuses its commit/reveal + claim/evidence ledger for any in-loop disagreement.
-- **138 (meeting-bounded-autopilot)** — `/squad` is the autonomous-loop demand 138 was gated on, realized as a *build* loop carrying 138's bounded/gate-driven discipline; 138's friction *measurement* stays, its autopilot-build concern is superseded by 150.
+- **De-biased deliberation** — hard predecessor; `/squad` reuses its commit/reveal + claim/evidence ledger for any in-loop disagreement.
+- **Meeting bounded-autopilot** — `/squad` is the autonomous-loop demand the meeting autopilot gate was gated on, realized as a *build* loop carrying that bounded/gate-driven discipline; the friction *measurement* stays, its autopilot-build concern is superseded by `/squad`.
 - **`/product` + SDD** — `/squad` runs a spec the planning pipeline produced; it does not replace them.
 - **governance-gate / secrets-scan** — unchanged floors; the squad's prod-trigger is human, and destructive/outward actions stay gated.
 

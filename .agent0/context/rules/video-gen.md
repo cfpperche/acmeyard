@@ -17,7 +17,7 @@ A consumer project that activates neither pays zero cost. The skill is a thin ro
 
 ## Why this shape (and not Remotion / Higgsfield / one-mode)
 
-Chosen via a cross-model debate (Claude Code ↔ Codex CLI; `docs/specs/132-video-skill/debate.md`):
+Chosen via a cross-model debate (Claude Code ↔ Codex CLI):
 
 - **HyperFrames over Remotion** — Remotion is free only for ≤3-person orgs (paid license above), a per-consumer gate that fights harness propagation. HyperFrames is Apache-2.0, no threshold, and HTML is more reliable for LLM-authored compositions.
 - **Own the authoring layer, depend on the engine** — we use the pinned `hyperframes@<pin>` npm engine but ship our **own** composition template + `references/authoring.md` rather than installing the upstream `heygen-com/hyperframes` agent-skill (a second un-version-controlled discovery surface).
@@ -96,4 +96,3 @@ The render fingerprint is recorded as **fields only**. There is intentionally **
 - `.agent0/skills/video/references/authoring.md` — owned composition-authoring guide
 - `.agent0/tools/fal-rest.sh` — shared fal queue REST primitives (a follow-up spec migrates `/image` onto this)
 - `.agent0/context/rules/image-gen.md` — sibling capacity; the exemplar this mirrors
-- `docs/specs/132-video-skill/` — spec, plan, cross-model debate

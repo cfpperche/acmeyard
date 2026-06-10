@@ -1,6 +1,6 @@
 # Visual contract acceptance
 
-When **any change** produces UI — whether or not it carries a spec or a delegated task — "done" must be provable by **driving the UI**, not by static code review — an agent can otherwise claim a screen works without ever loading it. The obligation is independent of SDD: a UI tweak that correctly *skips* a spec (see `spec-driven.md` § When to skip) still owes this contract, with its evidence recorded outside a spec — in the PR body, a `report.json` path, or the session handoff. A **visual contract** makes that proof a first-class acceptance artifact in both SDD and the delegation gate. It is the spec-152 follow-up #2, built on the fail-closed `agent-browser` primitive (spec 152/153) and reusing the existing 5-field delegation gate (spec 119/delegation.md). (Spec 155.)
+When **any change** produces UI — whether or not it carries a spec or a delegated task — "done" must be provable by **driving the UI**, not by static code review — an agent can otherwise claim a screen works without ever loading it. The obligation is independent of SDD: a UI tweak that correctly *skips* a spec (see `spec-driven.md` § When to skip) still owes this contract, with its evidence recorded outside a spec — in the PR body, a `report.json` path, or the session handoff. A **visual contract** makes that proof a first-class acceptance artifact in both SDD and the delegation gate, built on the fail-closed `agent-browser` primitive and reusing the existing 5-field delegation gate.
 
 The contract is an **interaction trace**, not a screenshot/pixel diff. It asserts *semantic* conditions — DOM roles/names, a11y, console budget, route/URL, post-action state. Screenshots are review artifacts, never the bar.
 
@@ -45,7 +45,7 @@ There is no parallel format. The existing fixture-spec consumed by `agent-browse
 
 - `action` ∈ `click | type | select | press`. `target` is resolved to a snapshot ref; `value` feeds `type`/`select`/`press`.
 - A step may carry `"flaky": true`. A flaky step that fails is recorded as a non-fatal `warn` check — it does **not** flip `overall` to fail. Because v1 is non-blocking (below), flakiness cannot break a build; `flaky` plus sane per-step timeouts/retries is the whole flakiness story for v1.
-- A malformed fixture is a usage error (exit 3); an **unavailable** `agent-browser` is exit 4 / `unavailable` — **never a pass** (fail-closed, spec 152/153). A green gate from an absent browser would be a false acceptance.
+- A malformed fixture is a usage error (exit 3); an **unavailable** `agent-browser` is exit 4 / `unavailable` — **never a pass** (fail-closed). A green gate from an absent browser would be a false acceptance.
 
 ## Where it plugs in
 
@@ -65,7 +65,7 @@ There is no parallel format. The existing fixture-spec consumed by `agent-browse
 
 v1 ships **non-blocking** — a `visual-contract-advisory`, matching the `tdd-advisory` / `lint-advisory` / `typecheck-advisory` precedent. A new discipline earns a hard gate by the rule-of-three demand test, not by fiat: a mandatory browser-verification gate that over-fires gets rubber-stamped or disabled, which is worse than no gate.
 
-The **first hard-gate candidate** (preserved from the spec-149 decision-grade `/meeting` minority report) is declared `UI impact: flow` tasks — lowest false-positive rate, highest cost of a missed proof. Hardening is a separate, future, dogfood-evidence-gated spec; it is explicitly **not** part of spec 155.
+The **first hard-gate candidate** is declared `UI impact: flow` tasks — lowest false-positive rate, highest cost of a missed proof. Hardening is a separate, future, dogfood-evidence-gated spec.
 
 ## Reconcile with `/product`
 

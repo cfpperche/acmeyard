@@ -48,7 +48,7 @@ Examples:
 
 ```markdown
 - Claude Code — implementing auth spec — paths: `src/auth/*`, `tests/auth/*` — release: when PR #42 is merged.
-- Codex CLI — auditing handoff hooks — paths: `.agent0/hooks/session-*.sh` — release: when validation commands in spec 101 pass.
+- Codex CLI — auditing handoff hooks — paths: `.agent0/hooks/session-*.sh` — release: when handoff hook validation passes.
 ```
 
 Rules:

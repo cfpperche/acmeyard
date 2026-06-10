@@ -8,7 +8,7 @@ paths:
 
 # Audio
 
-`/audio` (engine `.agent0/tools/audio.sh`) is **text-to-speech synthesis**, local-first and free by default with an optional paid upgrade. It is the synthesis member of Agent0's audio family — the counterpart of the recognition-side `/transcribe` (spec 159) — shaped in the decision-grade meeting `.agent0/meetings/audio-transcribe-media-family-skills-2026-06-06T17-01-43Z/` (split by **output ontology**: synthesis produces a media asset, recognition produces text). v1 is **TTS only**. Spec: `docs/specs/160-audio/`.
+`/audio` (engine `.agent0/tools/audio.sh`) is **text-to-speech synthesis**, local-first and free by default with an optional paid upgrade. It is the synthesis member of Agent0's audio family — the counterpart of the recognition-side `/transcribe` — shaped by the family's design split by **output ontology** (synthesis produces a media asset, recognition produces text). v1 is **TTS only**.
 
 ## Two local engines (free, on-device) — asymmetric acquisition
 

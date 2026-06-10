@@ -39,13 +39,13 @@ This keeps write authority single-owner per turn and makes a peer's mid-turn fai
 
 ## Addressing & speaker selection
 
-Speaker selection is **context-driven, not round-robin** (spec 140). A turn body MAY end with a single explicit trailing directive — `Next: <roster-id>` — to hand the floor to a specific participant. `meeting.sh` parses **only** that exact shape on the last non-empty line (never natural language; prose `@mentions` or the word "Next" mid-line do not count). A valid marker becomes the new `next_speaker`; an explicit-but-invalid marker (empty, multi-token, or a non-roster id) **fails the append before anything is written**. The directive is left **visible** in the canonical transcript (it is part of the audit trail). A turn with no marker leaves the default unchanged.
+Speaker selection is **context-driven, not round-robin**. A turn body MAY end with a single explicit trailing directive — `Next: <roster-id>` — to hand the floor to a specific participant. `meeting.sh` parses **only** that exact shape on the last non-empty line (never natural language; prose `@mentions` or the word "Next" mid-line do not count). A valid marker becomes the new `next_speaker`; an explicit-but-invalid marker (empty, multi-token, or a non-roster id) **fails the append before anything is written**. The directive is left **visible** in the canonical transcript (it is part of the audit trail). A turn with no marker leaves the default unchanged.
 
 `next_speaker` is therefore a **derived, reported default** — not enforced legality. `meeting.sh check` is demoted to **roster-membership only** (is this a known participant?), and `--speaker` directs freely with no "out of order" warning. The default at any moment is computed by `resolve-speaker` with this precedence, every source roster-validated (a stale/non-roster value is skipped, never used as a hidden default):
 
 `--speaker <id>` → trailing `Next:` marker from the last appended turn (already stored in `next_speaker`) → existing `next_speaker` header → first model in `rotation` (fallback order) → convener.
 
-**Boundary with spec 138 (load-bearing).** A deterministic, transcript-addressed default speaker is **in scope** here: the human still triggers exactly one turn, and the selection is mechanical (exact `Next: <id>` match) and visible in the header. **Out of scope** — and still gated behind spec 138's demand test — are the active model *semantically inferring* the "right" next speaker, and any multi-turn auto-chain. Deterministic transcript directive → yes; semantic speaker choice or autonomous looping → no.
+**Boundary (load-bearing).** A deterministic, transcript-addressed default speaker is **in scope** here: the human still triggers exactly one turn, and the selection is mechanical (exact `Next: <id>` match) and visible in the header. **Out of scope** — and still gated behind the meeting autopilot demand test — are the active model *semantically inferring* the "right" next speaker, and any multi-turn auto-chain. Deterministic transcript directive → yes; semantic speaker choice or autonomous looping → no.
 
 ## Research-backed turns
 
@@ -82,7 +82,7 @@ A **qualifying meeting** is a real v1 meeting where BOTH hold:
 
 The mechanical half is measured now: `meeting.sh friction <meeting.md>` (and the `model_turns` / `max_consecutive_model_turns` / `current_model_streak` lines in `meeting.sh state`) report the longest run of consecutive model turns with no human turn between them, and flag whether the ≥4 mechanical threshold is met. **Three qualifying meetings** reopen planning on the autopilot build. Until then, only this measurement ships.
 
-## De-biased deliberation (decision-grade tier — spec 149)
+## De-biased deliberation (decision-grade tier)
 
 To make "the agents converged" a trustworthy signal (the prerequisite for the planned `/squad`), decision-grade deliberation runs a structural anti-confirmation-bias protocol. **Structural, not persona** (no "be the skeptic" — consistent with `[[feedback_no_persona_role_prompting]]`). This rule defines the **mechanics** of the decision-grade tier — `meeting.sh` owns them (blind commit/reveal, claim/evidence ledger, minority report); `/meeting` and `/sdd debate` both call them. It does **not** own which deliberations are required to run at this tier: that `/sdd debate` is *always* decision-grade is SDD policy, owned by `.agent0/context/rules/spec-driven.md` § debate.md (this rule does not assert that mandate). A `/meeting` whose synthesis will gate implementation should likewise select the decision-grade tier. Exploratory meetings stay on the **light** tier (no blind phase / ledger) — set the tier at `init` (`--tier light|decision-grade`; default `light`); `light` is a `/meeting`-only tier and never applies to `/sdd debate`.
 

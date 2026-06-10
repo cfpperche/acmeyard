@@ -6,6 +6,7 @@ source "$(dirname "$0")/_lib.sh"
 echo "07-adopt-detect"
 
 command -v node >/dev/null 2>&1 || { echo "  ⓘ SKIP (no node)"; finish; exit 0; }
+command -v agent-browser >/dev/null 2>&1 || { echo "  ⓘ SKIP (no agent-browser binary) — adopt fail-closes without it; CDP-detect logic needs the real route"; finish; exit 0; }
 FCDP=9231
 
 start_fake() { # start_fake <url>

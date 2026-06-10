@@ -43,10 +43,6 @@ Acme Yard is a portfolio of small, focused SaaS tools for professions that do no
 
 Non-trivial work is spec-first — intent before code under `docs/specs/NNN-<slug>/{spec,plan,tasks,notes}.md`, scaffolded and progressed by the `/sdd` skill. See `.agent0/context/rules/spec-driven.md`.
 
-## Agent0 governance doctrine
-
-Before expanding Agent0 capacities, consult `.agent0/context/rules/agent0-governance-doctrine.md`: Agent0 remains a stack-neutral template/governance harness, not a product by default, and new capacity work must pass explicit scope-admission discipline.
-
 ## Runtime entrypoints
 
 `CLAUDE.md` is the Claude Code entrypoint; `AGENTS.md` is the Codex entrypoint. This managed block is the shared Agent0 index; runtime support details live in `.agent0/context/rules/runtime-capabilities.md`. `AGENTS.md` is baseline-tracked; Codex consumer project customization belongs in `AGENTS.override.md` or nested `AGENTS.md`.

@@ -8,9 +8,9 @@ paths:
 
 # Browser primitive
 
-`agent-browser` (vercel-labs) is Agent0's **sole, runtime-neutral agent browser primitive** — the "eyes + hands" an agent drives against a web UI: navigate/control via CDP, accessibility-tree snapshot with stable LLM-friendly refs (`@e1`), click/fill/wait/drag, annotated screenshot + PDF, read text/HTML, cookies/storage/network/tabs/frames/dialogs, persistent auth, vitals, React introspection, JSON output. It is a native-Rust **CLI** (client-daemon over CDP), so Claude Code and Codex both invoke it through plain shell — **no per-runtime MCP wiring, no session restart**. This consolidates what used to be split across Playwright MCP + Chrome DevTools MCP. (spec 152, graduated from the accepted meeting `agent-browser-visual-inspection`.)
+`agent-browser` (vercel-labs) is Agent0's **sole, runtime-neutral agent browser primitive** — the "eyes + hands" an agent drives against a web UI: navigate/control via CDP, accessibility-tree snapshot with stable LLM-friendly refs (`@e1`), click/fill/wait/drag, annotated screenshot + PDF, read text/HTML, cookies/storage/network/tabs/frames/dialogs, persistent auth, vitals, React introspection, JSON output. It is a native-Rust **CLI** (client-daemon over CDP), so Claude Code and Codex both invoke it through plain shell — **no per-runtime MCP wiring, no session restart**. This consolidates what used to be split across Playwright MCP + Chrome DevTools MCP.
 
-**No MCP fallback (spec 153).** Playwright MCP + Chrome DevTools MCP are **not** a harness path the routing degrades to — they survive only as opt-in `.mcp.json.example` / `.codex/config.toml.example` templates a consumer may wire up by hand for their own use. When `agent-browser` is unavailable, first-party browser work **fails closed** (rc 4) rather than silently switching stacks. Keep-the-template ≠ keep-the-harness-dependency.
+**No MCP fallback.** Playwright MCP + Chrome DevTools MCP are **not** a harness path the routing degrades to — they survive only as opt-in `.mcp.json.example` / `.codex/config.toml.example` templates a consumer may wire up by hand for their own use. When `agent-browser` is unavailable, first-party browser work **fails closed** (rc 4) rather than silently switching stacks. Keep-the-template ≠ keep-the-harness-dependency.
 
 ## The wrapper — `.agent0/tools/agent-browser.sh`
 
@@ -22,8 +22,8 @@ agent-browser.sh route [task]                         → primary | unavailable:
 agent-browser.sh policy-eval <action> <target> [--confirm]   → allow|deny|confirm ; reason
 agent-browser.sh run [--confirm] -- <agent-browser args...>   policy-gated, audited passthrough (fail-closed if unavailable)
 agent-browser.sh verify-contract <url> <fixture.json> <outdir>   bounded visual-contract verify
-agent-browser.sh audit <base-url> (--paths a,b,c|--paths-file f) [--out d] [--max-console N] [--structure strict|optional]   multi-page structural+console+vitals+overflow sweep (spec 152.1; structure modes + responsive overflow spec 153)
-agent-browser.sh adopt <host> [--port 9222] [--detect-only]   attach to a human-logged-in CDP Chrome + save state (spec 152.2)
+agent-browser.sh audit <base-url> (--paths a,b,c|--paths-file f) [--out d] [--max-console N] [--structure strict|optional]   multi-page structural+console+vitals+overflow sweep
+agent-browser.sh adopt <host> [--port 9222] [--detect-only]   attach to a human-logged-in CDP Chrome + save state
 agent-browser.sh reset                                tear down the daemon (rebind launch options)
 agent-browser.sh audit-tail [N]                       recent audit lines
 ```
@@ -32,19 +32,19 @@ The human-run launcher `.agent0/tools/browser-login.sh <host>` pairs with `adopt
 
 The raw `agent-browser` CLI is fine for read-only ad-hoc inspection; route mutating/interactive flows through `run` so they are policy-gated and audited.
 
-## Routing — agent-browser or fail-closed (spec 153)
+## Routing — agent-browser or fail-closed
 
 `route` is deterministic and has **no MCP lane**. It prints `primary` when agent-browser is usable, else `unavailable:<reason>`:
 
 1. **`unavailable:no-binary`** — `agent-browser` is not on PATH.
 2. **`unavailable:no-chrome`** — no usable browser even via agent-browser's bundled Chrome-for-Testing (signalled by `AGENT0_BROWSER_NO_CHROME=1`; a missing *system* Chrome alone is NOT a reason — agent-browser self-provides one).
-3. **`unavailable:mcp-removed`** — the legacy `AGENT0_BROWSER=mcp` override is now an **explicit unsupported error**, not an alternate route (MCP routing was removed in spec 153).
+3. **`unavailable:mcp-removed`** — the legacy `AGENT0_BROWSER=mcp` override is now an **explicit unsupported error**, not an alternate route (MCP routing was removed).
 
 On any `unavailable:*`, explicit commands (`run`/`verify-contract`/`audit`/`adopt`) **fail closed** — rc 4 with an install/`doctor`/`caps` message (rc 3 for the `mcp-removed` override) — they never degrade to Playwright/Chrome DevTools MCP. A reserved `capability-gap` slot exists but the v1 gap list is empty (agent-browser is a superset of the old MCP surface). This single rule keeps "agent-browser is the only path" unambiguous.
 
 ## Attempt-before-handoff — try the primitive, don't punt to the human by reflex
 
-**The failure this prevents (real, cognixse spec 020):** an agent that *had* `agent-browser` available and *knew* it existed still told the human _"abra essa URL e confira — não dá pra automatizar daqui"_ for a form smoke test — an assertion of incapability with **zero evidence**, emitted **before** running `route`/`caps` or driving anything. It only tried after the human pushed back. This is the same anti-pattern `runtime-capabilities.md` already forbids in another domain (*never assert a capability does not exist without verifying — hedge and verify*), here in the browser domain. The fix extends that discipline; it is not a new capability.
+**The failure this prevents:** an agent that *had* `agent-browser` available and *knew* it existed still told the human _"abra essa URL e confira — não dá pra automatizar daqui"_ for a form smoke test — an assertion of incapability with **zero evidence**, emitted **before** running `route`/`caps` or driving anything. It only tried after the human pushed back. This is the same anti-pattern `runtime-capabilities.md` already forbids in another domain (*never assert a capability does not exist without verifying — hedge and verify*), here in the browser domain. The fix extends that discipline; it is not a new capability.
 
 **The discipline.** Before telling a human to do browser work themselves — _"abra essa URL"_, _"confira no browser/backoffice"_, _"envie um teste no form"_, _"não dá pra automatizar daqui"_ — you MUST first either **drive it via agent-browser** or **prove a real, observed unavailability/blocker**. A handoff to the human is legitimate only when it carries that evidence and is scoped to the **smallest sub-step that is genuinely human-only**.
 
@@ -76,7 +76,7 @@ The bar for granting an agent "hands" is not *can it click* but **can a later hu
 
 Every `run` appends a JSONL audit line (`ts/cmd/action/target/class/decision/guard`) under `.agent0/.runtime-state/agent-browser/` (gitignored). Profiles / saved `state` JSON under `.agent0/.runtime-state/agent-browser/{profiles,state}/` are **credential-class** (gitignored — see `secrets-scan.md`).
 
-## Human-in-the-loop auth (spec 152.2 — the headed-login flow)
+## Human-in-the-loop auth (the headed-login flow)
 
 The headed human-login step **cannot be agent-spawned reliably** in this class of environment: WSLg drops the window surface and the harness reaps agent-spawned process trees (the Chrome process survives but the visible window dies). The robust, secure model is **the human owns the browser; the agent attaches over CDP**:
 
@@ -84,7 +84,7 @@ The headed human-login step **cannot be agent-spawned reliably** in this class o
 2. **Human logs in** in that window. The agent never sees or handles credentials.
 3. **Agent adopts** — `agent-browser.sh adopt <host> [--port 9222] [--timeout S]` polls the CDP `/json` endpoint (plain HTTP — **non-disruptive**, it never navigates the human's tab while they type) until a page on the host **leaves the login flow** (denylist: `login|signin|session|oauth|sso|challenge|checkpoint|authwall|i/flow`), then saves the session state (credential-class) over CDP. `--detect-only` reports completion without saving ("is the human logged in yet?"). After adopt, headless reuse via `--state`/`state load` works (§ Persistent auth).
 
-The agent signals the start with `BROWSER_LOGIN_REQUIRED: <host>` naming the exact `browser-login.sh` command (spec 153 — renamed from the legacy `BROWSER_AUTH_REQUIRED`, since the remedy is now `browser-login.sh` → `adopt`, no MCP). This is the agent-browser-native auth flow, with the CDP-attach twist the environment forces. See `browser-auth.md`.
+The agent signals the start with `BROWSER_LOGIN_REQUIRED: <host>` naming the exact `browser-login.sh` command (renamed from the legacy `BROWSER_AUTH_REQUIRED` — the remedy is now `browser-login.sh` → `adopt`, no MCP). This is the agent-browser-native auth flow, with the CDP-attach twist the environment forces. See `browser-auth.md`.
 
 ## Persistent auth
 
@@ -92,11 +92,11 @@ agent-browser's native `state save <file>` / `--state <file> open` (or `state lo
 
 ## Visual-contract verification
 
-`verify-contract <url> <fixture.json> <outdir>` is the bounded loop for verifying a `/product`→`/sdd` visual contract: it opens the URL, captures a11y snapshot + annotated screenshot + console + vitals, and asserts a fixture-spec (`{ "required": [{role,name}...], "max_console_errors": N }`) → a `PASS/FAIL` `report.json` + artifacts. The model reasons only over the residual, not over whether the page loaded. The fixture-spec extends past the `render` floor with optional `interactions` and `flow` arrays (named-control exercise + ordered route traversal with per-step assertions), so a contract covers navigation/interaction/flow, not just static render — the depth tiers and the `UI impact` acceptance gate they feed live in `.agent0/context/rules/visual-contract.md` (spec 155).
+`verify-contract <url> <fixture.json> <outdir>` is the bounded loop for verifying a `/product`→`/sdd` visual contract: it opens the URL, captures a11y snapshot + annotated screenshot + console + vitals, and asserts a fixture-spec (`{ "required": [{role,name}...], "max_console_errors": N }`) → a `PASS/FAIL` `report.json` + artifacts. The model reasons only over the residual, not over whether the page loaded. The fixture-spec extends past the `render` floor with optional `interactions` and `flow` arrays (named-control exercise + ordered route traversal with per-step assertions), so a contract covers navigation/interaction/flow, not just static render — the depth tiers and the `UI impact` acceptance gate they feed live in `.agent0/context/rules/visual-contract.md`.
 
-## Structural audit (spec 152.1 — demand-validated by the real site-audit dogfood)
+## Structural audit (demand-validated by the real site-audit dogfood)
 
-`audit <base-url> --paths a,b,c [--out dir] [--max-console N] [--structure strict|optional]` sweeps a page set and emits `report.{md,json}` + per-page screenshots. Per page it parses the rendered a11y tree for **structure** (exactly one level-1 heading + a `main` landmark + `nav`), counts console errors, records vitals (advisory), and probes **horizontal overflow** at 375 px and 1280 px (`scrollWidth > clientWidth`, advisory — captured via a fixed internal read-only `eval`, spec 153). Two structure modes: **`strict`** (default) gates `h1 != 1` / no `main` / console `> max` (the 152.1 site-audit semantics, unchanged); **`optional`** makes `h1`/`main` advisory and gates on console only — for landmark-less fragments like `/product` hi-fi mood screens. The sweep owns daemon lifecycle + aggregation so callers don't hand-roll it.
+`audit <base-url> --paths a,b,c [--out dir] [--max-console N] [--structure strict|optional]` sweeps a page set and emits `report.{md,json}` + per-page screenshots. Per page it parses the rendered a11y tree for **structure** (exactly one level-1 heading + a `main` landmark + `nav`), counts console errors, records vitals (advisory), and probes **horizontal overflow** at 375 px and 1280 px (`scrollWidth > clientWidth`, advisory — captured via a fixed internal read-only `eval`). Two structure modes: **`strict`** (default) gates `h1 != 1` / no `main` / console `> max`; **`optional`** makes `h1`/`main` advisory and gates on console only — for landmark-less fragments like `/product` hi-fi mood screens. The sweep owns daemon lifecycle + aggregation so callers don't hand-roll it.
 
 The primitive owns the structural parsing because **hand-rolling it is error-prone**: the naive `grep -c 'level=1'` over the snapshot text ALSO matches `listitem [level=1]` (nesting depth), so a clean page with one `<h1>` and seven list items mis-reports as `h1=8`. `parse-structure` parses heading lines only (`heading … [level=1[,\]]`). This bug was hit for real auditing `site/dist/` by hand — the `audit` command exists so nobody repeats it. Vitals are meaningful only against a deployed/throttled target (on local static, LCP is always ~20ms).
 
@@ -109,9 +109,9 @@ npm install -g agent-browser        # or: brew install agent-browser / cargo ins
 agent-browser install               # download Chrome-for-Testing (skip if a system Chrome exists)
 ```
 
-The wrapper defaults the browser executable to the system Chrome via `AGENT_BROWSER_EXECUTABLE_PATH` when present. `bash .agent0/tools/doctor.sh` reports availability (tri-state under `=== browser primitive ===`). When the binary is absent, first-party browser work **fails closed** (rc 4) — there is no MCP fallback (spec 153); install agent-browser to restore the capability.
+The wrapper defaults the browser executable to the system Chrome via `AGENT_BROWSER_EXECUTABLE_PATH` when present. `bash .agent0/tools/doctor.sh` reports availability (tri-state under `=== browser primitive ===`). When the binary is absent, first-party browser work **fails closed** (rc 4) — there is no MCP fallback; install agent-browser to restore the capability.
 
-## Gotchas (verified empirically, spec 152 build)
+## Gotchas (verified empirically)
 
 - **`close --all` HANGS when no daemon is running.** The wrapper's `reset` guards this (only calls it when a daemon exists, with a timeout). Never call `agent-browser close --all` blind in a script.
 - **The daemon is global and ignores launch options** (`--profile`/`--state`/`--session-name`) if already running. Use `agent-browser.sh reset` to rebind, or use **isolated `--session <name>`** (independent cookies within one daemon) to avoid restarts.
@@ -124,4 +124,4 @@ The wrapper defaults the browser executable to the system Chrome via `AGENT_BROW
 - `.agent0/context/rules/browser-auth.md` — the agent-browser-native auth-gated read flow (`browser-login.sh` → `adopt`; `BROWSER_LOGIN_REQUIRED` signal).
 - `.agent0/context/rules/secrets-scan.md` — credential-class framing for profiles/state files.
 - `.agent0/context/rules/runtime-capabilities.md` — runtime-neutral capability matrix.
-- `docs/specs/152-browser-primitive-consolidation/` — the spec; `.agent0/tests/agent-browser/` — the suite.
+- `.agent0/tests/agent-browser/` — the test suite.

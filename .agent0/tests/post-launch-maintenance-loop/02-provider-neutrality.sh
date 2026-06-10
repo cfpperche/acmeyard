@@ -12,7 +12,7 @@ fail() {
 require_text() {
   local file="$1"
   local text="$2"
-  rg -q --fixed-strings "$text" "$file" || fail "missing '$text' in $file"
+  grep -qF -- "$text" "$file" || fail "missing '$text' in $file"
 }
 
 rule=".agent0/context/rules/post-launch-maintenance-loop.md"
@@ -40,12 +40,12 @@ require_text "$example" "Linear agents: https://linear.app/docs/agents-in-linear
 require_text "$example" "Sentry alert rule API reference: https://docs.sentry.io/api/alerts/create-an-issue-alert-rule-for-a-project/"
 require_text "$example" "Codex in Linear: https://developers.openai.com/codex/integrations/linear"
 
-if rg -n "https://linear|developers.openai|docs.sentry" "$provider_map" "$issue_template" "$checklist"; then
+if grep -nE "https://linear|developers.openai|docs.sentry" "$provider_map" "$issue_template" "$checklist"; then
   fail "vendor docs URL leaked into provider-neutral templates"
 fi
 
 neutral_targets=("$rule" "$provider_map" "$issue_template" "$checklist")
-if rg -n "(must use|required to use|only works with|requires) (Sentry|Linear|Codex)" "${neutral_targets[@]}"; then
+if grep -nE "(must use|required to use|only works with|requires) (Sentry|Linear|Codex)" "${neutral_targets[@]}"; then
   fail "provider-neutral guidance contains mandatory vendor wording"
 fi
 

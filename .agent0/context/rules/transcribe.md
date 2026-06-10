@@ -7,7 +7,7 @@ paths:
 
 # Transcribe
 
-`/transcribe` (and its engine `.agent0/tools/transcribe.sh`) turns an audio **or video** file into a transcript, **locally**, on demand. It is the recognition member of Agent0's audio family — the counterpart of the synthesis-side `/audio` skill — and was shaped in the decision-grade meeting `.agent0/meetings/audio-transcribe-media-family-skills-2026-06-06T17-01-43Z/` (blind openings, 8-row anchored ledger, minority report). Engine is **whisper.cpp** (MIT). Spec: `docs/specs/159-transcribe/`.
+`/transcribe` (and its engine `.agent0/tools/transcribe.sh`) turns an audio **or video** file into a transcript, **locally**, on demand. It is the recognition member of Agent0's audio family — the counterpart of the synthesis-side `/audio` skill — and was shaped in the decision-grade meeting `.agent0/meetings/audio-transcribe-media-family-skills-2026-06-06T17-01-43Z/` (blind openings, 8-row anchored ledger, minority report). Engine is **whisper.cpp** (MIT).
 
 ## Not a paid-media skill — a local utility
 
