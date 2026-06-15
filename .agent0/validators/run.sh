@@ -89,6 +89,49 @@ if [ "${CLAUDE_VALIDATOR_SKIP_SDD_CLOSE:-0}" != "1" ] && [ -d "$ROOT/docs/specs"
   done
 fi
 
+# Shared session diff path list, computed BEFORE stack detection so the ui-runner
+# advisory fires even on a stackless repo (mirrors spec-verify/sdd-close placement;
+# a no-stack emit at the bottom would otherwise skip it). The TDD warning later
+# reuses the same in_git_repo/changed_files set.
+in_git_repo=0
+changed_files=""
+if git rev-parse --git-dir >/dev/null 2>&1; then
+  in_git_repo=1
+  # Modified-tracked + untracked-not-ignored, deduped. A sub-agent that uses
+  # the Write tool to create a new test file leaves it untracked, so plain
+  # `git diff` would miss it. Including `ls-files --others --exclude-standard`
+  # closes that gap. The grep is a belt-and-suspenders noise filter against a
+  # mis-configured .gitignore dumping 15k+ node_modules paths (dogfood 2026-05-12).
+  changed_files="$(
+    ( git diff --name-only 2>/dev/null
+      git ls-files --others --exclude-standard 2>/dev/null
+    ) | grep -vE '^(node_modules/|\.venv/|venv/|__pycache__/|\.pytest_cache/|\.mypy_cache/|\.ruff_cache/|target/|dist/|build/|out/|coverage/|\.next/|\.nuxt/|\.svelte-kit/|\.cache/|\.turbo/)' \
+      | sort -u || true
+  )"
+fi
+
+# --- UI-runner advisory (spec 206, retire-visual-contract-gate) ------------
+# When a rendered UI surface changed but the project declares NO UI test runner,
+# prompt the author to provision one. UI acceptance is a green UI test covering
+# the changed surface — NOT a frozen agent-browser bundle (the retired visual
+# contract). The harness requires the runner instead of shipping a substitute.
+# Advisory only: never affects the validator pipeline, JSON `ok`, or exit code.
+# Fires iff: a rendered surface changed AND ui-runner-detect reports `absent`.
+# A project that already declares a runner is silent (writing/running the test
+# is its own discipline; the validator cannot verify test coverage content-free).
+if [ -n "$changed_files" ] && [ -f "$ROOT/.agent0/tools/ui-impact-detect.sh" ]; then
+  ui_detect_out="$(printf '%s\n' "$changed_files" | bash "$ROOT/.agent0/tools/ui-impact-detect.sh" 2>/dev/null || true)"
+  ui_surfaces="$(printf '%s\n' "$ui_detect_out" | sed -n 's/^surfaces:[[:space:]]*//p' | head -n 1)"
+  ui_has_surface=0
+  [ -n "$ui_surfaces" ] && [ "$ui_surfaces" != "(none)" ] && [ "$ui_surfaces" != "(unknown)" ] && ui_has_surface=1
+
+  if [ "$ui_has_surface" -eq 1 ] && [ -f "$ROOT/.agent0/tools/ui-runner-detect.sh" ]; then
+    if ! bash "$ROOT/.agent0/tools/ui-runner-detect.sh" --root "$ROOT" >/dev/null 2>&1; then
+      printf "ui-runner-advisory: rendered UI surface(s) changed but this project declares no UI test runner — provision your stack's idiomatic UI/e2e runner (a 'test:e2e' script, a playwright/cypress config, or declare one in .agent0/ui-test.json). UI acceptance is a green UI test covering the changed surface, not a frozen browser bundle. Surfaces: %s\n" "$ui_surfaces" >&2
+    fi
+  fi
+fi
+
 command_str=""
 stack=""
 stack_subtype=""
@@ -306,95 +349,6 @@ if [ -n "$lint_advisory_msg" ]; then
 fi
 if [ -n "$typecheck_advisory_msg" ]; then
   printf '%s\n' "$typecheck_advisory_msg" >&2
-fi
-
-# Shared session diff path list. Keep this in one place: the visual-contract
-# advisory and the TDD warning both reason over the same modified/untracked set.
-in_git_repo=0
-changed_files=""
-if git rev-parse --git-dir >/dev/null 2>&1; then
-  in_git_repo=1
-  # Modified-tracked + untracked-not-ignored, deduped. A sub-agent that uses
-  # the Write tool to create a new test file leaves it untracked, so plain
-  # `git diff` would miss it and the warning would falsely fire. Including
-  # `ls-files --others --exclude-standard` closes that gap.
-  #
-  # Belt-and-suspenders noise filter — defends against consumer projects with
-  # mis-configured .gitignore (e.g. Agent0 ships a stack-agnostic gitignore
-  # template with `# node_modules/` commented; consumer projects must uncomment per
-  # stack). Without this filter, an un-ignored node_modules can dump 15k+
-  # paths into the per-file shell loop, hanging the validator for minutes.
-  # Surfaced via dogfood 2026-05-12.
-  changed_files="$(
-    ( git diff --name-only 2>/dev/null
-      git ls-files --others --exclude-standard 2>/dev/null
-    ) | grep -vE '^(node_modules/|\.venv/|venv/|__pycache__/|\.pytest_cache/|\.mypy_cache/|\.ruff_cache/|target/|dist/|build/|out/|coverage/|\.next/|\.nuxt/|\.svelte-kit/|\.cache/|\.turbo/)' \
-      | sort -u || true
-  )"
-fi
-
-# --- Visual-contract advisory ------------------------------------
-# A likely rendered UI surface change with no `UI impact` declaration should
-# prompt for a visual-contract evidence pass. Advisory only: never affects the
-# validator pipeline, JSON `ok`, or exit code.
-if [ -n "$changed_files" ] && [ -f "$ROOT/.agent0/tools/ui-impact-detect.sh" ]; then
-  ui_decl="none"
-  old_ifs="$IFS"
-  IFS='
-'
-  for f in $changed_files; do
-    case "$f" in
-      spec.md|*/spec.md)
-        [ -f "$f" ] || continue
-        maybe_decl="$(
-          grep -iE '^\*\*UI impact:\*\*' "$f" 2>/dev/null \
-            | head -n 1 \
-            | tr '[:upper:]' '[:lower:]' \
-            | sed -E 's/^\*\*ui impact:\*\*[[:space:]]*//; s/[^a-z].*$//' || true
-        )"
-        case "$maybe_decl" in
-          none|render|interaction|flow) ui_decl="$maybe_decl"; break ;;
-        esac
-        ;;
-    esac
-  done
-  IFS="$old_ifs"
-
-  ui_detect_out="$(printf '%s\n' "$changed_files" | bash "$ROOT/.agent0/tools/ui-impact-detect.sh" --declared "$ui_decl" 2>/dev/null || true)"
-  ui_surfaces="$(printf '%s\n' "$ui_detect_out" | sed -n 's/^surfaces:[[:space:]]*//p' | head -n 1)"
-  [ -n "$ui_surfaces" ] || ui_surfaces="(unknown)"
-  ui_has_surface=0
-  [ "$ui_surfaces" != "(none)" ] && [ "$ui_surfaces" != "(unknown)" ] && ui_has_surface=1
-
-  ui_evidence_present=0
-  if [ "$ui_has_surface" -eq 1 ]; then
-    old_ifs="$IFS"
-    IFS='
-'
-    for f in $changed_files; do
-      case "$f" in
-        report.json|*/report.json)
-          if [ -f "$f" ] && jq -e '.overall=="pass"' "$f" >/dev/null 2>&1; then
-            ui_evidence_present=1
-            break
-          fi
-          ;;
-      esac
-    done
-    IFS="$old_ifs"
-  fi
-
-  if printf '%s\n' "$ui_detect_out" | grep -qE '^mismatch:[[:space:]]*true$'; then
-    printf "visual-contract-advisory: rendered UI surface(s) changed without a 'UI impact' declaration or visual-contract evidence — declare **UI impact:** render|interaction|flow and attach an agent-browser verify-contract pass, or set 'none' if non-UI. Surfaces: %s\n" "$ui_surfaces" >&2
-  else
-    case "$ui_decl" in
-      render|interaction|flow)
-        if [ "$ui_has_surface" -eq 1 ] && [ "$ui_evidence_present" -ne 1 ]; then
-          printf "visual-contract-advisory: declared UI impact '%s' with rendered surface change but no passing visual-contract report.json in the changed set — attach an agent-browser verify-contract pass (report.json .overall==pass). Surfaces: %s\n" "$ui_decl" "$ui_surfaces" >&2
-        fi
-        ;;
-    esac
-  fi
 fi
 
 stdout_file="$(mktemp 2>/dev/null || mktemp -t validator-stdout)"

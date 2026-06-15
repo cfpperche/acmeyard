@@ -17,7 +17,7 @@ Use this before merging or releasing an agent-produced maintenance fix.
 - [ ] A regression test was added or a clear test-exempt reason is recorded.
 - [ ] Existing tests pass for the affected area.
 - [ ] Lint/typecheck/validator evidence is recorded when the project supports it.
-- [ ] UI changes include visual-contract evidence when applicable.
+- [ ] UI changes are proven by a green project UI test covering the changed surface (see `.agent0/context/rules/ui-acceptance.md`).
 - [ ] Security-sensitive changes received human security review.
 
 ## Release gate

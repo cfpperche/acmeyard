@@ -1,4 +1,4 @@
-# Quality rubric — `/product` v0.4.0
+# Quality rubric — `/product` v0.6.0
 
 _Referenced as `quality-checklist.md` for historical continuity. It is the **quality judge's rubric contract** — the semantic half of the per-step rubric the judge grades against._
 
@@ -19,8 +19,10 @@ For each pipeline step the quality judge assembles a rubric from three sources a
 Each criterion has a stable `id` (the **bold label**) — the quality judge's verdict keys `criteria[].id` on it. The judge grades each `pass` / `concern` / `fail`.
 
 ### 01 — Ideation → `docs/concept-brief.md`
-- **structure** — 9 H2 sections present, including `§ Market Sizing`
+- **structure** — required H2 sections present, including `§ Market Sizing` and `§ Product Form`
 - **citations** — ≥ 5 `[N]`-style citations
+- **product-form** — `§ Product Form` declares exactly one of `screen-app | headless-service | cli | bot | embedded` via a `**Form:**` line + rationale naming where the primary user value is delivered; genuine ambiguity flagged for the concept gate rather than silently resolved
+- **sizing-as-hypothesis** — `§ Market Sizing` opens by declaring its numbers pre-validation desk-research estimates; every figure cited or `Estimated`-tagged; ranges used where sources disagree. TAM/SAM/SOM presented as established fact is a `fail`
 
 ### 02 — Prototype v1, lo-fi → `docs/direction-a.html` + `docs/screens/*.html` ×3-5
 - **mood-files** — `direction-a.html` plus 3-5 killer-flow lo-fi mood screens present
@@ -30,7 +32,7 @@ Each criterion has a stable `id` (the **bold label**) — the quality judge's ve
 
 ### 03 — Spec → `docs/functional-spec.md`
 - **gherkin** — `**Given**` / `**When**` / `**Then**` present; ≥ 3 Gherkin scenarios
-- **problem-validation** — `§ Problem-Validation Interviews` present
+- **assumption-register** — `§ Assumption Register` carries a 5-10 row bets table with ≥1 `value` and ≥1 `viability` row, no blank Basis, plus the three subsections (Riskiest assumption / Cheapest real-world test / Abandon signal). **Any content presented as a real user interview that did not happen is a `fail`** — fabricated evidence is the failure mode this register exists to eliminate; confidence levels must trace to the stated basis (a `high` on a `value` row requires founder-supplied real-world signal)
 
 ### 04 — Validation → `docs/validation-report.md`
 - **heuristics** — references both `Nielsen` and `WCAG`
@@ -64,15 +66,19 @@ Each criterion has a stable `id` (the **bold label**) — the quality judge's ve
 - **phases** — 3 phase headers, user-flow-shaped
 - **milestones** — 1-3 milestones per phase
 - **open-decisions** — `§ Open Decisions` present
+- **projection-notice** — the `**Pre-validation projection.**` blockquote opens the document; Phase-2+ content phrased as sequencing intent, not commitment
 
 ### 11 — Cost Estimate → `docs/cost-estimate.md`
 - **structure** — Assumptions / Build Cost / Run Cost / Legal & Audit Budget / Recommendations headers
 - **roadmap-traceability** — build-cost rows reference roadmap phases
+- **projection-notice** — the `**Pre-validation projection.**` blockquote opens the document
+- **ranges-not-points** — every `[Estimated]` monetary/effort figure presents as a range; point values appear only on sourced facts (vendor list prices, signed contracts); derived totals propagate range arithmetic. A single-point estimated total is a `fail`
 
 ### 12 — GTM-launch → `docs/gtm-launch.md`
 - **positioning-canvas** — a 5-line Positioning Canvas
 - **launch-plan** — a Launch Plan with 4 weekly milestones
 - **pricing-strategy** — a Pricing Strategy section
+- **projection-notice** — the `**Pre-validation projection.**` blockquote opens the document; pricing framed as working hypothesis
 
 ### 13 — Brand → `docs/brand-book.md`
 - **metadata** — `**Version:**` + `**Date:**`
@@ -116,7 +122,7 @@ Mechanical checks the orchestrator runs directly — pass/fail by `grep`, parse,
 
 ### Sitemap completeness (Step 07)
 - `docs/sitemap.yaml` is valid YAML.
-- All 5 `required_categories` (marketing / auth / primary / admin / error) each have ≥ 1 route, OR appear in `deferred_categories` with a reason. Otherwise the orchestrator BLOCKs Step 07 and re-dispatches with an augmented brief naming the uncovered category(ies) — up to 2 auto-retries before falling through to the user `iterate` choice at the Phase 2 gate (see `state-machine.md § Failure handling`).
+- All 5 `required_categories` (the declared product form's set per `product-forms.md § Step 07` — for `screen-app`: marketing / auth / primary / admin / error) each have ≥ 1 route, OR appear in `deferred_categories` with a reason. Otherwise the orchestrator BLOCKs Step 07 and re-dispatches with an augmented brief naming the uncovered category(ies) — up to 2 auto-retries before falling through to the user `iterate` choice at the Phase 2 gate (see `state-machine.md § Failure handling`).
 - Per-route fields complete per `sitemap-schema.md` Rules 4-6.
 
 ### SDD handoff (Phase 5)

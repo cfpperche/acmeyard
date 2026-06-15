@@ -12,6 +12,12 @@ delegation_hint: "draft step-11 roadmap.md from step-8 PRD + step-9 system-desig
 
 **Output file:** `roadmap.md` in `docs/`. Single-artifact — no `extra_files`.
 
+**Projection notice (required).** `roadmap.md` MUST open — immediately after its H1 — with this blockquote (adapt the product reference, keep the bolded lead verbatim; it is a Layer 1 anchor):
+
+> **Pre-validation projection.** This roadmap was generated before any of the product's assumptions (functional-spec § Assumption Register) were tested with real customers. Phase 1 is the only part that merits planning confidence; later phases are order-of-magnitude sequencing, not commitments. Re-derive this document once the riskiest assumptions have been tested.
+
+The notice is honesty, not hedging — the phasing logic below stays rigorous; the reader just knows what kind of document they are holding.
+
 **Two operating modes:**
 
 - **Canonical timeline-aware path** — when PRD frontmatter declares `validation_mode: tested` (or no `validation_mode` field — assume tested for revenue-generating / venture-scale products). Full phases with week ranges, milestones, dependency graph, risks + buffer per phase, v2 sketch.

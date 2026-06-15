@@ -60,7 +60,7 @@ On every validator run, for each `docs/specs/*/spec.md` with `**Status:** shippe
   ```
 - a shipped spec that declares **no** verify command is never nagged (opt-in; absence of a declaration is silence).
 
-The advisory is **non-blocking** — it never alters the validator's JSON `ok` field or exit code, exactly like `lint-advisory`/`typecheck-advisory`/`visual-contract-advisory`. It is emitted before stack detection so it fires even on a stackless harness repo (Agent0 itself emits `no-stack-detected` and would otherwise skip every advisory). On Codex CLI the validator's stderr is routed into the hook's `additionalContext` like the other advisories.
+The advisory is **non-blocking** — it never alters the validator's JSON `ok` field or exit code, exactly like `lint-advisory`/`typecheck-advisory`/`ui-runner-advisory`. It is emitted before stack detection so it fires even on a stackless harness repo (Agent0 itself emits `no-stack-detected` and would otherwise skip every advisory). On Codex CLI the validator's stderr is routed into the hook's `additionalContext` like the other advisories.
 
 ## When to override
 

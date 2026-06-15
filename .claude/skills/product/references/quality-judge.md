@@ -1,14 +1,14 @@
-# Quality judge — `/product` v0.4.0
+# Quality judge — `/product` v0.6.0
 
-The quality judge is an independent-context `opus` sub-agent dispatched **after each pipeline step** to grade the step's artifact(s) against the step's rubric. It is the replacement for the retired size-budget instrument: it answers *"is this artifact correctly scoped, complete, and coherent for its declared job?"* — the question the KB ceiling was a poor proxy for.
+The quality judge is an independent-context sub-agent dispatched **once per phase, after the phase's producers return** — one batched call grading every judge-unit in the phase against its own rubric, writing one verdict file per unit. It is the replacement for the retired size-budget instrument: it answers *"is this artifact correctly scoped, complete, and coherent for its declared job?"* — the question the KB ceiling was a poor proxy for. Batching (v0.6.0, replacing the v0.5.0 one-call-per-step shape) cuts dispatch overhead — judge calls were ~50% of total run tokens in the 2026-05-23 baseline — and buys the cross-document consistency check a per-step judge structurally cannot make.
 
 This doc is the judge's operational contract: when it runs, how its rubric is assembled, the verdict it returns, how a verdict routes. The judge's 5-field dispatch brief lives in `delegation-briefs.md § quality-judge`; the rubric content lives in `quality-checklist.md`.
 
 ## What the judge is
 
-- **Independent context.** A fresh sub-agent per judge-unit — it does not share context with the step's producer. Generation and evaluation are separate (LLM-as-judge best practice: a producer grading its own work is biased toward its own choices).
-- **`opus`.** A stronger reasoner for evaluation, and a within-family asymmetry against the `sonnet` step producers. `sonnet` is the documented cost knob (§ Cost).
-- **Pointwise, chain-of-thought.** The judge grades one artifact-set against one rubric, reasoning criterion-by-criterion (G-Eval style). It never compares or ranks two artifacts — pointwise grading sidesteps position bias and makes self-preference bias bland.
+- **Independent context.** A fresh sub-agent per phase-batch — it does not share context with the steps' producers. Generation and evaluation are separate (LLM-as-judge best practice: a producer grading its own work is biased toward its own choices).
+- **Model per phase-batch (provisional mix — § Cost & model mix).** Phases 1 + 3 (light artifacts) dispatch on `sonnet`; Phases 2 + 4 (heavy artifacts: system design, legal, cost, the visual contract) dispatch on `opus`. The mix is provisional until a dogfood run confirms detection quality holds (§ Measurement protocol); the all-`opus` revert is one line.
+- **Pointwise per unit, chain-of-thought.** Within the batch, the judge grades each judge-unit's artifact-set against that unit's own rubric, reasoning criterion-by-criterion (G-Eval style). It never compares or ranks two artifacts for quality — pointwise grading sidesteps position bias and makes self-preference bias bland. The one cross-unit read it DOES make is consistency: contradictions between the phase's artifacts (a number, date, name, or claim asserted differently in two documents) are reported as a `cross-consistency` criterion on the offending unit's verdict — checking agreement is not ranking.
 - **Advisory, never a hard gate.** Its strongest action is to pre-populate a phase gate's `iterate` recommendation (§ Verdict → gate routing). It never autonomously BLOCKs or aborts — deterministic structural BLOCK/abort stays the `schema.md` Layer 1 job.
 
 The step producers' briefs deliberately do **not** mention the judge. The judge evaluates after the fact; telling a producer it will be judged invites writing-to-the-judge bias.
@@ -17,10 +17,10 @@ The step producers' briefs deliberately do **not** mention the judge. The judge 
 
 After a step's producer returns, the orchestrator (`SKILL.md`):
 
-1. **Anti-stub pre-filter.** `wc -c` each artifact against the step's `schema.md § Size floor` `min_size`. If any required artifact is below its floor it is a **stub** — the producer did not try. The orchestrator skips the judge call (judging a stub wastes an `opus` call) and re-dispatches the producer with a brief naming the stubbed artifact.
+1. **Anti-stub pre-filter.** `wc -c` each artifact against the step's `schema.md § Size floor` `min_size`. If any required artifact is below its floor it is a **stub** — the producer did not try. The orchestrator excludes that judge-unit from the batch (judging a stub wastes judge tokens) and re-dispatches the producer with a brief naming the stubbed artifact; the unit is judged with the next batch or a follow-up call once un-stubbed.
 1b. **Craft-floor pre-check (judge-units `02-prototype` + `15b-hifi-mood` only).** The orchestrator runs the deterministic anti-slop check (`scripts/craft-floor-check.ts`) over the unit's HTML artifacts and passes its JSON into the judge brief (`SKILL.md § Quality judge` step 1b). The judge's `craft-floor` criterion (`quality-checklist.md`) reads `summary.active_p0` — `fail` iff `> 0` — rather than re-discovering tells; this keeps deterministic detection out of the LLM grader (mirrors the Layer-1-at-submit boundary). The judge still weighs the two judge-only guidance tells (`references/craft-floor.md`) semantically. No other judge-unit runs this.
-2. **Dispatch the judge** on the artifacts that cleared the floor.
-3. **Record the verdict** to `.state.json` `quality_verdicts` and route it (§ Verdict → gate routing).
+2. **Dispatch the batched judge** — ONE `Agent` call for the phase, covering every judge-unit whose artifacts cleared the floor. The brief enumerates the units, each unit's artifact paths + rubric section + verdict path; the judge writes one verdict file per unit (same paths as the per-step shape — the merge path is unchanged).
+3. **Record the verdicts** — read each per-unit verdict file into `.state.json` `quality_verdicts` under its own key and route (§ Verdict → gate routing). Per-unit granularity is fully preserved; an `iterate` re-judge re-dispatches a batch containing only the re-run units, overwriting their keys.
 
 The catastrophe cap (200 KB, `artifact-budgets.md`) sits upstream of all this: a runaway producer is circuit-broken mid-flight and emits a partial-result — the judge never receives a 200 KB artifact.
 
@@ -38,8 +38,9 @@ For a judge-unit the rubric is **assembled, not authored** authors no new rubric
 1. **`quality-checklist.md` per-step criteria** — the gradeable semantic criteria, each with a stable `id`. The judge grades each as a *semantic* read — "is this section substantive and load-bearing", not "does the string exist". Some steps (e.g. 07 Sitemap-IA) have no semantic criterion; their rubric is right-sizing + schema context only.
 2. **`schema.md` — as context, not a re-graded checklist.** The judge reads the step's `schema.md` (required sections, `contains`-anchors, `§ Size floor`) and `prompt.md` to know the artifact's required shape and job. The deterministic "does the anchor exist" check is already enforced at submit by `schema.md` Layer 1 — the judge does **not** re-run it. Schema is the judge's *brief*: the source of "what this artifact is for".
 3. **The right-sizing criterion** (below) — appended to every judge-unit's rubric.
+4. **The cross-consistency criterion** (batch-level) — appended to a unit's verdict ONLY when the batched judge finds a contradiction between that unit's artifact and another artifact in the same phase (a value, date, name, or claim asserted differently in two places). `id: cross-consistency`; the `note` MUST name both artifacts and quote the contradiction. Units with no contradiction simply omit the criterion — absence means clean, not unchecked.
 
-So a verdict's `criteria[]` = the step's `quality-checklist.md` criteria + `right-sizing`.
+So a verdict's `criteria[]` = the step's `quality-checklist.md` criteria + `right-sizing` (+ `cross-consistency` when a contradiction was found).
 
 ## The right-sizing criterion
 
@@ -77,7 +78,7 @@ The judge returns one verdict object per judge-unit:
 |---|---|
 | `step` | judge-unit label (`01-ideation` … `15c-fixture-spec`) |
 | `judged_at` | UTC ISO-8601 |
-| `model` | judge model actually used (`opus` default; `sonnet` if the cost knob was pulled) |
+| `model` | judge model actually used — per the phase-batch mix (§ Cost & model mix): `sonnet` for Phases 1/3, `opus` for Phases 2/4. The per-verdict record is the measurement surface for the mix. |
 | `criteria[]` | one row per assembled rubric criterion — `id` + `verdict` ∈ `pass`/`concern`/`fail` + a one-line `note`. On `concern`/`fail` the `note` MUST name the section + dimension (the actionable signal). |
 | `scope_assessment` | top-level one-line whole-artifact scope headline — lands in `REPORT.md § Quality concerns` and the gate summary |
 | `outcome` | max-severity rollup: `fail` if any criterion `fail`, else `concern` if any `concern`, else `pass` |
@@ -109,9 +110,29 @@ Phase 4 (step 15) has no gate — a `15a/15b/15c` `fail` cannot pre-populate any
 - **Never grades size in bytes.** `min_size` is the `wc -c` anti-stub pre-filter; the 200 KB catastrophe cap is a runaway circuit-breaker. The judge grades scope fit (`right-sizing`), never byte count.
 - **Never authors rubric.** It grades the assembled rubric (§ Rubric assembly). If a step's rubric feels wrong, fix `quality-checklist.md` / `schema.md` — not the judge.
 
-## Cost
+## Cost & model mix
 
-~17 `opus` judge calls per full run (steps 01-14 + 15a/15b/15c) — marginal against a 35-55 min run, but real. The documented knob: dispatch the judge on `sonnet` instead (the brief's `model` field). A `sonnet` judge is cheaper and faster; it trades some evaluation depth and removes the within-family asymmetry. Pull the knob if judge cost bites; the verdict shape is identical (`model` records which ran).
+The 2026-05-23 baseline measured 17 per-step `opus` judge calls at ~1.6M of ~3.1M total run tokens (~50% of spend) for 8 pass / 9 concern / 0 fail — a high price for verdicts that changed nothing that run. v0.6.0 attacks the cost on two axes:
+
+1. **Batching** — 4 judge calls per full run (one per phase) instead of 17. Dispatch overhead and repeated rubric/context preamble collapse; the cross-consistency check comes free.
+2. **Model mix (PROVISIONAL — adoption pending § Measurement protocol):**
+
+| Phase batch | Judge-units | Model | Rationale |
+|---|---|---|---|
+| Phase 1 — discovery | 01-04 | `sonnet` | short, structurally simple artifacts |
+| Phase 2 — specification | 05-12 | `opus` | the heavy reasoning surface (system design, legal, cost) |
+| Phase 3 — identity | 13-14 | `sonnet` | brand/design checks are mostly coherence reads |
+| Phase 4 — visual contract | 15a/15b/15c | `opus` | the contract the SDD build runs against |
+
+## Measurement protocol (the mix is provisional)
+
+The mix adopts permanently only if detection quality holds. On the next full dogfood run:
+
+1. Run with the mix above; every verdict records `model` (the recording surface — no new field needed).
+2. **Detection bar:** the `sonnet`-judged batches must still catch real semantic inconsistencies of the class the baseline validated — the fixture-spec "Persona streak=17 vs derivation streak=8" internal-contradiction catch. Plant-or-find: if the run surfaces no natural inconsistency in a sonnet-judged phase, compare its notes' specificity against the baseline's opus notes for the same steps (vague "looks fine" notes = complacency signal).
+3. **Verdict:** detection holds → keep the mix, record the run in `.agent0/memory/product-pipeline-empirical-baseline.md`. Detection degrades → revert that phase batch to `opus` (one line in the table above) or re-split; record why.
+
+Until the protocol runs, treat the mix as a hypothesis carried by this contract, not a validated saving.
 
 ## Cross-references
 

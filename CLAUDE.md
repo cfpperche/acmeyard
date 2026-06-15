@@ -189,9 +189,9 @@ The validator runs a typecheck step only when the project declares the primitive
 
 On an auth-gated URL with no saved state the agent emits `BROWSER_LOGIN_REQUIRED: <host>`; the human runs `bash .agent0/tools/browser-login.sh <host>` and logs in, then the agent attaches over CDP via `agent-browser.sh adopt <host>` and reuses saved state headless. See `.agent0/context/rules/browser-auth.md`.
 
-## Visual contract acceptance
+## UI acceptance
 
-When a spec/task produces UI, "done" is proven by driving the UI, not static review. A `**UI impact:** none|render|interaction|flow` declaration triggers a visual contract verified via `agent-browser.sh verify-contract`; the validator emits a non-blocking `visual-contract-advisory:` (v1 advisory; `agent-browser` unavailable ≠ pass). See `.agent0/context/rules/visual-contract.md`.
+When a spec/task produces UI, "done" is proven by driving the UI, not static review — and the proof is **a green project UI test** (the stack's e2e/runner) covering the changed surface, not a frozen browser bundle (the visual contract is retired — spec 206 supersedes 155). A `**UI impact:** none|ui` declaration is the forcing function. When a UI surface changes but the project declares no UI test runner, the validator emits a non-blocking `ui-runner-advisory:` to provision one (`agent-browser` stays as the dev/inspection primitive only). See `.agent0/context/rules/ui-acceptance.md`.
 
 ## Skill compliance
 
@@ -203,7 +203,7 @@ When a spec/task produces UI, "done" is proven by driving the UI, not static rev
 
 ## Frontend designer
 
-`/frontend-designer` — build-time craft loop that designs or refines a *real, runnable* frontend with taste (`create`/`refine`/`explore`); researches references first, reuses the project's design system, proves output via a green `agent-browser verify-contract`. NOT planning artifacts → `/product`. See `.agent0/context/rules/frontend-designer.md`.
+`/frontend-designer` — build-time craft loop that designs or refines a *real, runnable* frontend with taste (`create`/`refine`/`explore`); researches references first, reuses the project's design system, proves output via a green project UI test covering the surface. NOT planning artifacts → `/product`. See `.agent0/context/rules/frontend-designer.md`.
 
 ## Meeting
 

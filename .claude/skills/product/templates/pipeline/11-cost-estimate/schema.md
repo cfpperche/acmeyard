@@ -44,7 +44,8 @@ The schema does NOT structurally enforce the conditional shape (would require pr
         "| # | Assumption | Value | Source | Confidence |",
         "| Vendor | Tier | Monthly cost |",
         "[Estimated]",
-        "Flip if:"
+        "Flip if:",
+        "**Pre-validation projection.**"
       ],
       "any_of_contains": [
         "## Unit Economics",

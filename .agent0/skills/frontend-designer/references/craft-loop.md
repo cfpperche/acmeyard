@@ -27,7 +27,7 @@ An agent can convince itself a screen looks good without ever rendering it. The 
 
 The refine loop stops on a **declared** bar, not on exhaustion or vibes. Good stop criteria are observable:
 
-- the done-proof passes (green `report.json`, or the honest native-evidence path);
+- the done-proof passes (a green project UI test covering the surface, or the honest native-evidence path);
 - the surface visibly matches the design direction's tokens/feel and the borrowed reference patterns;
 - a11y baseline holds (required roles/names present; console errors within budget; keyboard/focus sane);
 - no remaining item on the surface's punch-list from the last critique.

@@ -21,7 +21,6 @@ agent-browser.sh caps [--json]                       binary + chrome + pinned-ve
 agent-browser.sh route [task]                         → primary | unavailable:<reason>
 agent-browser.sh policy-eval <action> <target> [--confirm]   → allow|deny|confirm ; reason
 agent-browser.sh run [--confirm] -- <agent-browser args...>   policy-gated, audited passthrough (fail-closed if unavailable)
-agent-browser.sh verify-contract <url> <fixture.json> <outdir>   bounded visual-contract verify
 agent-browser.sh audit <base-url> (--paths a,b,c|--paths-file f) [--out d] [--max-console N] [--structure strict|optional]   multi-page structural+console+vitals+overflow sweep
 agent-browser.sh adopt <host> [--port 9222] [--detect-only]   attach to a human-logged-in CDP Chrome + save state
 agent-browser.sh reset                                tear down the daemon (rebind launch options)
@@ -40,7 +39,7 @@ The raw `agent-browser` CLI is fine for read-only ad-hoc inspection; route mutat
 2. **`unavailable:no-chrome`** — no usable browser even via agent-browser's bundled Chrome-for-Testing (signalled by `AGENT0_BROWSER_NO_CHROME=1`; a missing *system* Chrome alone is NOT a reason — agent-browser self-provides one).
 3. **`unavailable:mcp-removed`** — the legacy `AGENT0_BROWSER=mcp` override is now an **explicit unsupported error**, not an alternate route (MCP routing was removed).
 
-On any `unavailable:*`, explicit commands (`run`/`verify-contract`/`audit`/`adopt`) **fail closed** — rc 4 with an install/`doctor`/`caps` message (rc 3 for the `mcp-removed` override) — they never degrade to Playwright/Chrome DevTools MCP. A reserved `capability-gap` slot exists but the v1 gap list is empty (agent-browser is a superset of the old MCP surface). This single rule keeps "agent-browser is the only path" unambiguous.
+On any `unavailable:*`, explicit commands (`run`/`audit`/`adopt`) **fail closed** — rc 4 with an install/`doctor`/`caps` message (rc 3 for the `mcp-removed` override) — they never degrade to Playwright/Chrome DevTools MCP. A reserved `capability-gap` slot exists but the v1 gap list is empty (agent-browser is a superset of the old MCP surface). This single rule keeps "agent-browser is the only path" unambiguous.
 
 ## Attempt-before-handoff — try the primitive, don't punt to the human by reflex
 
@@ -90,9 +89,9 @@ The agent signals the start with `BROWSER_LOGIN_REQUIRED: <host>` naming the exa
 
 agent-browser's native `state save <file>` / `--state <file> open` (or `state load`) is the auth-reuse mechanism. The saved JSON (under `.agent0/.runtime-state/agent-browser/state/<host>.json`) holds cookies + localStorage and is credential-class. For an auth-gated flow: log in once (interactively or via `auth login`/the `browser-login.sh`→`adopt` flow above), `state save`, then reuse with `--state` on later runs.
 
-## Visual-contract verification
+## UI acceptance is a test, not a browser bundle
 
-`verify-contract <url> <fixture.json> <outdir>` is the bounded loop for verifying a `/product`→`/sdd` visual contract: it opens the URL, captures a11y snapshot + annotated screenshot + console + vitals, and asserts a fixture-spec (`{ "required": [{role,name}...], "max_console_errors": N }`) → a `PASS/FAIL` `report.json` + artifacts. The model reasons only over the residual, not over whether the page loaded. The fixture-spec extends past the `render` floor with optional `interactions` and `flow` arrays (named-control exercise + ordered route traversal with per-step assertions), so a contract covers navigation/interaction/flow, not just static render — the depth tiers and the `UI impact` acceptance gate they feed live in `.agent0/context/rules/visual-contract.md`.
+This primitive is for **driving and inspecting** UI during development — not for generating an acceptance artifact. UI acceptance is a **green project UI test** covering the changed surface; the retired `verify-contract` subcommand (and the per-spec evidence bundle it produced) is gone. See `.agent0/context/rules/ui-acceptance.md`. For an opt-in a11y/console/vitals/overflow sweep, use `audit` (below).
 
 ## Structural audit (demand-validated by the real site-audit dogfood)
 

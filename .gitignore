@@ -98,3 +98,6 @@ assets/generated/mockups/*
 assets/generated/sound/*
 assets/generated/videos/*
 assets/transcripts/*
+
+.tachyon/
+tachyon.yml

@@ -6,6 +6,8 @@ The submitted concept brief MUST contain level-2 markdown headings (`## <Title>`
 
 Each name slugifies by lowercasing + dashing — `## Target Persona(s)` → `target-persona-s` matches `target-persona` (we accept trailing-s as cosmetic). The agent should match these slugs precisely.
 
+- product-form
+- market-sizing
 - hook
 - retain
 - refer
@@ -39,6 +41,8 @@ Identity block (name, tagline, scale, model, AI-nativity, comparables) is enforc
         "**Scale:**",
         "**Model:**",
         "**AI-native:**",
+        "**Form:**",
+        "## Product Form",
         "## Hook",
         "## Retain",
         "## Refer",
@@ -58,6 +62,8 @@ Identity block (name, tagline, scale, model, AI-nativity, comparables) is enforc
 The schema enforces presence and floor; *depth* is the agent's responsibility. Quality cues per section:
 
 - **identity block (top of brief)** — `Tagline` is one sentence, max 10 words, makes a non-technical reader curious. `Scale` is one of: Micro-Product / SMB / Venture-Scale / Marketplace / Developer Tool / Mobile App. `Model` is one of: Subscription / Usage-based / Hybrid / Service-as-Software. `AI-native` is Yes (remove AI → product can't exist) or No (AI enhances).
+- **product-form** — `**Form:**` field naming one of `screen-app | headless-service | cli | bot | embedded` + 1-3 line rationale (where the primary user value is delivered; hybrids name the secondary surface). Binding for Steps 02/07/14/15 — see `references/product-forms.md` at skill level. Ambiguity must be flagged for the concept gate, not silently resolved.
+- **market-sizing** — TAM/SAM/SOM as explicitly-hypothesis paragraphs (opening line declares pre-validation desk research; ranges preferred over point values; 1-2 citations per number).
 - **hook** — why someone signs up. Must fit in a tweet (280 chars).
 - **retain** — why they stay past month 3, with a Month 1 / 3 / 6 / 12 progression showing accumulating switching cost.
 - **refer** — what specific moment triggers sharing. Concrete: "when they see their report saved them $2K this month" beats "when they have a good experience".

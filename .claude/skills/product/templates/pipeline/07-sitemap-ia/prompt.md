@@ -22,7 +22,7 @@ Per design discipline, Decision 5 + 13: sitemap-IA is its own step (was inline i
 
 - `<out>/docs/prd/v1.md` § User stories — every P0/P1 US-NN MUST map to ≥1 route (P2 may defer)
 - `<out>/docs/functional-spec.md` § Pages & Surfaces — surface inventory hints
-- `<out>/docs/concept-brief.md` — product class (B2C / B2B / internal-tool / etc) drives which `required_categories` apply
+- `<out>/docs/concept-brief.md` — product class (B2C / B2B / internal-tool / etc) drives deferral judgment; `§ Product Form` (mirrored in the brief's CONTEXT as `{{product_form}}`) selects WHICH `required_categories` set applies per `references/product-forms.md § Step 07` — the YAML shape below shows the `screen-app` set; non-screen forms substitute theirs (inventory units become endpoints / commands / intents / host touchpoints)
 - `.claude/skills/product/references/sitemap-schema.md` — the binding schema (read this CLOSELY; orchestrator enforces it post-return)
 
 ## YAML shape (schema-bound)

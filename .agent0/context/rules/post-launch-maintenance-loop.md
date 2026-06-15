@@ -17,7 +17,7 @@ Describe the loop by roles, not vendors:
 1. **Signal source** - where production evidence comes from: error tracker, logs, uptime alerts, cron/monitor alerts, support tickets, CI failures, or manual triage.
 2. **Work hub** - where a human-trackable item lives: Linear, GitHub Issues, Jira, a support queue, or a project-local issue tracker.
 3. **Agent delegate** - the coding agent or runtime asked to investigate or propose a fix: Codex, Claude, Cursor, Devin, or another agent.
-4. **Review gate** - the human-owned checkpoint before merge/release: tests, lint/typecheck, visual contract when relevant, security review, and release decision.
+4. **Review gate** - the human-owned checkpoint before merge/release: tests, lint/typecheck, a green project UI test covering the changed surface when the fix touches UI (see `.agent0/context/rules/ui-acceptance.md`), security review, and release decision.
 5. **Feedback sink** - the durable place for what the incident taught the project: a regression test, `/sdd new` hardening spec, project memory, reminder/routine, or `/product` vN discovery when the human explicitly chooses product discovery.
 
 Sentry -> Linear -> Codex is a concrete example recipe only. Do not present it as the Agent0 architecture or a required provider stack.

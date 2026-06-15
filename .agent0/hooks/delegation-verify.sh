@@ -83,106 +83,11 @@ if [ -n "$SUBAGENT_CWD" ] && [ -d "$SUBAGENT_CWD" ]; then
   fi
 fi
 
-visual_contract_brief_from_transcript() {
-  transcript_path="$1"
-  [ -n "$transcript_path" ] && [ -r "$transcript_path" ] || return 1
-
-  transcript_text_file="$(mktemp 2>/dev/null || mktemp -t delegation-verify-transcript)"
-  : > "$transcript_text_file" 2>/dev/null || return 1
-
-  while IFS= read -r transcript_line; do
-    printf '%s\n' "$transcript_line" | jq -r '.. | strings?' 2>/dev/null || true
-  done < "$transcript_path" > "$transcript_text_file" 2>/dev/null || true
-
-  if [ ! -s "$transcript_text_file" ]; then
-    cat "$transcript_path" > "$transcript_text_file" 2>/dev/null || true
-  fi
-
-  awk '
-    /(^|[[:space:]])TASK:[[:space:]]*/ { seen = 1; block = "" }
-    { if (seen) { block = block $0 "\n" } else { all = all $0 "\n" } }
-    END { if (seen) { printf "%s", block } else { printf "%s", all } }
-  ' "$transcript_text_file" 2>/dev/null || true
-
-  rm -f "$transcript_text_file" 2>/dev/null || true
-}
-
-visual_contract_resolve_report_path() {
-  report_path="$1"
-  [ -n "$report_path" ] || return 1
-  case "$report_path" in
-    /*) printf '%s\n' "$report_path" ;;
-    *) printf '%s/%s\n' "$VALIDATOR_CWD" "$report_path" ;;
-  esac
-}
-
-visual_contract_report_path_from_brief() {
-  brief_text="$1"
-
-  explicit_report="$(
-    printf '%s\n' "$brief_text" \
-      | tr -cs '[:alnum:]_./:-' '\n' \
-      | grep -E 'report\.json$' \
-      | tail -n 1 || true
-  )"
-  if [ -n "$explicit_report" ]; then
-    visual_contract_resolve_report_path "$explicit_report"
-    return 0
-  fi
-
-  done_when_line="$(
-    printf '%s\n' "$brief_text" \
-      | grep -Ei 'DONE_WHEN:.*verify-contract' \
-      | tail -n 1 || true
-  )"
-  [ -n "$done_when_line" ] || return 0
-
-  verify_args="$(printf '%s\n' "$done_when_line" | sed -E 's/^.*verify-contract[[:space:]]+//; s/[;&|].*$//' 2>/dev/null || true)"
-  arg_count=0
-  report_dir=""
-  for token in $(printf '%s\n' "$verify_args" | tr -cs '[:alnum:]_./:-' '\n'); do
-    case "$token" in
-      --*) continue ;;
-    esac
-    arg_count=$((arg_count + 1))
-    if [ "$arg_count" -eq 3 ]; then
-      report_dir="$token"
-      break
-    fi
-  done
-
-  [ -n "$report_dir" ] || return 0
-  visual_contract_resolve_report_path "$report_dir/report.json"
-}
-
-visual_contract_evidence_advisory() {
-  [ -n "$TRANSCRIPT_PATH" ] && [ -r "$TRANSCRIPT_PATH" ] || return 0
-
-  brief_text="$(visual_contract_brief_from_transcript "$TRANSCRIPT_PATH" 2>/dev/null || true)"
-  [ -n "$brief_text" ] || return 0
-
-  declared_ui=0
-  if printf '%s\n' "$brief_text" | grep -Eiq 'UI impact:[[:space:]]*(render|interaction|flow)([^[:alpha:]]|$)'; then
-    declared_ui=1
-  elif printf '%s\n' "$brief_text" | grep -Eiq 'DONE_WHEN:.*verify-contract'; then
-    declared_ui=1
-  fi
-  [ "$declared_ui" -eq 1 ] || return 0
-
-  report_path="$(visual_contract_report_path_from_brief "$brief_text" 2>/dev/null || true)"
-  display_path="$report_path"
-  [ -n "$display_path" ] || display_path="(none found)"
-
-  if [ -z "$report_path" ] || [ ! -f "$report_path" ]; then
-    printf "visual-contract-advisory: declared UI task closed without a passing visual-contract report (%s) — attach an agent-browser verify-contract pass (report.json .overall==pass) as DONE_WHEN proof.\n" "$display_path" >&2
-    return 0
-  fi
-
-  jq -e '.overall=="pass"' "$report_path" >/dev/null 2>&1 || \
-    printf "visual-contract-advisory: declared UI task closed without a passing visual-contract report (%s) — attach an agent-browser verify-contract pass (report.json .overall==pass) as DONE_WHEN proof.\n" "$display_path" >&2
-}
-
-visual_contract_evidence_advisory
+# UI-producing briefs (spec 206): acceptance is a green UI test, not a frozen
+# agent-browser bundle. The retired `visual_contract_evidence_advisory` (which
+# parsed the brief for a `verify-contract` report.json) is gone — the validator's
+# own `ui-runner-advisory:` (surfaced below via VALIDATOR_OWN_STDERR) now carries
+# the UI-acceptance signal. See .agent0/context/rules/ui-acceptance.md.
 
 # --- Validator resolution chain — first executable wins; else fail-open. ---
 VALIDATOR=""

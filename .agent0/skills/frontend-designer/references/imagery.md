@@ -46,10 +46,10 @@ Safest patterns:
 - `/image` prints the cost before every call; surface it. The count cap + per-surface opt-in are the real guards for autonomous work.
 - Any retry, multiple candidates, or a brand-tier call requires a **separate human instruction** or standalone `/image`.
 
-## Done-proof interaction (spec 155)
+## Done-proof interaction (UI acceptance)
 
-- The generated image is **decorative** (`aria-hidden` / `alt=""`, or a real `alt` only if it conveys content). `verify-contract` asserts the **semantic surface** (heading/controls/console), **never the bitmap**.
-- **Verify with the draft disabled/missing too** — prove the neutral fallback renders and the contract still passes, so a locally-successful draft never masks a broken neutral path.
+- The generated image is **decorative** (`aria-hidden` / `alt=""`, or a real `alt` only if it conveys content). The project's UI test asserts the **semantic surface** (heading/controls/console), **never the bitmap**.
+- **Verify with the draft disabled/missing too** — prove the neutral fallback renders and the UI test still passes, so a locally-successful draft never masks a broken neutral path.
 
 ## What is refused (no rule-of-three demand)
 

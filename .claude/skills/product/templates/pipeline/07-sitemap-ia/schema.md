@@ -25,7 +25,7 @@ The YAML output binds to `.claude/skills/product/references/sitemap-schema.md`. 
 | `slug` | string | yes | kebab-case product slug, matches `<out>/` basename |
 | `platform` | string | yes | `web` or `mobile` |
 | `stack` | string | yes | `next` or `expo` |
-| `required_categories` | list[string] | yes | `[marketing, auth, primary, admin, error]` (verbatim) |
+| `required_categories` | list[string] | yes | the declared product form's set per `references/product-forms.md § Step 07` — for `screen-app`: `[marketing, auth, primary, admin, error]` (verbatim) |
 | `routes` | list[object] | yes | per-route entries |
 | `deferred_categories` | list[object] | optional | only present if a required category is genuinely out of v1 scope |
 

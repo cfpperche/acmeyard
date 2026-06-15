@@ -20,7 +20,7 @@ Per design discipline, Decision 1 + 15: PRD is reshaped from monolithic spec to 
 
 ```markdown
 ## Problem
-<2-3 sentences. User-voice problem statement. Cite Step 03 problem-validation interviews if real signal exists.>
+<2-3 sentences. User-voice problem statement. Cite the Step 03 Assumption Register's value-risk rows — carry their confidence level; only founder-supplied real-world signal reads as evidence.>
 
 ## Why now
 <2-3 sentences. What changed in the world / market / tech / regulation that makes this the right moment. Cite Step 01 concept-brief § Market Sizing + § Competitive positioning.>

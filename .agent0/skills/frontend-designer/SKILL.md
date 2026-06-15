@@ -1,8 +1,8 @@
 ---
 name: frontend-designer
-description: Design or refine a real frontend with taste — the build-time "artist" that researches references, grounds in the product domain, reuses the project's design system, and proves the result by driving it. Use when creating or refining UI (web, mobile, desktop, any platform) and you want design-led, evidence-backed implementation — not planning (that is /product), not just an acceptance check (the visual-contract gate). Three modes - create (greenfield UI slice in the project stack), refine (improve existing UI in its stack), explore (research + direction only, no code). Always researches references first, writing a git-tracked reference-research.md + design-direction.md pair. Adapts to the project's stack via a project-derived ladder — never a frozen default; reuses an existing design system before inventing. Done reuses agent-browser verify-contract (spec 155); unavailable is a blocker, never a pass. Helper - scripts/frontend-designer.sh.
+description: Design or refine a real frontend with taste — the build-time "artist" that researches references, grounds in the product domain, reuses the project's design system, and proves the result by driving it. Use when creating or refining UI (web, mobile, desktop, any platform) and you want design-led, evidence-backed implementation — not planning (that is /product), not just an acceptance check (UI acceptance). Three modes - create (greenfield UI slice in the project stack), refine (improve existing UI in its stack), explore (research + direction only, no code). Always researches references first, writing a git-tracked reference-research.md + design-direction.md pair. Adapts to the project's stack via a project-derived ladder — never a frozen default; reuses an existing design system before inventing. Done is a green project UI test covering the surface (.agent0/context/rules/ui-acceptance.md); no runner is a blocker, never a pass. Helper - scripts/frontend-designer.sh.
 license: MIT
-compatibility: Compatible with any agentskills.io-compatible runtime (Claude Code, OpenAI Codex, Cursor, Goose, OpenCode, and others). Uses only universal primitives — file IO, shell, and web research — plus the in-repo agent-browser.sh for reference capture and visual proof. No Claude-only primitive in the core loop.
+compatibility: Compatible with any agentskills.io-compatible runtime (Claude Code, OpenAI Codex, Cursor, Goose, OpenCode, and others). Uses only universal primitives — file IO, shell, and web research — plus the in-repo agent-browser.sh for reference capture and dev-time inspection. No Claude-only primitive in the core loop.
 metadata:
   agent0-portability-tier: agentskills-portable
   version: "0.1"
@@ -13,10 +13,10 @@ argument-hint: <create <surface> | refine <surface> | explore <surface>> [--plat
 
 Design or refine a **real, runnable frontend** with taste. This skill is the build-time **craft loop** that sits in the gap between Agent0's two adjacent UI capacities:
 
-- **`/product`** does docs-first product *planning* (concept brief → PRD → design-system doc → design-time visual contract) and **does not generate a runnable app**.
-- The **visual-contract acceptance gate** (spec 155) *proves* a built UI by driving it (`agent-browser.sh verify-contract` → `report.json`).
+- **`/product`** does docs-first product *planning* (concept brief → PRD → design-system doc → design-time UI artifacts) and **does not generate a runnable app**.
+- **UI acceptance** (`.agent0/context/rules/ui-acceptance.md`) *proves* a built UI by driving it — a **green project UI test** (the stack's e2e/runner) covering the changed surface.
 
-`frontend-designer` is what turns intent + references + (optional) design system into **good-looking, working UI with evidence**. It never re-does `/product`'s planning, invents no new acceptance gate (it reuses spec 155), and ships **zero frozen stack opinions** — it detects and adapts. The "artist" is a context-engineered *loop*, not a persona: research → direction → implement → drive-and-see → critique → refine.
+`frontend-designer` is what turns intent + references + (optional) design system into **good-looking, working UI with evidence**. It never re-does `/product`'s planning, invents no new acceptance gate (done is the project's own UI test per `ui-acceptance.md`), and ships **zero frozen stack opinions** — it detects and adapts. The "artist" is a context-engineered *loop*, not a persona: research → direction → implement → drive-and-see → critique → refine.
 
 > Graduated from a decision-grade `/meeting` (Claude + Codex): `.agent0/meetings/frontend-designer-skill-design-2026-06-06T01-30-48Z/meeting.md`. Spec: `docs/specs/158-frontend-designer-skill/`.
 
@@ -60,11 +60,11 @@ Resolution ladder, in order; the first that resolves wins, and you **record whic
 
 Never consume a bundled skeleton or a hardcoded default (repo rule: no shipped stack opinions). Detected, free, local+remote tools (Tailwind, shadcn, Radix, Style Dictionary, Fontsource/Google Fonts, lucide icons, Storybook, Vite, Expo, Tauri, …) are **detect-don't-impose** — add one only when the project stack or the researched plan justifies it.
 
-## Done-proof — reuse spec 155, fail closed (see references/done-proof.md)
+## Done-proof — a green project UI test, fail closed (see references/done-proof.md)
 
-- **Browser-renderable output:** declare `**UI impact:** render|interaction|flow` in `design-direction.md`, write a `fixture-spec.json` (template in `templates/`), and run `scripts/frontend-designer.sh verify <url> fixture-spec.json <outdir>` → a green `report.json`. **`agent-browser` unavailable is a BLOCKER (rc 4), never a pass.**
-- **Native-only surfaces** (no Expo-web/Storybook/web-preview harness): use a project-provided browser-renderable harness if one exists; otherwise ship code + native build/test evidence **explicitly labeled "not visual-contract proof."** Do **not** add new native visual tooling — that is deferred behind the rule-of-three demand test.
-- **Animated / WebGL / 3D surfaces:** the gate proves the semantic+interaction surface, **not motion fidelity**. A painting WebGL canvas isn't in the a11y tree → mark it decorative (`aria-hidden`), meaning in real text; prove "renders & animates" programmatically (`eval` of a frame counter), labeled build/runtime evidence. Honor `prefers-reduced-motion` with an explicit Play/Pause opt-in. See references/done-proof.md § Animated.
+- **Browser-renderable output:** declare `**UI impact:** ui` in `design-direction.md`, write/extend the **project's UI test** so it covers the changed surface (name the route, assert after render, exercise the changed interaction, no `skip`/`only` — see `.agent0/context/rules/ui-acceptance.md`), and run `scripts/frontend-designer.sh verify <project>` → a green run. **No declared UI test runner is a BLOCKER (rc 4), never a pass.**
+- **Native-only surfaces** (no Expo-web/Storybook/web-preview harness): use a project-provided browser-renderable harness if one exists; otherwise ship code + native build/test evidence **explicitly labeled "NOT a UI-test proof."** Do **not** add new native visual tooling — that is deferred behind the rule-of-three demand test.
+- **Animated / WebGL / 3D surfaces:** the UI test proves the semantic+interaction surface, **not motion fidelity**. A painting WebGL canvas isn't in the a11y tree → mark it decorative (`aria-hidden`), meaning in real text; prove "renders & animates" programmatically (`eval` of a frame counter), labeled build/runtime evidence — NOT a UI-test proof of motion. Honor `prefers-reduced-motion` with an explicit Play/Pause opt-in. See references/done-proof.md § Animated.
 
 ## Dependencies
 
@@ -73,30 +73,30 @@ Hard deps (tiny, all free, local+remote): shell, `rg`, `jq`, the project's packa
 ## Artifacts & locations
 
 - `reference-research.md` + `design-direction.md` — **git-tracked decision records**, one compact pair per surface, in the active SDD spec dir (`--spec NNN`) if SDD-driven, else `docs/design/<surface>/`. Resolve with `scripts/frontend-designer.sh artifacts-dir`.
-- `agent-browser` screenshots / `report.json` — gitignored runtime **evidence**, linked from the docs, not committed.
+- `agent-browser` screenshots + the project UI-test output/run log — gitignored runtime **evidence**, linked from the docs, not committed.
 - No global reference cache or "design dashboard" — that would be harness-drift.
 
 ## Eval scenarios
 
 ### Eval 1: create on a project with a design system
 **Input:** `/frontend-designer create dashboard --from ./app` where `./app` is Next + Tailwind + shadcn.
-**Expected:** `detect` reports the stack; references researched + `reference-research.md` written; `design-direction.md` **reuses** the shadcn/Tailwind tokens (proposes nothing new); runnable dashboard built; `verify` returns a green `report.json`. Stack ladder rung 1 recorded.
-**Failure:** invented a new token set despite an existing DS; no reference research; claimed done without a green report; introduced a framework the project doesn't use.
+**Expected:** `detect` reports the stack; references researched + `reference-research.md` written; `design-direction.md` **reuses** the shadcn/Tailwind tokens (proposes nothing new); runnable dashboard built; the project's UI test covering the dashboard runs green (`verify` runs the declared command, or routes you to it). Stack ladder rung 1 recorded.
+**Failure:** invented a new token set despite an existing DS; no reference research; claimed done without a green UI test covering the surface; introduced a framework the project doesn't use.
 
 ### Eval 2: refine an existing surface
 **Input:** `/frontend-designer refine checkout --from ./shop` with intent "the form feels cramped and fails a11y."
 **Expected:** bounded diff in the existing stack; before/after evidence; preserved behavior; critique loop stops on the stated criteria; design-doc pair updated, not duplicated.
 **Failure:** re-platformed; unbounded rewrite; no before/after evidence; loop ran to exhaustion with no stop criterion.
 
-### Eval 3: native surface, no design system, agent-browser path
+### Eval 3: native surface, no design system, honest-evidence path
 **Input:** `/frontend-designer create profile-screen --from ./mobile --platform expo`, no DS present.
-**Expected:** ladder proposes a minimal token set (records "proposing — none exists"); if `react-native-web`/Storybook exists, real render evidence via that harness; otherwise code + native build/test evidence **labeled "not visual-contract proof."** No new native visual tooling added.
-**Failure:** claimed visual-contract proof for a native-only surface; added a bespoke screenshot tool; froze a default stack.
+**Expected:** ladder proposes a minimal token set (records "proposing — none exists"); if `react-native-web`/Storybook exists, real render evidence via that harness; otherwise code + native build/test evidence **labeled "NOT a UI-test proof."** No new native visual tooling added.
+**Failure:** claimed a UI-test proof for a native-only surface; added a bespoke screenshot tool; froze a default stack.
 
-### Eval 4: agent-browser unavailable
-**Input:** `verify` on a machine without agent-browser/Chrome.
-**Expected:** `scripts/frontend-designer.sh verify` exits rc 4 with a `BLOCKER` message; done is **not** claimed.
-**Failure:** treated unavailability as a pass.
+### Eval 4: no UI test runner declared
+**Input:** `verify` on a project that declares no UI test runner (no e2e script/config, no `.agent0/ui-test.json`).
+**Expected:** `scripts/frontend-designer.sh verify` exits rc 4 with a `BLOCKER` message pointing at `ui-acceptance.md`; done is **not** claimed.
+**Failure:** treated the missing runner as a pass or a substitute bundle.
 
 ## Notes
 

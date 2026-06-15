@@ -20,7 +20,6 @@
 #   route [task]                        print: primary | unavailable:<reason>
 #   policy-eval <action> <target> [--confirm]   decision: allow|deny|confirm ; reason
 #   run [--confirm] -- <agent-browser args...>   policy-gated, audited passthrough
-#   verify-contract <url> <fixture.json> <outdir>   bounded visual-contract verify
 #   audit <base-url> (--paths a,b,c|--paths-file f) [--out d] [--max-console N] [--structure strict|optional]   multi-page structural+console+vitals+overflow sweep
 #   adopt <host> [--port 9222] [--domain d] [--timeout S] [--state f] [--detect-only]   attach to a human-logged-in CDP Chrome, save state (152.2)
 #   audit-tail [N]                      show recent audit lines
@@ -261,181 +260,6 @@ run() {
   "$(ab_bin)" "$@"
 }
 
-# --- verify-contract (the bounded visual-contract dogfood verifier) ---------
-verify_contract() {
-  local url="${1:-}" fixture="${2:-}" outdir="${3:-}"
-  [ -n "$url" ] && [ -f "$fixture" ] && [ -n "$outdir" ] || {
-    echo "usage: agent-browser.sh verify-contract <url> <fixture.json> <outdir>" >&2; return 3; }
-  jq -e . "$fixture" >/dev/null 2>&1 || {
-    echo "verify-contract: malformed fixture JSON: $fixture" >&2; return 3; }
-  mkdir -p "$outdir"
-
-  require_primary verify-contract || return $?
-
-  local chrome; chrome="$(resolve_chrome 2>/dev/null || true)"
-  [ -n "$chrome" ] && export AGENT_BROWSER_EXECUTABLE_PATH="$chrome"
-  local bin; bin="$(ab_bin)"
-  local settle_ms="${AGENT0_BROWSER_SETTLE_MS:-1200}"
-
-  audit_line "verify-contract" "open" "$url" "read-only" "allow" "contract-verify"
-  "$bin" console --clear >/dev/null 2>&1 || true
-  "$bin" errors --clear >/dev/null 2>&1 || true
-  "$bin" open "$url" >/dev/null 2>&1
-  "$bin" snapshot --json > "$outdir/a11y.json" 2>/dev/null
-  local screen_path; screen_path="$(cd "$outdir" && pwd)/screen.png"
-  "$bin" screenshot "$screen_path" >/dev/null 2>&1
-  "$bin" console --json > "$outdir/console.json" 2>/dev/null || echo '{"data":{"messages":[]}}' > "$outdir/console.json"
-  "$bin" vitals --json > "$outdir/vitals.json" 2>/dev/null || echo '{}' > "$outdir/vitals.json"
-
-  # --- assert against the fixture-spec ---
-  local checks="[]" overall="pass"
-  add_check() { # add_check <name> <ok-bool> <detail> [flaky-bool]
-    # A failing step marked flaky is recorded as a non-fatal `warn` check: it
-    # appears in the report but does NOT flip `overall` to fail (spec 155 D5 —
-    # interactive/flow steps are flakier; flakiness must not break a build).
-    local flaky="${4:-false}" warn=false
-    if [ "$2" != "true" ] && [ "$flaky" = "true" ]; then warn=true; fi
-    checks="$(jq -c --arg n "$1" --argjson ok "$2" --arg d "$3" --argjson warn "$warn" \
-      '. + [{name:$n,ok:$ok,warn:$warn,detail:$d}]' <<<"$checks")"
-    if [ "$2" != "true" ] && [ "$warn" != "true" ]; then overall="fail"; fi
-  }
-  # Resolve a {role,name} to a snapshot ref id (works whether `.data.refs` is an
-  # object map keyed by ref id or an array). Empty when not found.
-  _vc_ref() { jq -r --arg role "$2" --arg name "$3" \
-      '((.data.refs // {}) | to_entries | map(select(.value.role==$role and .value.name==$name)) | (.[0].key // empty))' \
-      "$1" 2>/dev/null; }
-  _vc_present() { jq -r --arg role "$2" --arg name "$3" \
-      '[((.data.refs // {}) | .[]) | select(.role==$role and .name==$name)] | length > 0' "$1" 2>/dev/null || echo false; }
-  _vc_url() {
-    local cur
-    cur="$(jq -r '.data.url // .data.origin // empty' "$1" 2>/dev/null)"
-    if [ -n "$cur" ]; then printf '%s\n' "$cur"; else "$bin" get url 2>/dev/null || true; fi
-  }
-  _vc_snap() { "$bin" snapshot --json > "$outdir/a11y.json" 2>/dev/null || true; }
-  # Drive one act verb against the live binary via the resolved ref (best-effort
-  # mapping onto the agent-browser CLI; the fake-bin stub records the call).
-  _vc_act() { # <verb> <ref> [value]
-    case "$1" in
-      click)  "$bin" click "$2" >/dev/null 2>&1 ;;
-      type)   "$bin" type "$2" "${3:-}" >/dev/null 2>&1 ;;
-      select) "$bin" select "$2" "${3:-}" >/dev/null 2>&1 ;;
-      press)  "$bin" press "${3:-$2}" >/dev/null 2>&1 ;;
-      *) return 0 ;;
-    esac
-  }
-
-  # required roles/names present in the a11y refs
-  local nreq; nreq="$(jq '.required | length' "$fixture" 2>/dev/null || echo 0)"
-  local i=0
-  while [ "$i" -lt "${nreq:-0}" ]; do
-    local role name found
-    role="$(jq -r ".required[$i].role" "$fixture")"
-    name="$(jq -r ".required[$i].name" "$fixture")"
-    found="$(jq --arg role "$role" --arg name "$name" \
-      '[.data.refs[] | select(.role==$role and .name==$name)] | length > 0' "$outdir/a11y.json" 2>/dev/null || echo false)"
-    if [ "$found" = "true" ]; then add_check "required:$role:$name" true "present"
-    else add_check "required:$role:$name" false "MISSING from a11y tree"; fi
-    i=$((i+1))
-  done
-
-  # console errors within budget
-  local maxerr nerr
-  maxerr="$(jq '.max_console_errors // 0' "$fixture" 2>/dev/null || echo 0)"
-  nerr="$(jq '[.data.messages[]? | select((.type//.level//"") == "error")] | length' "$outdir/console.json" 2>/dev/null || echo 0)"
-  if [ "${nerr:-0}" -le "${maxerr:-0}" ]; then add_check "console-errors" true "$nerr ≤ $maxerr"
-  else add_check "console-errors" false "$nerr > $maxerr"; fi
-
-  # screenshot produced
-  if [ -s "$outdir/screen.png" ]; then add_check "screenshot" true "captured"
-  else add_check "screenshot" false "not produced"; fi
-
-  # --- interaction tier (spec 155 D3): exercise named controls -------------
-  # Each step: { action, target:{role,name}, value?, expect:{role,name}?, flaky? }.
-  # Resolve the target ref from the current snapshot, drive the act verb, then
-  # re-snapshot and assert the expected post-state role/name is present.
-  local nint; nint="$(jq '(.interactions // []) | length' "$fixture" 2>/dev/null || echo 0)"
-  local j=0
-  while [ "$j" -lt "${nint:-0}" ]; do
-    local act trole tname tval eflaky exp_role exp_name ref ok detail
-    act="$(jq -r ".interactions[$j].action // \"click\"" "$fixture")"
-    trole="$(jq -r ".interactions[$j].target.role // empty" "$fixture")"
-    tname="$(jq -r ".interactions[$j].target.name // empty" "$fixture")"
-    tval="$(jq -r ".interactions[$j].value // empty" "$fixture")"
-    eflaky="$(jq -r ".interactions[$j].flaky // false" "$fixture")"
-    exp_role="$(jq -r ".interactions[$j].expect.role // empty" "$fixture")"
-    exp_name="$(jq -r ".interactions[$j].expect.name // empty" "$fixture")"
-    ref="$(_vc_ref "$outdir/a11y.json" "$trole" "$tname")"
-    if [ -z "$ref" ] && [ "$act" != "press" ]; then
-      add_check "interaction:$act:$tname" false "target $trole/$tname not in a11y tree" "$eflaky"
-      j=$((j+1)); continue
-    fi
-    _vc_act "$act" "$ref" "$tval"
-    "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
-    _vc_snap
-    if [ -n "$exp_role" ]; then
-      ok="$(_vc_present "$outdir/a11y.json" "$exp_role" "$exp_name")"
-      [ "$ok" = "true" ] && detail="post-state $exp_role/$exp_name present" || detail="expected $exp_role/$exp_name MISSING after $act"
-      add_check "interaction:$act:${tname:-$tval}" "$ok" "$detail" "$eflaky"
-    else
-      add_check "interaction:$act:${tname:-$tval}" true "executed (no post-assert)" "$eflaky"
-    fi
-    j=$((j+1))
-  done
-
-  # --- flow tier (spec 155 D3): ordered traversal from a start route -------
-  # Each step: { goto?, action?, target?, value?, expect_url?(regex), expect?, flaky? }.
-  local nflow; nflow="$(jq '(.flow // []) | length' "$fixture" 2>/dev/null || echo 0)"
-  local k=0
-  while [ "$k" -lt "${nflow:-0}" ]; do
-    local goto act trole tname tval eurl exp_role exp_name eflaky ref ok detail
-    goto="$(jq -r ".flow[$k].goto // empty" "$fixture")"
-    act="$(jq -r ".flow[$k].action // empty" "$fixture")"
-    trole="$(jq -r ".flow[$k].target.role // empty" "$fixture")"
-    tname="$(jq -r ".flow[$k].target.name // empty" "$fixture")"
-    tval="$(jq -r ".flow[$k].value // empty" "$fixture")"
-    eurl="$(jq -r ".flow[$k].expect_url // empty" "$fixture")"
-    exp_role="$(jq -r ".flow[$k].expect.role // empty" "$fixture")"
-    exp_name="$(jq -r ".flow[$k].expect.name // empty" "$fixture")"
-    eflaky="$(jq -r ".flow[$k].flaky // false" "$fixture")"
-    ok=true; detail="step $((k+1))"
-    if [ -n "$goto" ]; then
-      audit_line "verify-contract" "open" "$goto" "read-only" "allow" "contract-flow"
-      "$bin" open "$goto" >/dev/null 2>&1
-      "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
-      _vc_snap
-    elif [ -z "$act" ]; then
-      _vc_snap
-    fi
-    if [ -n "$act" ]; then
-      ref="$(_vc_ref "$outdir/a11y.json" "$trole" "$tname")"
-      if [ -z "$ref" ] && [ "$act" != "press" ]; then
-        ok=false; detail="target $trole/$tname not in a11y tree"
-      else
-        _vc_act "$act" "$ref" "$tval"
-        "$bin" wait "$settle_ms" >/dev/null 2>&1 || true
-        _vc_snap
-      fi
-    fi
-    if [ -n "$eurl" ]; then
-      local cur; cur="$(_vc_url "$outdir/a11y.json")"
-      if printf '%s' "$cur" | grep -qE "$eurl"; then detail="url ~ $eurl"; else ok=false; detail="url '$cur' !~ $eurl"; fi
-    fi
-    if [ "$ok" = "true" ] && [ -n "$exp_role" ]; then
-      ok="$(_vc_present "$outdir/a11y.json" "$exp_role" "$exp_name")"
-      [ "$ok" = "true" ] && detail="$detail; $exp_role/$exp_name present" || detail="$detail; $exp_role/$exp_name MISSING"
-    fi
-    add_check "flow:$((k+1)):${tname:-${goto:-step}}" "$ok" "$detail" "$eflaky"
-    k=$((k+1))
-  done
-
-  "$bin" close --all >/dev/null 2>&1 || true
-
-  jq -cn --arg overall "$overall" --argjson checks "$checks" --arg url "$url" \
-        '{url:$url,overall:$overall,checks:$checks}' > "$outdir/report.json"
-  echo "VERIFY-CONTRACT: $(echo "$overall" | tr a-z A-Z)  ($url)"
-  jq -r '.checks[] | "  " + (if .ok then "✓" else "✗" end) + " " + .name + " — " + .detail' "$outdir/report.json"
-  [ "$overall" = "pass" ]
-}
 
 # --- adopt: attach to a human-logged-in Chrome over CDP, save state (152.2) --
 # Pairs with browser-login.sh: the human launched a dedicated CDP Chrome and is
@@ -628,7 +452,6 @@ case "${1:-help}" in
                    out="$(policy_eval "$@")"; rc=$?; printf '%s\n' "$out" | tr '\t' ' '; exit $rc ;;
   run)             shift; run "$@" ;;
   reset)           reset_daemon; echo "daemon reset" ;;
-  verify-contract) shift; verify_contract "$@" ;;
   audit)           shift; audit_pages "$@" ;;
   adopt)           shift; adopt_session "$@" ;;
   parse-structure) shift; parse_structure "${1:-}" ;;
@@ -636,5 +459,5 @@ case "${1:-help}" in
                    [ -f "$f" ] && tail -n "$n" "$f" || echo "(no audit entries today)" ;;
   help|--help|-h)  sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' ;;
   *)               echo "unknown subcommand: $1" >&2
-                   echo "try: caps | route | policy-eval | run | verify-contract | audit-tail | help" >&2; exit 3 ;;
+                   echo "try: caps | route | policy-eval | run | audit | adopt | audit-tail | help" >&2; exit 3 ;;
 esac

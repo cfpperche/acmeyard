@@ -1,7 +1,0 @@
-{
-  "required": [
-    { "role": "heading", "name": "Dashboard" },
-    { "role": "navigation", "name": "primary" }
-  ],
-  "max_console_errors": 0
-}

@@ -29,6 +29,8 @@ delegation_hint: "produce gtm-launch.md — April Dunford positioning canvas (5 
 ```markdown
 # GTM-launch — <product name>
 
+> **Pre-validation projection.** This launch plan was drafted before any of the product's assumptions (functional-spec § Assumption Register) were tested with real customers. Launch timing and pricing are working hypotheses anchored to Phase 1; re-derive this document once the riskiest assumptions have been tested.
+
 _Positioning canvas per April Dunford, Obviously Awesome (aprildunford.com)._
 
 ## Positioning Canvas

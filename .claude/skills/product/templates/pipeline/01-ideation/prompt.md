@@ -169,15 +169,25 @@ After submit, call `product_advance` — no human-checkpoint required for step 1
 - Competitor data must be factual — funding rounds, public pricing, named features. Never invent revenue or user counts.
 - Critique mode is adversarial. Pinned does NOT get protected scoring. If a challenger wins, say so.
 
-## Market Sizing (NEW — extends Discovery phase)
+## Product Form (required section)
 
-The concept brief MUST include an `## Market Sizing` H2 section with TAM / SAM / SOM estimates (one paragraph each). At standard tier:
+The concept brief MUST include a `## Product Form` H2 section declaring the product's form factor — one of `screen-app | headless-service | cli | bot | embedded` — plus a 1-3 line rationale. Classification rule + the full taxonomy: `references/product-forms.md` (skill-level reference; the brief's CONTEXT carries the relevant excerpt). Pick the form where the *primary* user value is delivered; hybrids pick the dominant surface and note the secondary one. Open with a bold field line so the orchestrator can mirror it mechanically:
+
+```
+**Form:** screen-app — primary value is delivered through the booking dashboard; the sync API is a secondary surface.
+```
+
+This declaration is **binding downstream**: the orchestrator copies it to `.state.json.product_form`, and Steps 02 (mood variant), 07 (completeness category set), 14 (design-system scope), and 15 (contract artifacts) adapt to it. The concept gate right after this step is the founder's chance to correct a misclassification — flag genuine ambiguity explicitly so the founder sees it there.
+
+## Market Sizing (extends Discovery phase) — hypothesis, not fact
+
+The concept brief MUST include an `## Market Sizing` H2 section with TAM / SAM / SOM estimates (one paragraph each). **Framing discipline: every number in this section is a desk-research hypothesis, and the section must say so.** Open the section with one line stating that these are pre-validation estimates from cited secondary sources — not measured market data — and that downstream documents (roadmap, cost, GTM) inherit this uncertainty. Never present a sized market as an established fact. At standard tier:
 
 - **TAM (Total Addressable Market):** the universe of potential customers if everyone in the world used this category of product. Top-down: industry analyst report (Gartner / Forrester / IDC / Statista). 1 paragraph + citation.
 - **SAM (Serviceable Addressable Market):** subset reachable by THIS product's geography + language + segment. Top-down: filter TAM by reachable subset. 1 paragraph + citation OR explicit derivation from TAM.
 - **SOM (Serviceable Obtainable Market):** realistic v1 customer count in 1-3 years given founder's resources. Bottom-up: founder's pipeline / waitlist / outbound capacity × conversion. 1 paragraph + hedged ("estimated; based on...").
 
-**Discipline:** desk research, NOT primary research. 1-2 cited sources per number. NEVER invent numbers — if no source exists for a number, say "Estimated; based on <basis>" and explain. Worst case (zero sources): write "[Estimated — no public source found; 1-paragraph derivation from cost of building x competitor TAM y]".
+**Discipline:** desk research, NOT primary research. 1-2 cited sources per number. NEVER invent numbers — if no source exists for a number, say "Estimated; based on <basis>" and explain. Worst case (zero sources): write "[Estimated — no public source found; 1-paragraph derivation from cost of building x competitor TAM y]". Prefer ranges over point values when the sources disagree or the derivation is multiplicative — "US$ 80-140M SAM" communicates the uncertainty honestly; a single number fakes precision.
 
 This section is the lightweight upstream signal a heavier pipeline would dedicate a full step to (TAM/SAM/SOM market sizing). Standard tier folds it into ideation as 3 paragraphs.
 

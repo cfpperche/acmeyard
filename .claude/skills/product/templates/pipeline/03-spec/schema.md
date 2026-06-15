@@ -29,6 +29,7 @@ Each name slugifies by lowercasing + dashing the H2 title — `## Pages & Surfac
 - cross-cutting-concerns
 - acceptance-scenarios
 - edge-cases-error-states
+- assumption-register
 - non-goals
 - decisions-pending
 
@@ -45,6 +46,10 @@ Each name slugifies by lowercasing + dashing the H2 title — `## Pages & Surfac
         "## Features",
         "## Navigation Map",
         "## Acceptance Scenarios",
+        "## Assumption Register",
+        "### Riskiest assumption",
+        "### Cheapest real-world test",
+        "### Abandon signal",
         "## Decisions Pending",
         "**Given**",
         "**When**",
@@ -91,6 +96,7 @@ The schema enforces presence + floor; *depth* is the agent's responsibility, rei
 - **cross-cutting-concerns** — auth, persistence, a11y, i18n — one paragraph each, only where they apply. Shape, not system design.
 - **acceptance-scenarios** — 2–4 `**Given**` / `**When**` / `**Then**` scenarios for each feature with 3+ behavior branches; happy + error + edge minimum. Every `Then` assertion-shaped.
 - **edge-cases-error-states** — the cross-page failure / boundary scenarios that actually apply (not a generic checklist).
+- **assumption-register** — 5-10 row bets table (`| # | Assumption | Risk type | Confidence | Basis |`; ≥1 `value` + ≥1 `viability` row; no blank Basis) + `### Riskiest assumption` + `### Cheapest real-world test` + `### Abandon signal`. NEVER interview summaries that did not happen — this section replaced Problem-Validation Interviews precisely to stop fabricated evidence. All advice-only: nothing here gates the pipeline.
 - **non-goals** — features deliberately out of v1, each with a reason. Traceable to the concept brief's anti-goals.
 - **decisions-pending** — `| # | Question | Impact | Default if unresolved |` table (or the explicit empty-state line). The handoff contract step 8 (PRD) parses.
 

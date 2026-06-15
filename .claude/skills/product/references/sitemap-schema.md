@@ -2,6 +2,8 @@
 
 The `<out>/docs/sitemap.yaml` file produced by Step 07 (sitemap-IA) drives the Step 15a screen-atlas's § Screens Index + § Sitemap Coverage Cross-Check, and — via the atlas — the route inventory the SDD foundation child creates route-group directories for. **The schema is enforced mechanically by the orchestrator — Step 07 is BLOCKED if `required_categories` not satisfied without explicit deferral.** This is the load-bearing root-cause fix for the silent-undercover bug observed in earlier dogfood runs.
 
+**Form-conditional category set (v0.6.0).** The `required_categories` value resolves from `.state.json.product_form` per `product-forms.md § Step 07` — `[marketing, auth, primary, admin, error]` is the **`screen-app`** set this document details; `headless-service`/`cli`/`bot`/`embedded` substitute their own 5-category set from that table. The enforcement *mechanics* (≥1 route or explicit deferral, BLOCK + re-dispatch on gap) are identical for every form; only the ruler changes. For non-screen forms, `routes` entries inventory the form's interface units (endpoints / commands / intents / host touchpoints — `path` holds the unit identifier) and the per-category minimum is ≥1 unless `product-forms.md` says otherwise. The per-category minimums and path-pattern tables below are the `screen-app` calibration; non-screen calibrations harden as dogfood data accumulates.
+
 ## Top-level shape
 
 ```yaml
@@ -134,7 +136,7 @@ For sitemaps without explicit `chrome:` field on each route, the orchestrator ap
 
 ## Required categories enforcement (the load-bearing mechanical fix)
 
-`required_categories: [marketing, auth, primary, admin, error]` — orchestrator parses sitemap.yaml after Step 07 returns and enforces:
+`required_categories: <the declared form's set per product-forms.md>` (shown here for `screen-app`: `[marketing, auth, primary, admin, error]`) — orchestrator parses sitemap.yaml after Step 07 returns and enforces:
 
 **Every category in `required_categories` MUST have ≥1 route OR be listed in top-level `deferred_categories: [{name, reason}]` with a non-empty reason string.**
 
@@ -173,9 +175,9 @@ The skill runs these checks before allowing Step 07 to be marked complete:
 1. **Schema parses** — valid YAML, top-level keys match shape
 2. **`slug` matches** — `slug` field equals the slug derived from `--out` basename
 3. **`platform` + `stack` match `--stack` flag** — sanity check
-4. **5 categories accounted for** — every entry in `required_categories` has either ≥minimum routes OR is in `deferred_categories` with reason
+4. **5 categories accounted for** — every entry in `required_categories` (the declared form's set) has either ≥minimum routes OR is in `deferred_categories` with reason
 5. **Per-route fields complete** — every route has all 5 required fields with valid types
-6. **`category` values valid** — every route's `category` ∈ `[marketing, auth, primary, admin, error]`
+6. **`category` values valid** — every route's `category` ∈ the declared form's category set (`product-forms.md § Step 07`)
 7. **Path uniqueness** — no duplicate `path` values
 8. **Component name validity** — `components` entries match `^[A-Z][A-Za-z0-9]*$`
 9. **`covers_us` refs are valid US-NN** — each entry matches `^US-\d+$` and corresponds to an actual US-NN in `docs/prd/v1.md` (parse PRD's user-story table; emit warning if covers_us references an US-NN not in PRD)
@@ -189,7 +191,10 @@ sitemap = yaml.safe_load(open(f"{out}/docs/sitemap.yaml"))
 deferred = {d['name']: d['reason'] for d in sitemap.get('deferred_categories', [])}
 errors = []
 
-for required in ['marketing', 'auth', 'primary', 'admin', 'error']:
+# category set + minimums resolve from .state.json.product_form (product-forms.md § Step 07);
+# shown here for screen-app — non-screen forms substitute their set with min_count 1 per category
+form_categories = ['marketing', 'auth', 'primary', 'admin', 'error']
+for required in form_categories:
     routes_in_cat = [r for r in sitemap['routes'] if r['category'] == required]
     min_count = {'marketing': 1, 'auth': 3, 'primary': 1, 'admin': 2, 'error': 1}[required]
     if len(routes_in_cat) < min_count:

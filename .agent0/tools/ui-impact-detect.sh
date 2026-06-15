@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
-# .agent0/tools/ui-impact-detect.sh — spec 155, visual-contract-acceptance-gate.
+# .agent0/tools/ui-impact-detect.sh — spec 206, retire-visual-contract-gate
+# (originally spec 155; the visual-contract acceptance gate it fed was retired).
 #
 # Deterministic, content-free heuristic: given a set of changed paths, decide
-# whether any of them is a RENDERED BROWSER SURFACE, and therefore whether a
-# `UI impact` declaration / visual contract is plausibly owed. It only SUGGESTS;
-# the author's declared `UI impact: none|render|interaction|flow` is the source
-# of truth (declaration-first — spec 155 § Acceptance scenario 3). The detector
-# never sets a gate; the validator turns a `mismatch` into a non-blocking
-# `visual-contract-advisory:` (matching tdd/lint/typecheck advisories).
+# whether any of them is a RENDERED BROWSER SURFACE. It answers "did UI change?"
+# so the validator can pair it with `ui-runner-detect.sh` and emit a non-blocking
+# `ui-runner-advisory:` when UI surfaces changed but the project declares no UI
+# test runner. It only DETECTS surfaces; the author's `UI impact: none|ui`
+# declaration is the source of truth for whether proof is owed. The detector
+# never sets a gate (matching tdd/lint/typecheck advisories).
+#
+# Note: the legacy `--declared` tier vocabulary (render|interaction|flow) is
+# accepted but collapsed — any non-`none` declared value is treated as `ui`.
 #
 # Input (one of):
 #   --range <git-range>   classify `git diff --name-only <range>`
 #   (stdin)               newline-separated path list (default when no --range)
 # Options:
-#   --declared <level>    the author's declared level (none|render|interaction|flow);
+#   --declared <level>    the author's declared level (none|ui; legacy
+#                         render|interaction|flow accepted as `ui`);
 #                         absent/empty is treated as `none`
 #   --json                emit a JSON object instead of text
 #

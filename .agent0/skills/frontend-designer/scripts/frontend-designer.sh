@@ -9,18 +9,22 @@
 #                 artifacts / browser-renderable harness / package manager
 #   artifacts-dir resolve the git-tracked location for the design-doc pair
 #   scaffold-docs write the reference-research.md + design-direction.md pair
-#   verify        thin, FAIL-CLOSED wrapper over agent-browser.sh verify-contract
+#   verify        FAIL-CLOSED done-proof router: run the project's UI test, or
+#                 emit fail-closed guidance when no runner is declared
 #
 # No frozen stack opinions: detection only REPORTS what a project already is; the
 # agent uses the stack ladder (references/stack-ladder.md) to decide, never this
-# script. Done-proof reuses spec 155 (agent-browser verify-contract) — this adds
-# no acceptance machinery; agent-browser unavailable is a BLOCKER, never a pass.
+# script. Done-proof is a GREEN PROJECT UI TEST covering the changed surface
+# (.agent0/context/rules/ui-acceptance.md) — this script adds no acceptance
+# machinery: it detects the project's UI runner, runs a declared command if one
+# exists, and otherwise prints a BLOCKER (no runner = never a pass).
 set -u
 
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL_DIR="$(cd "$SELF_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
 AGENT_BROWSER="${FD_AGENT_BROWSER:-$REPO_ROOT/.agent0/tools/agent-browser.sh}"
+UI_RUNNER_DETECT="${FD_UI_RUNNER_DETECT:-$REPO_ROOT/.agent0/tools/ui-runner-detect.sh}"
 TEMPLATES="$SKILL_DIR/templates"
 
 die() { printf 'frontend-designer: %s\n' "$*" >&2; exit "${2:-1}"; }
@@ -180,20 +184,41 @@ cmd_scaffold_docs() {
   done
 }
 
-# ----------------------------------------------------------------------------- verify (fail-closed wrapper)
+# ----------------------------------------------------------------------------- verify (fail-closed done-proof router)
 cmd_verify() {
-  local url="${1:-}" fixture="${2:-}" outdir="${3:-}"
-  [ -n "$url" ] && [ -n "$fixture" ] && [ -n "$outdir" ] || \
-    die "verify: usage: verify <url> <fixture.json> <outdir>" 3
-  [ -f "$fixture" ] || die "verify: fixture not found: $fixture" 3
-  # FAIL CLOSED: browser visual proof requires agent-browser. Unavailable is a
-  # BLOCKER, never a pass (spec 155 / meeting D6).
-  local route; route="$(bash "$AGENT_BROWSER" route 2>/dev/null || echo unavailable:error)"
-  case "$route" in
-    primary*) ;;
-    *) die "BLOCKER: agent-browser is $route — browser visual proof CANNOT be produced. This is NOT a pass. Install agent-browser + Chrome, or prove a native-only surface via the honest-evidence path (references/done-proof.md)." 4;;
-  esac
-  bash "$AGENT_BROWSER" verify-contract "$url" "$fixture" "$outdir"
+  local p="${1:-.}"
+  [ -d "$p" ] || die "verify: not a directory: $p" 3
+  # Done-proof is a GREEN PROJECT UI TEST covering the changed surface
+  # (.agent0/context/rules/ui-acceptance.md). This routes that proof; it never
+  # produces a substitute acceptance bundle. FAIL CLOSED: no declared runner is a
+  # BLOCKER, never a pass.
+  [ -x "$UI_RUNNER_DETECT" ] || \
+    die "verify: ui-runner-detect.sh not found at $UI_RUNNER_DETECT" 3
+
+  # If the project declares an explicit UI-test command, run it.
+  local override="$p/.agent0/ui-test.json" cmd=""
+  if [ -f "$override" ]; then
+    if have jq; then
+      cmd="$(jq -r '.command // ""' "$override" 2>/dev/null || true)"
+    else
+      cmd="$(grep -oE '"command"[[:space:]]*:[[:space:]]*"[^"]+"' "$override" 2>/dev/null \
+        | head -n1 | sed -E 's/.*:[[:space:]]*"([^"]+)"/\1/' || true)"
+    fi
+  fi
+  if [ -n "$cmd" ]; then
+    printf 'frontend-designer: running declared UI test (%s):\n  %s\n' "$override" "$cmd" >&2
+    ( cd "$p" && eval "$cmd" )
+    return $?
+  fi
+
+  # No declared command — report whether the project even has a runner.
+  if bash "$UI_RUNNER_DETECT" --root "$p" >/dev/null 2>&1; then
+    local sig; sig="$(bash "$UI_RUNNER_DETECT" --root "$p" 2>/dev/null | sed -n 's/^signal: //p')"
+    die "verify: a UI test runner is present (${sig:-detected}) but no \`.agent0/ui-test.json\` command is declared.
+Run the project's UI test covering this surface yourself, e.g. the e2e/runner command for ${sig:-the runner}, and record the green run in design-direction.md § Acceptance (see .agent0/context/rules/ui-acceptance.md). Optionally declare the command in .agent0/ui-test.json so \`verify\` can run it." 4
+  fi
+
+  die "BLOCKER: no UI test runner is declared for this project. UI acceptance is a green project UI test covering the changed surface — there is NO substitute acceptance bundle. Provision the stack's idiomatic UI/e2e runner (or declare one via .agent0/ui-test.json), then run it covering this surface. This is NOT a pass. See .agent0/context/rules/ui-acceptance.md (native-only surfaces: honest-evidence path in references/done-proof.md)." 4
 }
 
 # ----------------------------------------------------------------------------- dispatch
@@ -211,7 +236,9 @@ frontend-designer.sh — deterministic mechanics for /frontend-designer
   detect <path> [--json]                     framework/design-system/product/harness/pm
   artifacts-dir <path> [--spec NNN] --surface <s>   resolve design-doc location
   scaffold-docs <path> --surface <s> [--spec NNN]   write the design-doc pair
-  verify <url> <fixture.json> <outdir>       fail-closed verify-contract wrapper
+  verify [<path>]                            fail-closed done-proof router: run the
+                                             project's declared UI test (.agent0/ui-test.json),
+                                             else print BLOCKER guidance (no runner = never a pass)
 EOF
     ;;
   *) die "unknown subcommand: $sub (try: help)" 3 ;;

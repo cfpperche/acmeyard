@@ -96,25 +96,30 @@ After a clean submit, call `product_advance` — step 3 is mid-Discovery, no gat
 - **Length budget.** `functional-spec.md` lands ≥ 15 KB for a non-trivial product (the deep-port floor — a thinner spec is almost certainly missing pages, states, or features). If you genuinely can't fill 15 KB, the prototype scope was probably too small for this pipeline — flag back to the parent rather than padding.
 - **Three files, one truth.** `architecture.md` and `architecture.{html,json}` are *derived* — if they disagree with `functional-spec.md` or each other, that's a defect, not a variation.
 
-## Problem-Validation Interviews (NEW — extends Discovery phase)
+## Assumption Register (extends Discovery phase)
 
-The functional-spec MUST include a `## Problem-Validation Interviews` H2 section with 3-5 summaries seeding the OST (Step 06). Per-interview shape:
+The functional-spec MUST include an `## Assumption Register` H2 section. **This replaces the former Problem-Validation Interviews section — never write interview summaries that did not happen.** A fabricated interview reads as evidence; an assumption register reads as what it is: the bets this product rests on, stated so the founder can test them. Shape:
+
+1. **The bets table** — 5-10 rows, each one assumption that must be TRUE for the product to succeed:
 
 ```markdown
-### Interview N — <subject name OR persona label>
-
-- **Date:** <YYYY-MM-DD OR "synthetic">
-- **Subject:** <role / company / context — 1 line>
-- **Provenance:** `[real]` (verbatim quotes from actual interview) OR `[synthetic]` (sub-agent-inferred from persona)
-- **Problem signal:** <2-3 sentences in user voice — what the subject said the problem is>
-- **Workaround today:** <1-2 sentences — how they cope without the proposed product>
-- **Quoted asks:** <2-3 verbatim quotes if real; OR inferred-best-guess phrasings if synthetic>
-- **What would make them switch:** <1 sentence>
+| # | Assumption (must be true) | Risk type | Confidence | Basis |
+|---|---|---|---|---|
+| A1 | Salon owners lose recurring clients to scheduling chaos | value | medium | 14 Reddit/community threads [3][7]; no primary data |
+| A2 | Owners will trust an app with their client book | viability | low | inferred from persona; zero direct signal |
 ```
 
-**Discipline:** at standard tier, SYNTHETIC interviews are acceptable (sub-agent infers from concept-brief persona). Clearly mark provenance — `[synthetic]` vs `[real]` — so post-Step-06 OST knows which opportunities have real signal vs inferred. Real interviews dominate when possible (the founder may have actual customer-development conversations to feed in).
+- **Risk type** — one of `value` (do they want it?), `usability` (can they use it?), `viability` (does the business work?), `feasibility` (can we build it?). Every register needs at least one `value` and one `viability` row — those are the two an LLM cannot resolve from a desk.
+- **Confidence** — `high` (multiple independent cited sources) / `medium` (secondary signal, no primary) / `low` (pure inference from the persona). Real founder-supplied evidence (actual customer conversations fed into the run) is the only thing that justifies `high` on a `value` row — cite it explicitly when present.
+- **Basis** — where the confidence comes from: citations, persona inference, founder input. Never blank.
 
-**Why this matters:** Step 06 OST consumes these summaries as opportunity inputs. Without this section, OST opportunities default to "[inferred: persona]" tags everywhere — losing the discovery-implementation gap that distinguishes a "PRD-and-pray" team from a "continuously-discovering" team (Torres-aligned).
+2. **`### Riskiest assumption`** — name the ONE row that kills the product if false, and why it beats the others.
+
+3. **`### Cheapest real-world test`** — a concrete recipe the founder can run before (or while) building: who to talk to, how many, what to ask or show, what it costs in days. This is written advice — the orchestrator never checks or enforces it; the pipeline proceeds regardless.
+
+4. **`### Abandon signal`** — one falsifiable threshold that should trigger a rethink, e.g. "if fewer than 3 of 10 salon owners recognize the problem unprompted, stop or reframe". Advisory by design: it arms the founder's judgment, it does not gate the pipeline.
+
+**Why this matters:** Step 06 OST consumes the register's `value` rows as opportunity inputs, carrying each row's confidence tag — so the tree distinguishes opportunities backed by real signal from inferred ones instead of laundering inference into fact. Downstream projection documents (roadmap, cost, GTM) inherit the register's uncertainty posture.
 
 ## What this step does NOT do
 

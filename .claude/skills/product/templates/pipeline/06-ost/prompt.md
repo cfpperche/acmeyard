@@ -1,14 +1,14 @@
 ---
 mode: synthesis
 delegable: true
-delegation_hint: "produce an Opportunity Solution Tree consuming step 05 PRD's NSM as the desired-outcome root, step 03 spec's Problem-Validation Interviews as opportunity inputs, and concept-brief persona as inference fallback; output is structured markdown bullets OR mermaid diagram; standard tier 3-6 KB; fully delegable from prior artifacts, no founder interview required"
+delegation_hint: "produce an Opportunity Solution Tree consuming step 05 PRD's NSM as the desired-outcome root, step 03 spec's Assumption Register value-risk rows (with confidence tags) as opportunity inputs, and concept-brief persona as inference fallback; output is structured markdown bullets OR mermaid diagram; standard tier 3-6 KB; fully delegable from prior artifacts, no founder interview required"
 ---
 
 # Step 06 — OST (Opportunity Solution Tree)
 
 **Goal:** produce `<out>/docs/ost.md` — a structured Opportunity Solution Tree (Teresa Torres, *Continuous Discovery Habits*) connecting the PRD's North Star Metric to user-problem opportunities to candidate solutions. Sibling artifact to PRD (not embedded).
 
-**Mode:** `synthesis` with `delegable: true`. Sub-agent reads PRD + functional-spec interviews + concept-brief and produces the tree mechanically.
+**Mode:** `synthesis` with `delegable: true`. Sub-agent reads PRD + the functional-spec Assumption Register + concept-brief and produces the tree mechanically.
 
 ## Output
 
@@ -20,8 +20,8 @@ delegation_hint: "produce an Opportunity Solution Tree consuming step 05 PRD's N
 
 - `<out>/docs/prd/v1.md` § Success metrics (NSM slot) — the desired-outcome ROOT of the tree
 - `<out>/docs/prd/v1.md` § User stories — context for what's already in scope
-- `<out>/docs/functional-spec.md` § Problem-Validation Interviews — raw problem signal (3-5 summaries per Decision 6)
-- `<out>/docs/concept-brief.md` § Mechanics + § Hook — persona context for inference fallback when interviews are thin
+- `<out>/docs/functional-spec.md` § Assumption Register — the `value`-risk rows are the opportunity inputs, each with confidence (high/medium/low) + basis
+- `<out>/docs/concept-brief.md` § Mechanics + § Hook — persona context for inference fallback when the register's value rows are thin
 - Reference reading: Teresa Torres, [*Continuous Discovery Habits*](https://www.producttalk.org/2021/03/continuous-discovery-habits-by-teresa-torres-is-coming-soon-may-2021/) (book) or [Product Talk Academy intro](https://www.producttalk.org/opportunity-solution-tree/)
 
 ## Structure (standard tier)
@@ -46,8 +46,8 @@ delegation_hint: "produce an Opportunity Solution Tree consuming step 05 PRD's N
 
 - **Desired Outcome (root)**: verbatim quote of PRD's NSM (e.g., "70% of new teams hit first-Slack-alert within 24 hours of install"). Single root only — multiple desired outcomes is a spec smell at standard tier.
 - **Opportunities** (3-5): each is a user problem statement in user voice ("I can't tell which override was important enough to share with security"). Each MUST be tagged with provenance:
-  - `[interview: <subject>]` — sourced from a Step 03 problem-validation interview
-  - `[inferred: <persona>]` — inferred from concept-brief persona, no direct interview signal yet
+  - `[register: A<N>, confidence: <high|medium|low>]` — sourced from a Step 03 Assumption Register value-risk row; the confidence tag travels with it (never launder a low-confidence bet into an evidenced opportunity)
+  - `[inferred: <persona>]` — inferred from concept-brief persona, not in the register yet
 - **Solutions** (2-3 per opportunity): high-level approach (NOT implementation detail). E.g. "Inline severity reason gating" (solution), NOT "React modal with useState for reason input" (implementation).
 - **Status per solution**: exactly one of:
   - `explored` — already reflected in the PRD scope (US-NN reference)

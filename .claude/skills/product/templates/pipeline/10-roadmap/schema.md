@@ -51,7 +51,8 @@ The schema does NOT structurally enforce the operating-mode (canonical timeline-
         "## Open Decisions",
         "| Deliverable | Owner | Status |",
         "**Exit criteria:**",
-        "Deciding signal"
+        "Deciding signal",
+        "**Pre-validation projection.**"
       ],
       "any_of_contains": [
         "**Buffer:**",
@@ -68,6 +69,8 @@ The schema does NOT structurally enforce the operating-mode (canonical timeline-
 - **`roadmap.md` `min_size: 6144` (6 KB)** — lowered from an earlier 8 KB declaration (compact-product variants legitimately land at 6-8 KB without an OVERRIDE marker). Floor anchored against the 8 required sections at honest depth. A roadmap with 4 phases (each with goal + deliverable table 4-6 rows + dependencies + exit criteria), 3-6 milestones, dependency graph for ≥3 phases, per-phase risks table (4 rows + buffer paragraph), v2-vision (3-5 bullets), and open-decisions (2-4 rows) lands at 10-12 KB for SMB SaaS Full. Micro-products may legitimately land under 8 KB (use `# OVERRIDE: compact-product: <class>` shape in submit context); 8 KB is the universal sanity line. The floor is lower than step-10's 10 KB because roadmap is narrative-shorter (no probability tables, no projections, no unit-economics math) — but the load-bearing literal anchors stay the same.
 
 - **The literal `## Phases` substring** — proves the phases section exists as an H2 (NOT inline as a sub-heading under § Horizon). The phases section is the spine; without an H2 anchor, the reader has no scan target.
+
+- **The literal `**Pre-validation projection.**` substring** — proves the projection-notice blockquote opens the document (the honesty disclaimer required by the prompt's § Projection notice; later phases are order-of-magnitude, not commitments).
 
 - **The literal `| Deliverable | Owner | Status |` substring** — proves at least one phase carries a structured deliverable table (`Deliverable | Owner | Status | Source`), not paragraph prose. Without this, the phase silently degrades into "we'll do auth, then features, then polish" — useless for sequencing discipline. Mirrors step-7's `| Token | Voice |` fix, step-9's `| Method | Path |` discipline, step-10's `| # | Assumption |` literal-anchor pattern. The literal row only appears as a real markdown table header.
 

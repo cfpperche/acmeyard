@@ -12,6 +12,10 @@ delegation_hint: "draft step-10 cost-estimate.md from step-8 PRD + step-9 system
 
 **Output file:** `cost-estimate.md` in `docs/`. Single-artifact — no `extra_files`.
 
+**Projection notice (required).** `cost-estimate.md` MUST open — immediately after its H1 — with this blockquote (adapt the product reference, keep the bolded lead verbatim; it is a Layer 1 anchor):
+
+> **Pre-validation projection.** These figures were derived before any of the product's assumptions (functional-spec § Assumption Register) were tested with real customers. Phase 1 costs are the only ones that merit planning confidence; everything else is order-of-magnitude. Re-derive this document once the riskiest assumptions have been tested.
+
 ---
 
 ## How to conduct this step
@@ -212,6 +216,7 @@ Schema enforces section presence + Layer 1 contains/size floors (assumption-tabl
 ## Voice & rigor
 
 - **Mark every number `[Estimated]` that isn't a current vendor invoice / signed contract / pricing-page snapshot with date.** Vendor pricing pages are factual (`Source: vendor pricing page · 2026-05-16`); user-count projections are estimates; build-cost is the most-likely-wrong number, always a range never a point.
+- **Ranges everywhere, not just build cost.** Every monetary or effort figure that is `[Estimated]` presents as a range ("$ 35-60k", "8-12 weeks") — a point value on an estimate fakes precision the model does not have. Point values are reserved for sourced facts (vendor list prices, signed contracts). Derived totals propagate the range arithmetic (sum the lows, sum the highs).
 - **Order of magnitude is what matters.** `$2k/mo at 1000 users` is useful; `$2,143/mo at 1000 users` is false precision — three significant figures is the upper limit at v1 (you don't know enough to claim more).
 - **If unit economics don't work (run-cost-per-user > price × gross margin), surface loudly.** Don't bury in § Sensitivity. The PRD's pricing target may be wrong; the founder needs to see this.
 - **The assumption table IS the audit trail.** Every number downstream cites a row in § Assumptions. No room for floating numbers.

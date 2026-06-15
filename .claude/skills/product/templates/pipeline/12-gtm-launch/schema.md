@@ -21,6 +21,10 @@ A uniform 200 KB catastrophe cap applies per `.agent0/context/rules/artifact-bud
 3. `## Pricing Strategy`
 4. `## Open Decisions`
 
+## Projection notice (required)
+
+The document MUST open — immediately after its H1 — with the `> **Pre-validation projection.** …` blockquote per the prompt's required structure. The literal `**Pre-validation projection.**` substring is the anchor; missing notice = sub-agent re-emit.
+
 ## Positioning Canvas — 5 lines required
 
 ```

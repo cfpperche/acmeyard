@@ -1,12 +1,12 @@
-# Delegation briefs — 5-field templates per sub-agent (v0.4.0)
+# Delegation briefs — 5-field templates per sub-agent (v0.6.0)
 
-Every `Agent` tool call dispatched by `/product` v0.4.0 MUST use the 5-field handoff per `.agent0/context/rules/delegation.md` (TASK / CONTEXT / CONSTRAINTS / DELIVERABLE / DONE_WHEN). The delegation-gate hook returns exit 2 otherwise.
+Every `Agent` tool call dispatched by `/product` v0.6.0 MUST use the 5-field handoff per `.agent0/context/rules/delegation.md` (TASK / CONTEXT / CONSTRAINTS / DELIVERABLE / DONE_WHEN). The delegation-gate hook returns exit 2 otherwise.
 
-**Briefs cover every `/product` sub-agent dispatch** — one per pipeline step (Step 02 = direction-writer; Step 15 = the three visual-contract sub-agents 15a-atlas / 15b-hi-fi-mood / 15c-fixture-spec) plus the shared **§ Mood-screen-writer** template, used by Step 02 (lo-fi mode) and Step 15b (hi-fi mode). The v2/v3 per-route Next.js/Expo `.tsx` screen-writer is **deleted** — `/product` ends at the visual contract; the runnable app is built by the SDD children scaffolded in Phase 5. The **§ Quality judge** brief is dispatched once per judge-unit AFTER the producer returns — an evaluator, not a producer.
+**Briefs cover every `/product` sub-agent dispatch** — one per pipeline step (Step 02 = direction-writer; Step 15 = the three visual-contract sub-agents 15a-atlas / 15b-hi-fi-mood / 15c-fixture-spec) plus the shared **§ Mood-screen-writer** template, used by Step 02 (lo-fi mode) and Step 15b (hi-fi mode). The v2/v3 per-route Next.js/Expo `.tsx` screen-writer is **deleted** — `/product` ends at the visual contract; the runnable app is built by the SDD children scaffolded in Phase 5. The **§ Quality judge** brief is dispatched once per PHASE (batched over the phase's judge-units) AFTER the phase's producers return — an evaluator, not a producer.
 
-**Per-step model assignment**: Step 01 = `opus` (concept brief multi-source synthesis); Steps 02-15 = `sonnet` (mechanical with dense brief + bundled template). The post-step **§ Quality judge** runs on `opus` (evaluation reasoning + a within-family asymmetry against the `sonnet` producers).
+**Per-step model assignment**: Step 01 = `opus` (concept brief multi-source synthesis); Steps 02-15 = `sonnet` (mechanical with dense brief + bundled template). The post-phase **§ Quality judge** runs on the phase-batch model mix per `quality-judge.md § Cost & model mix` — `sonnet` for Phases 1/3, `opus` for Phases 2/4 (provisional pending the measurement protocol).
 
-**Substitution placeholders** ({{...}}) are replaced inline by the orchestrator (SKILL.md) before dispatch. The orchestrator reads `<out>/docs/.state.json` for `slug`, `idea`, `out`, `flags.stack`, `target_language` (resolved at Phase 0.5), and the prior-step outputs by path. **`{{stack_hint}}`** is an alias for `flags.stack` used by Step 08's CONTEXT block; when `state.flags.stack` is empty (founder did not pass `--stack`), the substituted value is the literal `(none declared)`.
+**Substitution placeholders** ({{...}}) are replaced inline by the orchestrator (SKILL.md) before dispatch. The orchestrator reads `<out>/docs/.state.json` for `slug`, `idea`, `out`, `flags.stack`, `target_language` (resolved at Phase 0.5), `product_form` (mirrored from the concept brief after Step 01), and the prior-step outputs by path. **`{{stack_hint}}`** is an alias for `flags.stack` used by Step 08's CONTEXT block; when `state.flags.stack` is empty (founder did not pass `--stack`), the substituted value is the literal `(none declared)`. **`{{product_form}}`** substitutes `.state.json.product_form` into the Step 02/07/14/15 briefs (the four form-variant surfaces per `product-forms.md`); before Step 01 returns it has no value and no brief references it.
 
 **Per design discipline, every brief producing user-facing text MUST receive `{{target_language}}` substitution.** The orchestrator threads `.state.json.target_language` into the brief at dispatch time. Sub-agents read it and match all generated copy (page headings, button labels, microcopy, marketing copy, voice samples, etc) to that language. Code-flavored surfaces (e.g. `/settings/integrations` references to `API`, `OAuth`, etc) may stay English locally; flag those as exceptions in the brand-book `## Glossary § applies_to` column.
 
@@ -25,7 +25,7 @@ CONSTRAINTS:
 - Standard tier: ≥ 4 KB (anti-stub floor — NOT a ceiling; the catastrophe cap below is the only upper bound).
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — if output crosses it, STOP and emit a partial-result naming what was being produced (a token-runaway circuit-breaker, NOT a scope budget; no trim-loop, no re-emit-at-smaller-scope).
 - **Target language: `{{target_language}}`** (BCP-47, resolved at Phase 0.5). All section bodies + persona language + tagline candidates + name candidates in this language; cited sources stay in their original language.
-- Cover the standard-tier minimum sections as H2 headings: Hook (problem + audience) / Mechanics (user flow) / Monetization / Growth loop / Competitive positioning / Risks / Anti-goals / JTBD statement / **Market Sizing (TAM/SAM/SOM — 1 paragraph each, desk research with 1-2 cited sources per number, NOT primary research)**. SKIP critique-mode at standard tier.
+- Cover the standard-tier minimum sections as H2 headings: Hook (problem + audience) / Mechanics (user flow) / Monetization / Growth loop / Competitive positioning / Risks / Anti-goals / JTBD statement / **Product Form (one of screen-app | headless-service | cli | bot | embedded via a `**Form:**` line + 1-3 line rationale per .claude/skills/product/references/product-forms.md — where is the PRIMARY user value delivered; flag genuine ambiguity for the concept gate)** / **Market Sizing (TAM/SAM/SOM — 1 paragraph each, desk research with 1-2 cited sources per number, NOT primary research; the section OPENS by declaring its numbers pre-validation hypotheses, prefers ranges over point values, and never presents a sized market as established fact)**. SKIP critique-mode at standard tier.
 - Cite at least 5 unique sources with inline [N] references. Market Sizing section cites at minimum 1 source per TAM/SAM/SOM number.
 - Name placeholder discipline: if final product name not yet decided, use `**Working name:** <placeholder> (placeholder, never shipped; final at Step 13 brand-book § Product Name)`. Suggest 2-3 candidates.
 - Do NOT invent statistics — every claim either cites a source OR is hedged ("anecdotally", "in this researcher's view").
@@ -33,7 +33,7 @@ CONSTRAINTS:
 
 DELIVERABLE: {{out}}/docs/concept-brief.md
 
-DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); all 9 standard-tier sections present (H2 headings including § Market Sizing); ≥ 5 unique [N] source citations; placeholder discipline applied if name not finalized; TAM/SAM/SOM each cite ≥1 source.
+DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); all 10 standard-tier sections present (H2 headings including § Product Form with its **Form:** line and § Market Sizing with its hypothesis-framing opener); ≥ 5 unique [N] source citations; placeholder discipline applied if name not finalized; TAM/SAM/SOM each cite ≥1 source.
 ```
 
 ### Step 02 — Prototype v1 (lo-fi: direction + killer-flow mood screens)
@@ -67,13 +67,13 @@ DONE_WHEN: File exists; size ≥ the `schema.md § Size floor` `min_size`; conta
 
 **(b) Mood-screen-writer (lo-fi mode)** — produces the 3-5 killer-flow lo-fi mood screens at `{{out}}/docs/screens/NN-<name>.html`. The same § Mood-screen-writer brief in hi-fi mode produces the Step 15b hi-fi mood. See § Mood-screen-writer below.
 
-### Step 03 — Spec (functional + architecture; extended with problem-validation interviews per Decision 6)
+### Step 03 — Spec (functional + architecture; extended with the assumption register)
 
 **model:** `sonnet`  ·  **subagent_type:** `general-purpose`
 
 ```
 # SKILL-DIRECTED: product
-TASK: Produce functional-spec.md decomposing "{{idea}}" into pages, components, interactions, states, features with Gherkin acceptance scenarios + preliminary architecture skeleton + problem-validation interview summaries (seeds OST at Step 06).
+TASK: Produce functional-spec.md decomposing "{{idea}}" into pages, components, interactions, states, features with Gherkin acceptance scenarios + preliminary architecture skeleton + the Assumption Register (the bets this product rests on; seeds OST at Step 06).
 
 CONTEXT: Read concept-brief.md at {{out}}/docs/concept-brief.md for product scope. Read direction-a.html at {{out}}/docs/direction-a.html + screens at {{out}}/docs/screens/ for surface inventory. Read .claude/skills/product/templates/pipeline/03-spec/prompt.md for canonical structure (standard tier combines spec + architecture into a single file). Read .claude/skills/product/templates/pipeline/03-spec/schema.md § Size floor for the `min_size` anti-stub floor + required sections.
 
@@ -81,7 +81,7 @@ CONSTRAINTS:
 - Standard tier: combined functional-spec.md (skip separate architecture.md). Size floor: per `schema.md § Size floor` — the `min_size` anti-stub floor (no scope ceiling).
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — if output crosses it, STOP and emit a partial-result naming what was being produced (a token-runaway circuit-breaker, NOT a scope budget; no trim-loop, no re-emit-at-smaller-scope).
 - **Target language: `{{target_language}}`** (BCP-47). All section bodies, page descriptions, Gherkin scenario text + acceptance prose in this language. Technical terms (HTTP, JSON, OAuth, etc) stay English. User-story summaries match the language.
-- Sections required (H2): Product Overview / Pages & Surfaces (table per page) / Features (with Gherkin) / Navigation Map / Cross-cutting concerns / Acceptance Scenarios / Edge Cases / Non-goals / Decisions Pending / Preliminary Architecture / **Problem-Validation Interviews (3-5 summaries seeding OST; synthetic-OK at standard tier — clearly marked as synthetic vs sourced from real interviews)**.
+- Sections required (H2): Product Overview / Pages & Surfaces (table per page) / Features (with Gherkin) / Navigation Map / Cross-cutting concerns / Acceptance Scenarios / Edge Cases / **Assumption Register (5-10 row bets table `| # | Assumption | Risk type | Confidence | Basis |` with ≥1 value + ≥1 viability row; + `### Riskiest assumption` + `### Cheapest real-world test` + `### Abandon signal`; per templates/pipeline/03-spec/prompt.md § Assumption Register. NEVER write interview summaries that did not happen — fabricated evidence is forbidden; all subsections are written advice, nothing gates the pipeline)** / Non-goals / Decisions Pending / Preliminary Architecture.
 - Scale depth to surface importance; killer flow gets full treatment; trivial pages collapse to 2-4 table rows.
 - Every "Decisions Pending" row has either a source citation OR a default value.
 - ≥ 3 Gherkin scenarios.
@@ -89,7 +89,7 @@ CONSTRAINTS:
 
 DELIVERABLE: {{out}}/docs/functional-spec.md
 
-DONE_WHEN: File exists; size ≥ the `schema.md § Size floor` `min_size`; contains **Given** / **When** / **Then** keywords; contains "Pages & Surfaces" + "Features" + "Preliminary Architecture" + "Problem-Validation Interviews" section headers; ≥ 3 Gherkin scenarios; ≥ 3 interview summaries.
+DONE_WHEN: File exists; size ≥ the `schema.md § Size floor` `min_size`; contains **Given** / **When** / **Then** keywords; contains "Pages & Surfaces" + "Features" + "Preliminary Architecture" + "Assumption Register" section headers; ≥ 3 Gherkin scenarios; bets table has 5-10 rows with ≥1 value + ≥1 viability risk type; the three register subsections present; zero fabricated interview content.
 ```
 
 ### Step 04 — Validation (heuristic audit)
@@ -155,11 +155,11 @@ DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); contains literal table-
 # SKILL-DIRECTED: product
 TASK: Produce ost.md — Opportunity Solution Tree (Teresa Torres methodology) for "{{idea}}", consuming Step 05's PRD NSM as the desired outcome root.
 
-CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md for NSM (desired outcome) + user stories + anti-goals. Read functional-spec.md at {{out}}/docs/functional-spec.md § Problem-Validation Interviews for raw problem signal. Read concept-brief.md at {{out}}/docs/concept-brief.md for persona context. Read .claude/skills/product/templates/pipeline/06-ost/prompt.md for canonical OST shape. Reference: Teresa Torres, Continuous Discovery Habits (Product Talk Academy).
+CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md for NSM (desired outcome) + user stories + anti-goals. Read functional-spec.md at {{out}}/docs/functional-spec.md § Assumption Register — the `value`-risk rows are the opportunity inputs, each carrying a confidence level (high/medium/low) + basis. Read concept-brief.md at {{out}}/docs/concept-brief.md for persona context. Read .claude/skills/product/templates/pipeline/06-ost/prompt.md for canonical OST shape. Reference: Teresa Torres, Continuous Discovery Habits (Product Talk Academy).
 
 CONSTRAINTS:
 - Standard tier: 1 desired outcome root (NSM from Step 05) → 3-5 opportunities (user problems discovered/inferred) → 2-3 solutions per opportunity.
-- Each opportunity ties back to a specific Problem-Validation Interview summary OR a hedged "inferred from persona" attribution.
+- Each opportunity ties back to a specific Assumption Register row — carrying its confidence tag (`[register: A<N>, confidence: <level>]`) — OR a hedged "inferred from persona" attribution. NEVER launder a low-confidence bet into an evidenced opportunity.
 - Each solution is a high-level approach, NOT an implementation detail. E.g. "Inline override-reason input gating" (solution), NOT "React modal with useState" (implementation).
 - Mark solutions with status: `explored` (already in scope) / `to-test` (next interview cycle) / `parked` (out of v1).
 - Tree rendered as nested markdown bullets OR mermaid diagram (sub-agent's choice based on visual clarity at this depth).
@@ -180,13 +180,14 @@ DONE_WHEN: File exists; size ≥ 3 KB (anti-stub floor); tree structure with 1 o
 # SKILL-DIRECTED: product
 TASK: Produce sitemap.yaml — full screen inventory + IA decomposition for "{{idea}}", schema-bound to references/sitemap-schema.md's required_categories enforcement.
 
-CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md for US-NN inventory. Read functional-spec.md at {{out}}/docs/functional-spec.md § Pages & Surfaces for surface inventory. Read concept-brief.md at {{out}}/docs/concept-brief.md for product class (B2C / B2B / internal-tool / etc — drives which required_categories apply). Read .claude/skills/product/references/sitemap-schema.md for the binding schema. Read .claude/skills/product/templates/pipeline/07-sitemap-ia/prompt.md + schema.md for canonical shape.
+CONTEXT: Read prd.md at {{out}}/docs/prd/v1.md for US-NN inventory. Read functional-spec.md at {{out}}/docs/functional-spec.md § Pages & Surfaces for surface inventory. Read concept-brief.md at {{out}}/docs/concept-brief.md for product class (B2C / B2B / internal-tool / etc — drives deferral judgment). **Declared product form: `{{product_form}}`** — selects WHICH required_categories set applies, per .claude/skills/product/references/product-forms.md § Step 07 (the constraints below spell out the screen-app set; non-screen forms substitute their set from that table, inventorying the form's interface units — endpoints / commands / intents / host touchpoints — with min 1 route per category). Read .claude/skills/product/references/sitemap-schema.md for the binding schema. Read .claude/skills/product/templates/pipeline/07-sitemap-ia/prompt.md + schema.md for canonical shape.
 
 CONSTRAINTS:
 - YAML output. Top-level keys: `slug`, `platform`, `stack`, `required_categories`, `routes`, `deferred_categories` (optional).
-- `required_categories: [marketing, auth, primary, admin, error]` — every member MUST have ≥1 route OR be listed in `deferred_categories: [{name, reason}]`.
-- For B2C SaaS / B2B SaaS: all 5 required. For internal-tool/CLI/back-office-only: `marketing` may be deferred with reason "internal-tool, no marketing surface".
-- Per-route fields: `path` (string) · `category` (one of required_categories) · `states` (array — default/loading/empty/error/disabled/success as applicable) · `covers_us` (array of US-NN refs from PRD) · `components` (array of component names — for downstream Step 15 wiring).
+- `required_categories: <the {{product_form}} set per product-forms.md § Step 07>` (for screen-app: `[marketing, auth, primary, admin, error]`) — every member MUST have ≥1 route OR be listed in `deferred_categories: [{name, reason}]`.
+- For B2C SaaS / B2B SaaS: all 5 required. For internal-tool/back-office-only: `marketing` may be deferred with reason "internal-tool, no marketing surface".
+- Per-route fields: `path` (string — the route path for screen-app; the endpoint/command/intent/touchpoint identifier for other forms) · `category` (one of required_categories) · `states` (array — default/loading/empty/error/disabled/success as applicable) · `covers_us` (array of US-NN refs from PRD) · `components` (array of component names — for downstream Step 15 wiring).
+- The per-category minimums below apply to `screen-app`; other forms use ≥1 per category unless product-forms.md says otherwise:
 - Auth category MUST include AT MINIMUM: login + signup + password-reset (3 routes). Optionally: invite-accept, email-verify, oauth-callback.
 - Admin category MUST include AT MINIMUM: org-settings + team-management (2 routes). Optionally: billing, audit-log, integrations.
 - Error category MUST include AT MINIMUM: not-found (1 route). Optionally: server-error (500), forbidden (403), maintenance.
@@ -275,13 +276,14 @@ CONSTRAINTS:
 - Deliverables table per phase: rows reference Step-05 US-NN.
 - Milestones are observable end-of-phase deliverables.
 - § Overview 2-3 one-liners. § Horizon (duration estimate + team shape). § Open Decisions table.
+- **Projection notice (required):** the document opens — immediately after its H1 — with the `> **Pre-validation projection.** …` blockquote per `10-roadmap/prompt.md § Projection notice` (Layer 1 anchors the bolded lead). Phase-2+ content phrased as sequencing intent, not commitment.
 - Size floor: per `.claude/skills/product/templates/pipeline/10-roadmap/schema.md § Size floor` — the `min_size` anti-stub floor (no scope ceiling).
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — if output crosses it, STOP and emit a partial-result naming what was being produced (a token-runaway circuit-breaker, NOT a scope budget; no trim-loop, no re-emit-at-smaller-scope).
 - Write file DIRECTLY to {{out}}/docs/roadmap.md.
 
 DELIVERABLE: {{out}}/docs/roadmap.md
 
-DONE_WHEN: File exists; size ≥ the `schema.md § Size floor` `min_size`; 3 phase headers present + each phase has 1-3 milestones + deliverables table per phase + § Open Decisions section; phase titles are user-flow-shaped (NOT generic labels like "Foundation").
+DONE_WHEN: File exists; size ≥ the `schema.md § Size floor` `min_size`; the **Pre-validation projection.** blockquote opens the document; 3 phase headers present + each phase has 1-3 milestones + deliverables table per phase + § Open Decisions section; phase titles are user-flow-shaped (NOT generic labels like "Foundation").
 ```
 
 ### Step 11 — Cost Estimate (per-phase using Step 10's roadmap swap)
@@ -297,6 +299,8 @@ CONTEXT: Read **roadmap.md at {{out}}/docs/roadmap.md (phase boundaries drive co
 CONSTRAINTS:
 - Standard tier: SINGLE-SCENARIO only. ≥ 5 KB (anti-stub floor; no ceiling).
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — if output crosses it, STOP and emit a partial-result naming what was being produced (a token-runaway circuit-breaker, NOT a scope budget; no trim-loop, no re-emit-at-smaller-scope).
+- **Projection notice (required):** the document opens — immediately after its H1 — with the `> **Pre-validation projection.** …` blockquote per `11-cost-estimate/prompt.md § Projection notice` (Layer 1 anchors the bolded lead).
+- **Ranges everywhere:** every `[Estimated]` monetary/effort figure presents as a range; point values only on sourced facts (vendor list prices, signed contracts); derived totals propagate range arithmetic (sum lows, sum highs).
 - Build cost as a RANGE per phase from Step 10 roadmap (Phase 1 / Phase 2 / Phase 3 user-flow titles). Includes hourly/weekly rate assumption with source/confidence. Default $150-200/hr senior IC range with "indie founder-rate" caveat.
 - Run cost line items at v1 scale: tabular per vendor (vendor / tier / monthly cost / source). Count must match system-design § Integrations list (audit discipline).
 - **Legal review + audit costs in their own table row** — pulls from Step 09 legal posture (counsel-review hours estimate + SOC 2 audit if applicable).
@@ -309,7 +313,7 @@ CONSTRAINTS:
 
 DELIVERABLE: {{out}}/docs/cost-estimate.md
 
-DONE_WHEN: File exists; size ≥ 5 KB (anti-stub floor); contains all 8 required H2 headers verbatim (Overview / Pricing Model / Assumptions / Build Cost / Run Cost / Sensitivity / Risks / Recommendations); build cost rows reference Step 10 roadmap phase names; run-cost vendor count matches system-design integration count; for revenue-generating pricing-model, the 4 conditional H2s (Unit Economics / Projections / Scenarios / Break-even) are also present.
+DONE_WHEN: File exists; size ≥ 5 KB (anti-stub floor); the **Pre-validation projection.** blockquote opens the document; every [Estimated] figure is a range; contains all 8 required H2 headers verbatim (Overview / Pricing Model / Assumptions / Build Cost / Run Cost / Sensitivity / Risks / Recommendations); build cost rows reference Step 10 roadmap phase names; run-cost vendor count matches system-design integration count; for revenue-generating pricing-model, the 4 conditional H2s (Unit Economics / Projections / Scenarios / Break-even) are also present.
 ```
 
 ### Step 12 — GTM-launch (new per Decision 7 — positioning + launch + pricing)
@@ -327,6 +331,7 @@ CONSTRAINTS:
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — if output crosses it, STOP and emit a partial-result naming what was being produced (a token-runaway circuit-breaker, NOT a scope budget; no trim-loop, no re-emit-at-smaller-scope).
 - **Target language: `{{target_language}}`** (BCP-47). Positioning Canvas body lines + launch plan milestones + pricing tier descriptions in this language. The 5 canvas line-labels (`For:`, `Who:`, `We are:`, `Unlike:`, `Our product:`) stay English per Dunford template.
 - Required H2 sections: Positioning Canvas / Launch Plan / Pricing Strategy / Open Decisions.
+- **Projection notice (required):** the document opens — immediately after its H1 — with the `> **Pre-validation projection.** …` blockquote per `12-gtm-launch/prompt.md` required structure; launch timing + pricing framed as working hypotheses anchored to roadmap Phase 1.
 - **Positioning Canvas** (Dunford-lite, 3 lines minimum):
   - For: [target customer]
   - Who: [problem statement — what they're trying to do]
@@ -340,7 +345,7 @@ CONSTRAINTS:
 
 DELIVERABLE: {{out}}/docs/gtm-launch.md
 
-DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); contains all 4 H2 sections; positioning canvas has all 5 lines (For/Who/We-are/Unlike/Our-product); launch plan has 4 week-numbered milestones; pricing strategy declares tier shape.
+DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); the **Pre-validation projection.** blockquote opens the document; contains all 4 H2 sections; positioning canvas has all 5 lines (For/Who/We-are/Unlike/Our-product); launch plan has 4 week-numbered milestones; pricing strategy declares tier shape.
 ```
 
 ## Phase 3 — Identity
@@ -382,7 +387,7 @@ DONE_WHEN: File exists; size ≥ 4 KB (anti-stub floor); contains **Version:** +
 # SKILL-DIRECTED: product
 TASK: Produce tokens.css + components.md + README.md (3 files inside `{{out}}/docs/design-system/`) applying the brand-book to concrete semantic design tokens for "{{idea}}". Catalog-path PREFERRED (cite 1-2 OD vendors).
 
-CONTEXT: Read brand-book.md at {{out}}/docs/brand-book.md for posture + voice. Read sitemap.yaml at {{out}}/docs/sitemap.yaml for component scope (what surfaces need styling). Read concept-brief.md at {{out}}/docs/concept-brief.md for product class. Read .claude/skills/product/references/od-catalog-index.json for the 72-vendor catalog — pick 1-2 vendors whose mood + category match the brand-book; their DESIGN.md path (vendor_path field) is the lineage citation source. Read validation-report.md at {{out}}/docs/validation-report.md frontmatter `findings[]` and filter `fix_skill_hint: "design-system"` — these are token tunes to apply. Read .claude/skills/product/templates/pipeline/14-design-system/prompt.md + schema.md.
+CONTEXT: Read brand-book.md at {{out}}/docs/brand-book.md for posture + voice. Read sitemap.yaml at {{out}}/docs/sitemap.yaml for component scope (what surfaces need styling). Read concept-brief.md at {{out}}/docs/concept-brief.md for product class. **Declared product form: `{{product_form}}`** — for non-`screen-app` forms, scope the design system per .claude/skills/product/references/product-forms.md § Step 14 (e.g. cli → terminal palette + output conventions; headless-service → docs styling + API conventions; bot → message templates + tone); the component minimum below applies to screen-app. Read .claude/skills/product/references/od-catalog-index.json for the 72-vendor catalog — pick 1-2 vendors whose mood + category match the brand-book; their DESIGN.md path (vendor_path field) is the lineage citation source. Read validation-report.md at {{out}}/docs/validation-report.md frontmatter `findings[]` and filter `fix_skill_hint: "design-system"` — these are token tunes to apply. Read .claude/skills/product/templates/pipeline/14-design-system/prompt.md + schema.md.
 
 CONSTRAINTS:
 - Standard tier: catalog path PREFERRED — if 1-2 vendors match, inherit their tokens with brand-tuned overrides. Custom path fallback only.
@@ -417,6 +422,7 @@ CONTEXT: Read ALL prior artifacts at {{out}}/docs/ (semantic-named; pipeline ord
 - Phase 2 (Specification): prd/v1.md (US-NN inventory — load-bearing for PRD coverage), ost.md, sitemap.yaml (route inventory — load-bearing for the Screens Index), system-design.md + security.md + data-flow.json, legal-posture.md (legal-mandatory surfaces — consent dialog if DPIA fires), roadmap.md, cost-estimate.md, gtm-launch.md
 - Phase 3 (Identity): brand-book.md, design-system/tokens.css, design-system/components.md, design-system/README.md
 Read .claude/skills/product/templates/pipeline/15-screen-atlas/prompt.md + schema.md + references/ for the atlas shape.
+**Declared product form: `{{product_form}}`** — for non-`screen-app` forms the atlas indexes the form's interface units per .claude/skills/product/references/product-forms.md § Phase 4 (endpoints / commands / intents / host touchpoints) instead of screens; section names and table shapes stay the same, the inventory unit changes.
 The hi-fi killer-flow mood screens at {{out}}/docs/screens/hifi/ (Step 15b, produced in parallel) are the RENDERED half of this contract — reference them in § Design Fidelity, do not reproduce their markup.
 
 CONSTRAINTS:
@@ -451,7 +457,7 @@ The hi-fi mood is 3-5 brand+tokens-applied killer-flow screens as self-contained
 # SKILL-DIRECTED: product
 TASK: Produce fixture-spec.md — the single coherent mock-data contract for "{{idea}}". Every SDD-built screen will import ONE shared fixture set (foundation child implements it as `lib/mock-data.ts`); this spec defines it so no screen invents its own incoherent data.
 
-CONTEXT: Read concept-brief.md at {{out}}/docs/concept-brief.md for the primary persona. Read system-design.md at {{out}}/docs/system-design.md § Data Model for the entity set + relationships. Read prd/v1.md at {{out}}/docs/prd/v1.md for the user-story surfaces the data must populate. Read sitemap.yaml at {{out}}/docs/sitemap.yaml for which screens consume which entities.
+CONTEXT: Read concept-brief.md at {{out}}/docs/concept-brief.md for the primary persona. Read system-design.md at {{out}}/docs/system-design.md § Data Model for the entity set + relationships. Read prd/v1.md at {{out}}/docs/prd/v1.md for the user-story surfaces the data must populate. Read sitemap.yaml at {{out}}/docs/sitemap.yaml for which screens consume which entities. **Declared product form: `{{product_form}}`** — for non-`screen-app` forms the fixture fixes the form's context per .claude/skills/product/references/product-forms.md § Phase 4 (e.g. headless-service → one tenant + API keys + coherent payloads; cli → one project tree + deterministic outputs; bot → one user + conversation history).
 
 CONSTRAINTS:
 - ONE persona (the primary persona from concept-brief.md — name, role, the account they own) — every screen renders that one persona's view.
@@ -485,6 +491,7 @@ TASK: Write the {{mood_tier}} mood screen `{{NN}}-{{name}}.html` for "{{idea}}" 
 
 CONTEXT:
 - Mode: {{mood_tier}}. lo-fi = Step 02 pre-brand visual exploration; hi-fi = Step 15b brand+tokens-applied killer-flow screen (the rendered half of the visual contract).
+- Declared product form: `{{product_form}}` — for non-`screen-app` forms, render the form's mood variant per .claude/skills/product/references/product-forms.md § Step 02 (cli → styled terminal-session transcript; bot → styled conversation thread; headless-service → quickstart/annotated request-response walkthrough; embedded → panels inside a neutral host-chrome sketch). Still self-contained static HTML — every constraint below applies unchanged.
 - concept-brief.md at {{out}}/docs/concept-brief.md — product persona + mechanics + the killer flow.
 - direction-a.html at {{out}}/docs/direction-a.html — the picked visual direction (lo-fi: copy its `:root` tokens; hi-fi: visual lineage only).
 - hi-fi mode ALSO reads: design-system/tokens.css at {{out}}/docs/design-system/tokens.css (copy the `:root` token VALUES verbatim into this screen's `<style>` so it renders self-contained); brand-book.md at {{out}}/docs/brand-book.md (`## Language` for target language + `## Glossary` for the `We don't say` term-replacement lookup + voice samples for copy); design-system/components.md for component anatomy; fixture-spec.md at {{out}}/docs/fixture-spec.md for the mock data this screen renders.
@@ -507,37 +514,39 @@ DELIVERABLE: the {{mood_tier}} mood screen HTML file at the orchestrator-named p
 DONE_WHEN: File exists; valid self-contained HTML with one `<style>` block + a `:root` token block; size ≥ the 4 KB anti-stub floor; the `<style>` block carries ≥1 `@media (min-width: …)` breakpoint and the base CSS targets 375 px (mobile-first); NO `style=` layout attributes; no horizontal overflow at 375 px; hi-fi screens read `var(--token)` from tokens.css + render `fixture-spec.md` data + carry on-brand copy.
 ```
 
-## Quality judge (dispatched after every step)
+## Quality judge (dispatched once per phase — batched over the phase's judge-units)
 
-ONE brief, one dispatch per **judge-unit** (steps 01-14 = the step; Step 15 = `15a-screen-atlas` / `15b-hifi-mood` / `15c-fixture-spec`, judged separately). Dispatched by the orchestrator AFTER a step's producer returns and the `wc -c` anti-stub pre-filter passes — an independent-context sub-agent that grades the step's artifact(s) against the step's rubric and emits a structured verdict. It is the replacement for the retired size-budget instrument. The full operational contract — rubric assembly, the verdict shape, the verdict→gate routing — is `references/quality-judge.md`; this is the dispatch template. The orchestrator substitutes `{{step_label}}`, `{{artifact_paths}}`, `{{schema_dir}}`, `{{rubric_section}}`, `{{verdict_path}}`, `{{out}}` before dispatch.
+ONE brief, ONE dispatch per **phase** (Phase 1 = units 01-04; Phase 2 = 05-12; Phase 3 = 13-14; Phase 4 = `15a-screen-atlas` / `15b-hifi-mood` / `15c-fixture-spec`). Dispatched by the orchestrator AFTER the phase's producers return and the `wc -c` anti-stub pre-filter passes (stubbed units are excluded from the batch) — an independent-context sub-agent that grades EACH judge-unit's artifact(s) against that unit's own rubric and writes one verdict file per unit. It is the replacement for the retired size-budget instrument; the v0.6.0 batch shape replaced the v0.5.0 one-call-per-step shape (judge calls were ~50% of run tokens). The full operational contract — rubric assembly, the verdict shape, the verdict→gate routing, the model mix + measurement protocol — is `references/quality-judge.md`; this is the dispatch template. The orchestrator substitutes `{{phase_label}}`, `{{judge_model}}` (per the phase-batch mix: `sonnet` Phases 1/3, `opus` Phases 2/4), `{{judge_units}}` (a block with one entry per unit: `step_label` / `artifact_paths` / `schema_dir` / `rubric_section` / `verdict_path`), `{{out}}` before dispatch.
 
 The step producers' briefs deliberately do **not** mention the judge — telling a producer it will be graded invites writing-to-the-judge bias. The judge evaluates after the fact.
 
-**model:** `opus`  ·  **subagent_type:** `general-purpose`
+**model:** `{{judge_model}}`  ·  **subagent_type:** `general-purpose`
 
 ```
 # SKILL-DIRECTED: product
-TASK: Grade the artifact(s) of pipeline judge-unit "{{step_label}}" against the step's rubric and emit a structured quality verdict. You are an evaluator only — you do NOT edit the artifact, BLOCK, or abort.
+TASK: Grade every judge-unit of pipeline phase "{{phase_label}}" — each unit's artifact(s) against that unit's own rubric — and emit one structured quality verdict file per unit, plus a cross-document consistency read across the phase. You are an evaluator only — you do NOT edit artifacts, BLOCK, or abort.
 
 CONTEXT:
-- The artifact(s) to grade: {{artifact_paths}}.
-- .claude/skills/product/references/quality-judge.md — the operational contract: rubric assembly, the right-sizing criterion, the verdict JSON shape, the routing. READ THIS FIRST.
-- .claude/skills/product/references/quality-checklist.md {{rubric_section}} — the per-step semantic criteria (each a stable `id`) that form the rubric's semantic layer. Some steps have none — then the rubric is right-sizing + schema context only.
-- {{schema_dir}}schema.md + {{schema_dir}}prompt.md — the step's required shape + job; CONTEXT for "what this artifact is for", NOT a checklist to re-run (the deterministic anchor check already ran at submit).
-- {{out}}/docs/.state.json — the run's declared scope: `idea`, `flags`, and the roadmap phase count where present. The right-sizing criterion is judged against THIS, not a fixed size.
+- The judge-units in this batch (one entry per unit — step_label, artifact paths, schema dir, rubric section, verdict path):
+{{judge_units}}
+- .claude/skills/product/references/quality-judge.md — the operational contract: rubric assembly, the right-sizing criterion, the cross-consistency criterion, the verdict JSON shape, the routing. READ THIS FIRST.
+- .claude/skills/product/references/quality-checklist.md — each unit's `rubric_section` names its per-step semantic criteria (each a stable `id`). Some steps have none — then that unit's rubric is right-sizing + schema context only.
+- Each unit's `schema_dir`/schema.md + prompt.md — the step's required shape + job; CONTEXT for "what this artifact is for", NOT a checklist to re-run (the deterministic anchor check already ran at submit).
+- {{out}}/docs/.state.json — the run's declared scope: `idea`, `flags`, `product_form`, and the roadmap phase count where present. The right-sizing criterion is judged against THIS, not a fixed size.
 
 CONSTRAINTS:
-- Pointwise, chain-of-thought. Grade ONE artifact-set against ONE rubric; reason criterion-by-criterion before emitting each `verdict`. Never compare or rank two artifacts.
-- The rubric = the `quality-checklist.md {{rubric_section}}` criteria + the universal `right-sizing` criterion. Grade each `pass` / `concern` / `fail` with a one-line `note`. On `concern`/`fail` the `note` MUST name the section + dimension — never just "missing" or "too long".
+- Pointwise per unit, chain-of-thought. Grade each unit's artifact-set against that unit's own rubric; reason criterion-by-criterion before emitting each `verdict`. Never compare or rank two artifacts for quality — units are graded independently.
+- **Cross-consistency (the one cross-unit read).** After grading the units, sweep the phase's artifacts for contradictions — a value, date, name, or claim asserted differently in two documents. Report each as a `cross-consistency` criterion row on the OFFENDING unit's verdict, with a `note` naming both artifacts and quoting the contradiction. Units with no contradiction omit the criterion entirely.
+- Each unit's rubric = its `quality-checklist.md` criteria + the universal `right-sizing` criterion (+ `cross-consistency` only when found). Grade each `pass` / `concern` / `fail` with a one-line `note`. On `concern`/`fail` the `note` MUST name the section + dimension — never just "missing" or "too long".
 - **right-sizing — the anti-verbosity criterion. DO NOT REWARD LENGTH.** A longer artifact is not a better artifact. Judge whether every section pulls weight for the artifact's declared job at THIS run's declared scope (read `.state.json`). A correctly-scoped large artifact for a large declared product is `pass`; a padded artifact for a small one is `fail`; a section too thin for its job is `fail`. Grade scope-fit, never byte count. Full criterion text: `quality-judge.md § The right-sizing criterion`.
 - Grade quality, not presence. The `schema.md` anchors were already deterministically checked at submit — your job is whether the present sections are substantive and load-bearing.
-- You NEVER BLOCK, abort, trim, or edit the artifact. Your strongest signal is `outcome: "fail"`, which the orchestrator routes to a phase-gate `iterate` recommendation — the human decides. Deterministic BLOCK/abort is not yours.
-- Emit the verdict in the exact JSON shape of `quality-judge.md § The verdict`: `step` / `judged_at` (UTC ISO-8601) / `model` (`opus`) / `criteria[]` / `scope_assessment` / `outcome`. `outcome` = max-severity rollup (`fail` > `concern` > `pass`).
+- You NEVER BLOCK, abort, trim, or edit any artifact. Your strongest signal is a unit's `outcome: "fail"`, which the orchestrator routes to a phase-gate `iterate` recommendation — the human decides. Deterministic BLOCK/abort is not yours.
+- Emit each unit's verdict in the exact JSON shape of `quality-judge.md § The verdict`: `step` / `judged_at` (UTC ISO-8601) / `model` ("{{judge_model}}") / `criteria[]` / `scope_assessment` / `outcome`. `outcome` = max-severity rollup (`fail` > `concern` > `pass`). ONE verdict file per unit at that unit's `verdict_path` — never a combined file.
 - Catastrophe cap per `.agent0/context/rules/artifact-budgets.md`: a uniform 200 KB ceiling — a verdict never approaches it; if you somehow do, STOP and emit a partial-result.
 
-DELIVERABLE: the verdict JSON object written to {{verdict_path}}; plus a 1-2 line plain-text summary as your final message (the human-readable trace — `outcome` + `scope_assessment`).
+DELIVERABLE: one verdict JSON file per judge-unit, each at its `verdict_path`; plus a plain-text summary as your final message (one line per unit — `step_label`: `outcome` + `scope_assessment` — and a final line listing any cross-consistency findings).
 
-DONE_WHEN: {{verdict_path}} exists and parses as JSON; carries `step` = "{{step_label}}", `criteria[]` with one row per rubric criterion (each `id` + `verdict` ∈ pass/concern/fail + `note`), a `right-sizing` criterion, a one-line `scope_assessment`, and `outcome` = the max-severity rollup; no artifact file was modified.
+DONE_WHEN: every unit's `verdict_path` exists and parses as JSON; each carries its `step` label, `criteria[]` with one row per rubric criterion (each `id` + `verdict` ∈ pass/concern/fail + `note`), a `right-sizing` criterion, a one-line `scope_assessment`, and `outcome` = the max-severity rollup; cross-consistency findings (if any) appear on the offending unit's verdict; no artifact file was modified.
 ```
 
 ## Concurrency cap
@@ -561,7 +570,7 @@ Mood-screen-writer (per-screen) failures within Step 02 or Step 15b: mark the sp
 ## Cross-references
 
 - `pipeline-coverage.md` — phase/step map + per-step output + size floors (15 steps)
-- `state-machine.md` — `.state.json` v5 shape + gate semantics + resume support
+- `state-machine.md` — `.state.json` v6 shape + gate semantics + resume support
 - `sitemap-schema.md` — Step 07's load-bearing required_categories enforcement
 - `sdd-handoff.md` — the Phase 5 umbrella + foundation-child scaffold contract
 - `quality-checklist.md` — the quality judge's semantic rubric (per-step + visual-contract criteria) + the deterministic orchestrator gates
